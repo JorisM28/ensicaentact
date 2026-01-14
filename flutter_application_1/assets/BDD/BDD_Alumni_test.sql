@@ -102,15 +102,15 @@ INSERT INTO UTILISATEUR (nom, prenom, sexe, age) VALUES
                                                      ('Rousseau', 'Chloé', 'F', 22), ('Blanc', 'Mathieu', 'M', 23), ('Guerin', 'Léa', 'F', 24);
 
 -- Education pour tous
-INSERT INTO EDUCATION (majeure, optio, ddiplome, id_promo, id_user) VALUES
-                                                                        ('Développement', 'Fullstack', 'Ingénieur', 1, 1), ('Développement', 'Cloud', 'Master M2', 1, 2),
-                                                                        ('Réseaux', 'Sécurité', 'Ingénieur', 2, 3), ('Data', 'IA', 'Double Diplôme', 3, 4),
-                                                                        ('Développement', 'Mobile', 'Master', 1, 5), ('Systèmes', 'IoT', 'Ingénieur', 2, 6),
-                                                                        ('Data', 'Big Data', 'Master', 3, 7), ('Réseaux', 'Télécom', 'Ingénieur', 2, 8),
-                                                                        ('Développement', 'DevOps', 'Master', 1, 9), ('Data', 'Statistiques', 'Ingénieur', 3, 10),
-                                                                        ('Systèmes', 'Automobile', 'Master', 2, 11), ('Développement', 'Jeux Vidéo', 'Ingénieur', 1, 12),
-                                                                        ('Data', 'Deep Learning', 'Master', 3, 13), ('Systèmes', 'Aéronautique', 'Ingénieur', 2, 14),
-                                                                        ('Développement', 'Backend', 'Master', 1, 15);
+INSERT INTO EDUCATION (majeure, option_, ddiplome, id_promo, id_user) VALUES
+                                                                          ('Développement', 'Fullstack', 'Ingénieur', 1, 1), ('Développement', 'Cloud', 'Master M2', 1, 2),
+                                                                          ('Réseaux', 'Sécurité', 'Ingénieur', 2, 3), ('Data', 'IA', 'Double Diplôme', 3, 4),
+                                                                          ('Développement', 'Mobile', 'Master', 1, 5), ('Systèmes', 'IoT', 'Ingénieur', 2, 6),
+                                                                          ('Data', 'Big Data', 'Master', 3, 7), ('Réseaux', 'Télécom', 'Ingénieur', 2, 8),
+                                                                          ('Développement', 'DevOps', 'Master', 1, 9), ('Data', 'Statistiques', 'Ingénieur', 3, 10),
+                                                                          ('Systèmes', 'Automobile', 'Master', 2, 11), ('Développement', 'Jeux Vidéo', 'Ingénieur', 1, 12),
+                                                                          ('Data', 'Deep Learning', 'Master', 3, 13), ('Systèmes', 'Aéronautique', 'Ingénieur', 2, 14),
+                                                                          ('Développement', 'Backend', 'Master', 1, 15);
 
 -- Stages pour tous (15 stages)
 INSERT INTO STAGE (intitule, id_date, id_lieu, id_user) VALUES
@@ -144,7 +144,7 @@ SELECT
     pr.promo AS annee_promo,
     pr.filière,
     e.majeure,
-    e.optio AS option_specialite,
+    e.option_ AS option_specialite,
     -- Infos Stage
     s.intitule AS stage_titre,
     l_s.entreprise AS entreprise_stage,
