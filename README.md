@@ -13,8 +13,8 @@
 
 
 ## Outils utilisés : 
-- Langages utilisés : React (JavaScript), SQL.
-- Logiciels utilisés : VisualStudioCode.
+- Langages utilisés : Flutter, SQL.
+- Logiciels utilisés : VisualStudioCode, DataGrip.
 
 
 ## Most Valuable Product 1 
@@ -22,5 +22,5 @@
 - Créer une première interface adaptée.
 - Établir la base de données adaptée à partir des ressources données.
 - Protéger la base de données sur les bases du RGPD.
-s
+
 
