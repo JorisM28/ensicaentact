@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_application_1/login.dart';
-import 'package:flutter_application_1/research.dart'; // Décommentez si votre page est là-bas
+import 'package:flutter_application_ensicaentact/login.dart';
+import 'package:flutter_application_ensicaentact/research.dart'; // Décommentez si votre page est là-bas
 
 void main() {
   runApp(const MyApp());
@@ -47,10 +47,10 @@ class PageAccueil extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => const Login()),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                );
               },
               child: const Text('Login'),
             ),
