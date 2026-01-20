@@ -15,6 +15,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.grey[100],),
       backgroundColor: Colors.grey[100],
       body: Center(
         child: Container(
@@ -52,16 +53,16 @@ class _LoginState extends State<Login> {
           key: _formkey,
           child: Column(
             children: [
-              _buildTextField(Icons.email, "Email"),
+              _buildTextField(Icons.email, "Email", textColor : AppColors.ensiCyan),
               const SizedBox(height: 15),
-              _buildTextField(Icons.key, "Password", isPassword: true),
+              _buildTextField(Icons.key, "Password", isPassword: true, textColor: AppColors.ensiCyan),
               Padding(
                 padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => setState(() => isForgotPassword = true),
-                    child: const Text("Forget Password?"),
+                    child: const Text("Forget Password ?", style : TextStyle(color: AppColors.ensiCyan,),),
                   ),
                 ),
               ),
@@ -101,10 +102,13 @@ class _LoginState extends State<Login> {
           height: 50,
           child: OutlinedButton.icon(
             onPressed: () { /* Logique Microsoft Connect */ },
-            icon: const Icon(Icons.window, color: AppColors.ensiCyan),
-            label: const Text("Connect with Microsoft 365", style: TextStyle(color: Colors.black87)),
+            icon: const Icon(Icons.window, color: Colors.white),
+            label: const Text("Connect with Microsoft 365", style: TextStyle(color:  Colors.white)),
+            
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.grey[300]!),
+              backgroundColor: AppColors.microsoftCyan,
+              foregroundColor: Colors.white,
+              side: BorderSide(color: const Color.fromARGB(0, 224, 224, 224)!),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
@@ -116,42 +120,106 @@ class _LoginState extends State<Login> {
   // --- FORMULAIRE DE RÉCUPÉRATION ---
   Widget _buildRecoveryForm() {
     return Column(
-      key: const ValueKey(2),
+      key: const ValueKey(2), // Clé pour l'AnimatedSwitcher
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text("Recovery", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        const Text(
+          "Recovery", 
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)
+        ),
+        
         const SizedBox(height: 15),
-        const Text("Enter your email to reset your password", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+        
+        const Text(
+          "Enter your email to reset your password", 
+          textAlign: TextAlign.center, 
+          style: TextStyle(color: Colors.grey, fontSize: 15),
+        ),
+        
+        const SizedBox(height: 30),
+        
+        _buildTextField(
+          Icons.email, 
+          "Recovery Email", 
+          textColor: AppColors.ensiCyan
+        ),
+        
         const SizedBox(height: 25),
-        _buildTextField(Icons.email, "Recovery Email"),
-        const SizedBox(height: 20),
+        
         SizedBox(
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
-            onPressed: () => setState(() => isForgotPassword = false),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.ensiCyan),
-            child: const Text("SEND RESET LINK", style: TextStyle(color: Colors.white)),
+            onPressed: () {
+              setState(() => isForgotPassword = false);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.ensiCyan,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 2,
+            ),
+            child: const Text(
+              "Send Reset Link", 
+              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)
+            ),
           ),
         ),
+        
+        const SizedBox(height: 10),
+        
         Padding(
           padding: const EdgeInsets.only(top: 5.0),
           child: TextButton(
             onPressed: () => setState(() => isForgotPassword = false),
-            child: const Text("Back to Login"),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey[600],
+            ),
+            child: const Text(
+              "Back to Login",
+              style: TextStyle(decoration: TextDecoration.underline),
+            ),
           ),
         )
       ],
     );
   }
 
-  Widget _buildTextField(IconData icon, String label, {bool isPassword = false}) {
+  Widget _buildTextField(IconData icon, String label, {bool isPassword = false, Color? textColor}) {
     return TextFormField(
       obscureText: isPassword,
+      style: TextStyle(color: textColor ?? Colors.black),
+      cursorColor: textColor ?? Colors.black,
+      cursorWidth: 1.5,
+      cursorRadius: const Radius.circular(15.0),
+
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: AppColors.ensiCyan),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        labelStyle: TextStyle(color: textColor),
+        prefixIcon: Icon(icon, color: textColor),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: Colors.grey,
+            width: 1.0,
+          )
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: textColor ?? AppColors.ensiCyan,
+            width: 2.0,
+          ),
+        ),
+
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 1.0,
+          ),
+        ),
         filled: true,
         fillColor: Colors.grey[50],
       ),
