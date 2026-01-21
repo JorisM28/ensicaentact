@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'login_check.dart';
+import 'admin_page.dart';
+import 'research.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -103,11 +105,38 @@ class _LoginState extends State<Login> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_formkey.currentState!.validate()) {
-                      // TODO: login logic
-                      debugPrint(_emailController.text);
+                  onPressed: _isLoading ? null : () async {
+                    setState(() => _isLoading = true);
+                    final connection = await EnsiCaenConnection().signIn(_emailController.text.trim(), _passwordController.text);
+
+                    if (connection['status'] == 'success') {
+                      if (!mounted) {
+                        return;
+                      }
+                      
+                      String role = connection['role'];
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Bienvenue ! Mode : $role")),
+                      );
+
+                      if (role == 'admin') {
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AdminPage()));
+                      } else {
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PageAnnuaire()));
+                      }
+
+                    } else {
+                      if (!mounted) {
+                        return;
+                      }  
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(connection['message'] ?? "Erreur inconnue"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                     }
+                    setState(() => _isLoading = false);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.ensiCyan,
@@ -143,8 +172,10 @@ class _LoginState extends State<Login> {
 
               if (userData != null && userData['status'] == 'success') {
                 String name = userData['name']!;
+                String role = userData['role']!;
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome $name"),));
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: ((_) => PageAnnuaire())));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome $name, $role"),));
                 } else {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed or abort connection..."),));
