@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
+import 'login_check.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -10,7 +11,12 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final _formkey = GlobalKey<FormState>();
-  bool isForgotPassword = false; // État pour afficher la récupération
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  bool isForgotPassword = false;
+  bool _isLoading = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -53,9 +59,33 @@ class _LoginState extends State<Login> {
           key: _formkey,
           child: Column(
             children: [
-              _buildTextField(Icons.email, "Email", textColor : AppColors.ensiCyan),
+
+              _buildTextField(
+                Icons.email,
+                "Email",
+                controller: _emailController,
+                textColor: AppColors.ensiCyan,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return "Email required";
+                  if (!value.contains('@')) return "Invalid email";
+                  return null;
+                },
+              ),
               const SizedBox(height: 15),
-              _buildTextField(Icons.key, "Password", isPassword: true, textColor: AppColors.ensiCyan),
+
+              _buildTextField(
+                Icons.key,
+                "Password",
+                isPassword: true,
+                controller: _passwordController,
+                textColor: AppColors.ensiCyan,
+                validator: (value) {
+                  if (value == null || value.length < 6) {
+                    return "Password too short";
+                  }
+                  return null;
+                },
+              ),
               Padding(
                 padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
                 child: Align(
@@ -69,12 +99,16 @@ class _LoginState extends State<Login> {
               
               const SizedBox(height: 10),
               
-              // BOUTON LOGIN
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () => _formkey.currentState!.validate(),
+                  onPressed: () {
+                    if (_formkey.currentState!.validate()) {
+                      // TODO: login logic
+                      debugPrint(_emailController.text);
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.ensiCyan,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -101,14 +135,32 @@ class _LoginState extends State<Login> {
           width: double.infinity,
           height: 50,
           child: OutlinedButton.icon(
-            onPressed: () { /* Logique Microsoft Connect */ },
+            onPressed: _isLoading ? null : () async { 
+              setState(() => _isLoading = true);
+              final connection = MicrosoftConnection();
+              final userData = await connection.signIn();
+              setState(() => _isLoading = false);
+
+              if (userData != null && userData['status'] == 'success') {
+                String name = userData['name']!;
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome $name"),));
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed or abort connection..."),));
+                  }
+                }
+                String email = userData['email']!;               
+              }
+            },
+
             icon: const Icon(Icons.window, color: Colors.white),
             label: const Text("Connect with Microsoft 365", style: TextStyle(color:  Colors.white)),
             
             style: OutlinedButton.styleFrom(
               backgroundColor: AppColors.microsoftCyan,
               foregroundColor: Colors.white,
-              side: BorderSide(color: const Color.fromARGB(0, 224, 224, 224)!),
+              side: BorderSide(color: const Color.fromARGB(0, 224, 224, 224)),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
@@ -184,8 +236,11 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Widget _buildTextField(IconData icon, String label, {bool isPassword = false, Color? textColor}) {
+  Widget _buildTextField(IconData icon, String label, {bool isPassword = false, Color? textColor, 
+  TextEditingController? controller, String? Function(String?)? validator,}) {
     return TextFormField(
+      controller: controller,
+      validator: validator,
       obscureText: isPassword,
       style: TextStyle(color: textColor ?? Colors.black),
       cursorColor: textColor ?? Colors.black,
