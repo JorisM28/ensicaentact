@@ -1,29 +1,17 @@
-# Utilisation de l'image Flutter stable
 image: ghcr.io/cirruslabs/flutter:stable
 
 pages:
   stage: deploy
   script:
-    # 1. Entrer dans le dossier de l'application
     - cd flutter_application_1
-    
-    # 2. Récupérer les dépendances
     - flutter pub get
-    
-    # 3. Construire l'application pour le Web
-    # --base-href doit correspondre exactement au nom du projet GitLab
-    # Par défaut, flutter build web ne s'arrête pas pour des warnings de code (lint)
     - flutter build web --release --base-href "/ENSICaentact/"
-    
-    # 4. Revenir à la racine du dépôt pour préparer le dossier 'public'
     - cd ..
     - rm -rf public
-    
-    # 5. Copier le résultat du build (qui est dans le sous-dossier) vers la racine 'public'
-    - cp -r flutter_application_1/build/web public
-
+    - mkdir public
+    - cp -r flutter_application_1/build/web/* public/
   artifacts:
     paths:
       - public
-  only:
-    - master
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
