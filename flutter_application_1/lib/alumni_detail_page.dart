@@ -13,7 +13,6 @@ class AlumniDetailPage extends StatefulWidget {
 }
 
 class _AlumniDetailPageState extends State<AlumniDetailPage> {
-  // Variable pour savoir si on est en mode édition
   bool _enEdition = false;
 
   
@@ -41,14 +40,12 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
 
   @override
   void dispose() {
-    // Nettoyage de la mémoire
     _posteCtrl.dispose();
     _entrepriseCtrl.dispose();
     _villeCtrl.dispose();
     super.dispose();
   }
 
-  // Fonction pour sauvegarder les changements
   void _sauvegarder() async {
 
     await DatabaseService().modifierEleve({
@@ -63,7 +60,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
       jobActuel = _posteCtrl.text;
       entrepriseActuelle = _entrepriseCtrl.text;
       villeActuelle = _villeCtrl.text;
-      _enEdition = false; // On quitte le mode édition
+      _enEdition = false;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(

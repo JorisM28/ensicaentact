@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/colors.dart';
 import 'package:flutter_application_ensicaentact/alumni_detail_page.dart';
-import 'filtre.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
 
@@ -66,7 +65,7 @@ class PageAnnuaire extends StatelessWidget {
                     children: [
                       SizedBox(width: 400, child: _champRecherche()),
                       const Spacer(),
-                      const FilterChipExample(), 
+                      
                     ],
                   )
                 : Column(
@@ -76,7 +75,6 @@ class PageAnnuaire extends StatelessWidget {
                       const SizedBox(height: 15),
                       _champRecherche(),
                       const SizedBox(height: 15),
-                      const FilterChipExample(),
                     ],
                   ),
           ),

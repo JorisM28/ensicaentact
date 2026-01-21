@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/login.dart';
-import 'package:flutter_application_ensicaentact/research.dart'; // Décommentez si votre page est là-bas
+import 'package:flutter_application_ensicaentact/page_annuaire.dart'; // Décommentez si votre page est là-bas
 
 void main() {
   runApp(const MyApp());

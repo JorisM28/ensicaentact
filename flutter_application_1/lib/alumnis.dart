@@ -1,40 +1,54 @@
 class Alumnis {
+  final int id;
   final String nom;
   final String prenom;
-  final int age;
+  final String email;
+  final String tel;
+  final int autor;
+  final int promo;
+  final int decede;
+  final String filiere;
   final String job;
   final String entreprise;
   final String ville;
-  final int? promo;
-  final String filiere;
 
   Alumnis({
+    required this.id,
     required this.nom,
     required this.prenom,
-    required this.age,
+    required this.tel,
+    required this.email,
+    required this.autor,
+    required this.promo,
+    required this.filiere,
     required this.job,
     required this.entreprise,
     required this.ville,
-    this.promo,
-    required this.filiere,
+    required this.decede,
   });
 
-  factory Alumnis.fromMap(Map<String, dynamic> data) {
+  String get nomComplet => "${decede == 1 ? "† " : ""}$prenom $nom";
+
+  factory Alumnis.fromMap(Map<String, dynamic> map) {
     return Alumnis(
-      nom: data['nom'] ?? '',
-      prenom: data['prenom'] ?? '',
+      id: int.tryParse(map['id'].toString()) ?? 0,
+
+      nom: map['nom']?.toString() ?? '',
+      prenom: map['prenom']?.toString() ?? '',
       
-      age: int.tryParse(data['age'].toString()) ?? 0,
-      
-      job: data['job_actuel'] ?? 'En recherche / Études', 
-      entreprise: data['entreprise_job'] ?? 'Non renseigné',
-      ville: data['ville_job'] ?? 'Localisation inconnue',
-      
-      promo: int.tryParse(data['annee_promo'].toString()),
-      
-      filiere: data['filière'] ?? 'Généraliste',
+      tel: map['tel']?.toString() ?? '', 
+      email: map['email']?.toString() ?? '',
+
+      autor: int.tryParse(map['autor'].toString()) ?? 0,
+      promo: int.tryParse(map['promo'].toString()) ?? 0,
+      decede: int.tryParse(map['decede'].toString()) ?? 0,
+
+      filiere: map['filiere']?.toString() ?? '',
+      job: map['job']?.toString() ?? 'En recherche',
+      entreprise: map['entreprise']?.toString() ?? 'Non renseigné',
+      ville: map['ville']?.toString() ?? '',
     );
   }
   
-  String get nomComplet => "$prenom $nom";
+  factory Alumnis.fromJson(Map<String, dynamic> json) => Alumnis.fromMap(json);
 }
