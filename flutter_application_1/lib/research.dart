@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/colors.dart';
 import 'package:flutter_application_ensicaentact/alumni_detail_page.dart';
-import 'filtre.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
 import 'profileBadge.dart';
@@ -34,6 +33,7 @@ class PageAnnuaire extends StatelessWidget {
   final Map<String, dynamic> user;
   const PageAnnuaire({super.key, required this.user});
 
+  const PageAnnuaire({super.key, this.estAdmin = true});
   @override
   Widget build(BuildContext context) {
     double largeurEcran = MediaQuery.of(context).size.width;
@@ -55,6 +55,14 @@ class PageAnnuaire extends StatelessWidget {
         ),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
+        actions: [
+        if (estAdmin) 
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: "Historique des actions",
+            onPressed: () => _afficherHistorique(context),
+          ),
+        ],
       ),
 
       body: Column(
@@ -68,7 +76,7 @@ class PageAnnuaire extends StatelessWidget {
                     children: [
                       SizedBox(width: 400, child: _champRecherche()),
                       const Spacer(),
-                      const FilterChipExample(), 
+                      
                     ],
                   )
                 : Column(
@@ -78,7 +86,6 @@ class PageAnnuaire extends StatelessWidget {
                       const SizedBox(height: 15),
                       _champRecherche(),
                       const SizedBox(height: 15),
-                      const FilterChipExample(),
                     ],
                   ),
           ),
@@ -171,6 +178,83 @@ class PageAnnuaire extends StatelessWidget {
           ),
         ],
       ),
+
+
+
+floatingActionButton: estAdmin 
+    ? FloatingActionButton(
+        backgroundColor: AppColors.ensiCyan,
+        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: () {
+          // Contrôleurs pour tous les champs
+          final nomCtrl = TextEditingController();
+          final prenomCtrl = TextEditingController();
+          final ageCtrl = TextEditingController();
+          final posteCtrl = TextEditingController();
+          final entrepriseCtrl = TextEditingController();
+          final villeCtrl = TextEditingController();
+          final stageCtrl = TextEditingController();
+          final promoCtrl = TextEditingController();
+          final filiereCtrl = TextEditingController();
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Nouvel Alumni"),
+              content: SizedBox(
+                width: 500,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text("Identité", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextField(controller: nomCtrl, decoration: const InputDecoration(labelText: "Nom")),
+                      TextField(controller: prenomCtrl, decoration: const InputDecoration(labelText: "Prénom")),
+                      TextField(controller: ageCtrl, decoration: const InputDecoration(labelText: "Âge"), keyboardType: TextInputType.number),
+                      const Divider(),
+                      const Text("Parcours ENSI", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextField(controller: promoCtrl, decoration: const InputDecoration(labelText: "Année Promo (ex: 2024)"), keyboardType: TextInputType.number),
+                      TextField(controller: filiereCtrl, decoration: const InputDecoration(labelText: "Filière (Info, MC, GPSE)")),
+                      TextField(controller: stageCtrl, decoration: const InputDecoration(labelText: "Sujet de stage (PFE)")),
+                      const Divider(),
+                      const Text("Poste Actuel", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextField(controller: posteCtrl, decoration: const InputDecoration(labelText: "Intitulé du poste")),
+                      TextField(controller: entrepriseCtrl, decoration: const InputDecoration(labelText: "Entreprise")),
+                      TextField(controller: villeCtrl, decoration: const InputDecoration(labelText: "Ville")),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(context), child: const Text("Annuler")),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.ensiCyan),
+                  onPressed: () async {
+                    if (nomCtrl.text.isNotEmpty && prenomCtrl.text.isNotEmpty) {
+                      await DatabaseService().ajouterEleve({
+                        "nom": nomCtrl.text,
+                        "prenom": prenomCtrl.text,
+                        "age": int.tryParse(ageCtrl.text) ?? 22,
+                        "annee_promo": int.tryParse(promoCtrl.text) ?? 2024,
+                        "filiere": filiereCtrl.text,
+                        "sujet_stage": stageCtrl.text,
+                        "poste": posteCtrl.text,
+                        "entreprise": entrepriseCtrl.text,
+                        "ville": villeCtrl.text,
+                      });
+                      Navigator.pop(context);
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const PageAnnuaire()));
+                    }
+                  },
+                  child: const Text("Enregistrer", style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          );
+        },
+      )
+    : null,
+
     );
   }
   Widget _champRecherche() {
@@ -184,7 +268,61 @@ class PageAnnuaire extends StatelessWidget {
       ),
     );
   }
+  void _afficherHistorique(BuildContext context) async {
+  // On récupère les logs depuis le service
+  final logs = await DatabaseService().getHistorique();
 
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.history, color: AppColors.ensiCyan),
+          SizedBox(width: 10),
+          Text("Historique des actions"),
+        ],
+      ),
+      content: SizedBox(
+        width: 500,
+        height: 400,
+        child: logs.isEmpty
+            ? const Center(child: Text("Aucune action enregistrée."))
+            : ListView.builder(
+                itemCount: logs.length,
+                itemBuilder: (context, index) {
+                  final log = logs[index];
+                  final bool isDelete = log['action'] == 'SUPPRESSION';
+                  
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
+                      child: Icon(
+                        isDelete ? Icons.delete_forever : Icons.person_add,
+                        color: isDelete ? Colors.red : Colors.green,
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      "${log['prenom_alumni']} ${log['nom_alumni']}",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      "${log['action']} le ${log['date_action']}",
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  );
+                },
+              ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Fermer"),
+        ),
+      ],
+    ),
+  );
+}
   // Ajoute 'BuildContext context' dans les paramètres
   Widget _carteEleve(BuildContext context, Alumnis eleve) {
     return Card(
@@ -192,13 +330,16 @@ class PageAnnuaire extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 15),
       clipBehavior: Clip.antiAlias, // Nécessaire pour que l'effet visuel du clic reste dans la carte
       child: InkWell( // InkWell ajoute un effet visuel au clic (vague)
-        onTap: () {
-          // C'est ICI que se fait le lien vers la page détail
-          Navigator.push(
+        onTap: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => AlumniDetailPage(alumni: eleve),
             ),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const PageAnnuaire()),
           );
         },
         child: Padding(
@@ -236,12 +377,36 @@ class PageAnnuaire extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.send, color: AppColors.ensiCyan),
-                onPressed: () { 
-                  // Action rapide (ex: envoyer un mail direct)
+              estAdmin
+              ? IconButton(
+                icon : const Icon(Icons.delete, color: Colors.red),
+                onPressed: () async {
+                  bool confirmation = await showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Supprimer ?"),
+                      content: Text("Veux-tu vraiment supprimer ${eleve.nomComplet} ?"),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Non")),
+                        TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Oui")),
+                      ]
+                    ),
+                  ) ?? false;
+
+                  if (confirmation) {
+                    await DatabaseService().supprimerEleve(eleve.nom, eleve.prenom);
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PageAnnuaire())
+                    );
+                  }
                 },
-              ),
+              )
+            : IconButton (
+              icon: const Icon(Icons.send, color : AppColors.ensiCyan),
+              onPressed: () {},
+            ),
             ],
           ),
         ),
