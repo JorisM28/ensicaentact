@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/colors.dart';
+import 'package:flutter_application_ensicaentact/alumni_detail_page.dart';
 import 'filtre.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
+import 'api_service.dart';
 
 void main() {
   runApp(const MonReseauAlumni());
@@ -95,7 +97,7 @@ class PageAnnuaire extends StatelessWidget {
                             itemCount: lesEleves.length,
                             padding: const EdgeInsets.all(10),
                             itemBuilder: (context, index) {
-                              return _carteEleve(lesEleves[index]);
+                              return _carteEleve(context, lesEleves[index]);
                             },
                           );
                         }
@@ -172,52 +174,68 @@ class PageAnnuaire extends StatelessWidget {
     );
   }
 
-  Widget _carteEleve(Alumnis eleve) {
+  // Ajoute 'BuildContext context' dans les paramètres
+  Widget _carteEleve(BuildContext context, Alumnis eleve) {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 15),
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: AppColors.ensiCyan,
-              radius: 30,
-              child: Text(
-                eleve.prenom.isNotEmpty ? eleve.prenom[0] : "?",
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+      clipBehavior: Clip.antiAlias, // Nécessaire pour que l'effet visuel du clic reste dans la carte
+      child: InkWell( // InkWell ajoute un effet visuel au clic (vague)
+        onTap: () {
+          // C'est ICI que se fait le lien vers la page détail
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AlumniDetailPage(alumni: eleve),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: AppColors.ensiCyan,
+                radius: 30,
+                child: Text(
+                  eleve.prenom.isNotEmpty ? eleve.prenom[0] : "?",
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
               ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    eleve.nomComplet,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  if (eleve.promo != null)
-                    Text("'${eleve.promo.toString().substring(2)}", style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold)),
-                  Text("${eleve.job} @ ${eleve.entreprise}", style: TextStyle(color: Colors.grey[800])),
-                  const SizedBox(height: 5),
-                  Wrap(
-                    spacing: 5,
-                    children: [
-                      Chip(label: Text(eleve.filiere, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
-                      Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(eleve.ville, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
-                    ],
-                  ),
-                ],
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      eleve.nomComplet,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    if (eleve.promo != null)
+                      Text("'${eleve.promo.toString().substring(2)}", style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold)),
+                    Text("${eleve.job} @ ${eleve.entreprise}", style: TextStyle(color: Colors.grey[800])),
+                    const SizedBox(height: 5),
+                    Wrap(
+                      spacing: 5,
+                      children: [
+                        Chip(label: Text(eleve.filiere, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
+                        Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(eleve.ville, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.send, color: AppColors.ensiCyan),
-              onPressed: () { print("Contact ${eleve.nomComplet}"); },
-            ),
-          ],
+              IconButton(
+                icon: const Icon(Icons.send, color: AppColors.ensiCyan),
+                onPressed: () { 
+                  // Action rapide (ex: envoyer un mail direct)
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
 }
