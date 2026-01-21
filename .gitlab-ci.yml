@@ -1,0 +1,56 @@
+# Image officielle recommandée pour Flutter
+image: ghcr.io/cirruslabs/flutter:stable
+
+variables:
+  # IMPORTANT : Si votre projet Flutter est dans un sous-dossier (ex: "mon_app"), 
+  # remplacez "." par le nom du dossier. Sinon, laissez "."
+  FLUTTER_PROJECT_DIR: "./flutter_application_1/"
+  
+  # Optimisation du cache
+  PUB_CACHE: "$CI_PROJECT_DIR/.pub-cache"
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .pub-cache/
+    - bin/cache/
+
+stages:
+  - analyze
+  - test
+  - build
+
+# Script exécuté avant chaque job
+before_script:
+  - cd $FLUTTER_PROJECT_DIR
+  - export PATH="$PATH:$HOME/.pub-cache/bin"
+  - flutter pub get
+
+# Étape 1 : Analyse statique du code
+lint:
+  stage: analyze
+  script:
+    - flutter analyze
+  allow_failure: false
+
+# Étape 2 : Tests unitaires
+unit_test:
+  stage: test
+  script:
+    - flutter test --coverage
+  artifacts:
+    paths:
+      - $FLUTTER_PROJECT_DIR/coverage/
+    expire_in: 1 week
+
+# Étape 3 : Build de l'APK (Android)
+build_android:
+  stage: build
+  script:
+    - flutter build apk --release
+  artifacts:
+    paths:
+      - $FLUTTER_PROJECT_DIR/build/app/outputs/flutter-apk/app-release.apk
+    expire_in: 1 month
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "main"
