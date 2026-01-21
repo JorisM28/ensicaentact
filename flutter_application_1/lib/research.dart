@@ -3,6 +3,7 @@ import 'package:flutter_application_ensicaentact/colors.dart';
 import 'package:flutter_application_ensicaentact/alumni_detail_page.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
+import 'profileBadge.dart';
 
 
 void main() {
@@ -17,13 +18,20 @@ class MonReseauAlumni extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: AppColors.ensiCyan),
-      home: const PageAnnuaire(),
+      home: const PageAnnuaire(user: {
+            'prenom': 'Visiteur',
+            'nom': '',
+            'email': '',
+            'role': 'guest'
+          },
+      ),
     );
   }
 }
 
 class PageAnnuaire extends StatelessWidget {
-  final bool estAdmin;
+  final Map<String, dynamic> user;
+  const PageAnnuaire({super.key, required this.user});
 
   const PageAnnuaire({super.key, this.estAdmin = true});
   @override
@@ -39,7 +47,10 @@ class PageAnnuaire extends StatelessWidget {
             const SizedBox(width: 20),
             const Text("ENSIcaentact"),
             const Spacer(),
-            const Icon(Icons.account_circle, size: 40),
+            // const Icon(Icons.account_circle, size: 40),
+
+            ProfileBadge(user: user),
+
           ],
         ),
         backgroundColor: AppColors.ensiCyan,
@@ -402,5 +413,7 @@ floatingActionButton: estAdmin
       ),
     );
   }
+
+
 
 }
