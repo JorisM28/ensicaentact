@@ -14,6 +14,9 @@ Voici la mise à jour complète de votre document Markdown. J'ai synchronisé la
 | Prénom Alumni                   | prenom           | VARCHAR(50)   | NOT NULL               |
 | Sexe                            | sexe             | CHAR(1)       | 'M', 'F' ou 'I'        |
 | Âge                             | age              | INT           | Entre 18 et 100 ans    |
+| Numéro de téléphone             | tel              | VARCHAR(20)   |                        |
+| Adresse mail                    | mail             | VARCHAR(50)   |                        |
+| Autorisation partage du contact | autor            | BOOLEAN       | Défaut : FALSE (0)     |
 | Décédé                          | decede           | BOOLEAN       | Défaut : FALSE (0)     |
 | **Éducation / Promo**           |                  |               |                        |
 | ID Éducation                    | id_education     | INT (PK)      |                        |
@@ -52,6 +55,9 @@ erDiagram
         varchar prenom
         char sexe
         int age
+        varchar mail
+        varchar tel
+        boolean autor
         boolean decede
     }
 

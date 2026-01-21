@@ -172,7 +172,7 @@ class _LoginState extends State<Login> {
   // --- FORMULAIRE DE RÉCUPÉRATION ---
   Widget _buildRecoveryForm() {
     return Column(
-      key: const ValueKey(2), // Clé pour l'AnimatedSwitcher
+      key: const ValueKey(2),
       mainAxisSize: MainAxisSize.min,
       children: [
         const Text(
