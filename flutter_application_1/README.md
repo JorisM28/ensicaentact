@@ -14,3 +14,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+## Question entretien RGPD
+- Est ce qu'on ne pourrait pas afficher seulement la filère ainsi que l'entrepris pour tout personne extérieur de l'ensi ? (Moyen de promotion de l'ecole)
