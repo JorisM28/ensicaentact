@@ -39,8 +39,8 @@ if ($user && password_verify($pass, $user['password_hash'])) {
     echo json_encode([
         "status" => "success", 
         "role" => $user['role'],
-        "family_name" => $user['nom'],       // <--- Ajouté
-        "name" => $user['prenom'], // <--- Ajouté
+        "family_name" => $user['nom'], 
+        "name" => $user['prenom'],
         "email" => $email
     ]);
 } else {

@@ -41,7 +41,13 @@ class PageAccueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PageAnnuaire()),
+                  MaterialPageRoute(builder: (context) => const PageAnnuaire(user: {
+                      'prenom': 'Visiteur',
+                      'nom': '',
+                      'email': '',
+                      'role': 'guest'
+                    },
+                  )),
                 );
               },
               child: const Text('Contacter un ancien élève'),

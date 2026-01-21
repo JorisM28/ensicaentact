@@ -4,6 +4,7 @@ import 'package:flutter_application_ensicaentact/alumni_detail_page.dart';
 import 'filtre.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
+import 'profileBadge.dart';
 
 
 void main() {
@@ -18,13 +19,20 @@ class MonReseauAlumni extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: AppColors.ensiCyan),
-      home: const PageAnnuaire(),
+      home: const PageAnnuaire(user: {
+            'prenom': 'Visiteur',
+            'nom': '',
+            'email': '',
+            'role': 'guest'
+          },
+      ),
     );
   }
 }
 
 class PageAnnuaire extends StatelessWidget {
-  const PageAnnuaire({super.key});
+  final Map<String, dynamic> user;
+  const PageAnnuaire({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +47,10 @@ class PageAnnuaire extends StatelessWidget {
             const SizedBox(width: 20),
             const Text("ENSIcaentact"),
             const Spacer(),
-            const Icon(Icons.account_circle, size: 40),
+            // const Icon(Icons.account_circle, size: 40),
+
+            ProfileBadge(user: user),
+
           ],
         ),
         backgroundColor: AppColors.ensiCyan,
@@ -237,5 +248,7 @@ class PageAnnuaire extends StatelessWidget {
       ),
     );
   }
+
+
 
 }

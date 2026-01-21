@@ -82,7 +82,9 @@ class _LoginState extends State<Login> {
                 controller: _passwordController,
                 textColor: AppColors.ensiCyan,
                 validator: (value) {
-                  if (value == null || value.length < 6) {
+                  if (value == null || value.isEmpty) {
+                    return "Enter a password";
+                  } else if (value.length < 6) {
                     return "Password too short";
                   }
                   return null;
@@ -106,37 +108,34 @@ class _LoginState extends State<Login> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : () async {
-                    setState(() => _isLoading = true);
-                    final connection = await EnsiCaenConnection().signIn(_emailController.text.trim(), _passwordController.text);
+                    if (_formkey.currentState!.validate()) {
+                      setState(() => _isLoading = true);
+                      final userData = await EnsiCaenConnection().signIn(_emailController.text.trim(), _passwordController.text);
 
-                    if (connection['status'] == 'success') {
-                      if (!mounted) {
-                        return;
-                      }
+                      if (!mounted) return;
                       
-                      String role = connection['role'];
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Bienvenue ! Mode : $role")),
-                      );
+                      setState(() => _isLoading = false);
 
-                      if (role == 'admin') {
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AdminPage()));
+                      if (userData['status'] == 'success') {
+                        String role = userData['role'];
+                        String name = userData['name'];
+                        
+                        if (role == 'admin') {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AdminPage(user: userData)));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome $name")));
+                        } else if (role == 'student') {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PageAnnuaire(user: userData)));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome $name")));
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Unauthorized account !"),));
+                        }
                       } else {
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PageAnnuaire()));
+                        if (!mounted) return;  
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(userData['message'] ?? "Unknown error"), backgroundColor: Colors.red),
+                        );
                       }
-
-                    } else {
-                      if (!mounted) {
-                        return;
-                      }  
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(connection['message'] ?? "Erreur inconnue"),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
                     }
-                    setState(() => _isLoading = false);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.ensiCyan,
@@ -166,22 +165,17 @@ class _LoginState extends State<Login> {
           child: OutlinedButton.icon(
             onPressed: _isLoading ? null : () async { 
               setState(() => _isLoading = true);
-              final connection = MicrosoftConnection();
-              final userData = await connection.signIn();
+              final userData = await MicrosoftConnection().signIn();
+              
+              if (!mounted) return;
+
               setState(() => _isLoading = false);
 
               if (userData != null && userData['status'] == 'success') {
-                String name = userData['name']!;
-                String role = userData['role']!;
-                if (mounted) {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: ((_) => PageAnnuaire())));
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome $name, $role"),));
-                } else {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Failed or abort connection..."),));
-                  }
-                }
-                String email = userData['email']!;               
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: ((_) => PageAnnuaire(user: userData))));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome ${userData['name']}"),));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Microsoft connection failed..."),));            
               }
             },
 

@@ -11,7 +11,8 @@ import 'colors.dart'; // Assure-toi que le chemin est bon
 
 
 class AdminPage extends StatefulWidget {
-  const AdminPage({super.key});
+  final Map<String, dynamic> user;
+  const AdminPage({super.key, required this.user});
 
   @override
   State<AdminPage> createState() => _AdminPageState();
