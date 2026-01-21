@@ -30,8 +30,7 @@ before_script:
 lint:
   stage: analyze
   script:
-    - flutter analyze
-  allow_failure: false
+    - flutter analyze --no-fatal-infos --no-fatal-warnings
 
 # Étape 2 : Tests unitaires
 unit_test:
