@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Nécessaire pour le clavier (LogicalKeyboardKey)
+import 'package:flutter/services.dart';
 import 'colors.dart';
-import 'filtre.dart';
-import 'alumnis.dart';
+import 'alumnis.dart';  
 import 'database_service.dart';
 import 'alumni_detail_page.dart';
 import 'alumni_preview.dart';
+import 'filtre_widget.dart';
 
-// Si tu n'as pas séparé le main, garde le main() ici. Sinon, efface ces 3 lignes.
 void main() {
   runApp(const MonReseauAlumni());
 }
@@ -33,54 +32,91 @@ class PageAnnuaire extends StatefulWidget {
 }
 
 class _PageAnnuaireState extends State<PageAnnuaire> {
-  // --- VARIABLES D'ÉTAT ---
   Alumnis? _eleveSelectionne;
-  late Future<List<Alumnis>> _futureAlumnis;
-  
-  // Permet de contrôler le défilement de la liste (pour suivre la sélection clavier)
   final ScrollController _scrollController = ScrollController();
+  List<Alumnis> _tousLesAlumnis = [];
+  List<Alumnis> _alumnisAffiches = [];
+  final Set<String> _filtresPromoSelectionnes = {};
+  final Set<String> _filtresFiliereSelectionnes = {};
+  bool _chargementEnCours = true;
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // On charge les données une seule fois au démarrage
-    _futureAlumnis = DatabaseService().getTousLesEleves();
+    _chargerDonneesInitiales();
   }
 
-  // --- LOGIQUE DE NAVIGATION CLAVIER ---
-  void _changerSelectionClavier(int direction, List<Alumnis> liste) {
-    if (liste.isEmpty) return;
+  List<String> get _promosDisponibles {
+    final promos = _tousLesAlumnis
+        .map((e) => e.promo.toString())
+        .where((e) => e != "0" && e.isNotEmpty)
+        .toSet()
+        .toList();
+    promos.sort();
+    return promos;
+  }
 
-    // 1. Si personne n'est sélectionné, on prend le premier
-    if (_eleveSelectionne == null) {
+  List<String> get _filieresDisponibles {
+    final filieres = _tousLesAlumnis
+        .map((e) => e.filiere)
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList();
+    filieres.sort();
+    return filieres;
+  }
+
+  void _chargerDonneesInitiales() async {
+    try {
+      var donnees = await DatabaseService().getTousLesEleves();
       setState(() {
-        _eleveSelectionne = liste.first;
+        _tousLesAlumnis = donnees;
+        _alumnisAffiches = donnees;
+        _chargementEnCours = false;
       });
-      return;
+    } catch (e) {
+      print("Erreur de chargement : $e");
+      setState(() {
+        _chargementEnCours = false;
+      });
+    }
+  }
+
+ void _filtrerResultats(String recherche) {
+    List<Alumnis> resultats = _tousLesAlumnis;
+
+    if (recherche.isNotEmpty) {
+      resultats = resultats.where((eleve) {
+        final nomLower = eleve.nomComplet.toLowerCase();
+        final jobLower = eleve.job.toLowerCase();
+        final entrepriseLower = eleve.entreprise.toLowerCase();
+        final queryLower = recherche.toLowerCase();
+
+        return nomLower.contains(queryLower) || 
+               jobLower.contains(queryLower) || 
+               entrepriseLower.contains(queryLower);
+      }).toList();
     }
 
-    // 2. Calcul du nouvel index
-    int indexActuel = liste.indexOf(_eleveSelectionne!);
-    int nouvelIndex = indexActuel + direction;
+    if (_filtresPromoSelectionnes.isNotEmpty) {
+      resultats = resultats.where((eleve) {
+        return _filtresPromoSelectionnes.contains(eleve.promo.toString());
+      }).toList();
+    }
 
-    // 3. Vérification des limites (ne pas aller plus haut que 0 ou plus bas que la fin)
-    if (nouvelIndex >= 0 && nouvelIndex < liste.length) {
-      setState(() {
-        _eleveSelectionne = liste[nouvelIndex];
-      });
+    if (_filtresFiliereSelectionnes.isNotEmpty) {
+      resultats = resultats.where((eleve) {
+        return _filtresFiliereSelectionnes.contains(eleve.filiere);
+      }).toList();
+    }
 
-      // 4. Scroll automatique pour garder l'élément visible
-      // On estime qu'une carte fait environ 80-100 pixels de haut
-      if (_scrollController.hasClients) {
-        double positionCible = nouvelIndex * 90.0; // 90 est une moyenne de hauteur de carte
-        // On centre un peu le scroll
-        _scrollController.animateTo(
-          positionCible > 200 ? positionCible - 200 : positionCible, 
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
+    setState(() {
+      _alumnisAffiches = resultats;
+      if (_eleveSelectionne != null && !resultats.contains(_eleveSelectionne)) {
+        _eleveSelectionne = null;
       }
-    }
+    });
   }
 
   @override
@@ -90,137 +126,141 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            // Image.asset('assets/logo_alumni.png', scale: 20), // Décommente si tu as l'image
-            const SizedBox(width: 10),
-            const Text("ENSIcaentact"),
-          ],
-        ),
+        title: const Text("ENSIcaentact"),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
-        actions: const [
-          Icon(Icons.account_circle, size: 40),
-          SizedBox(width: 20),
-        ],
       ),
-
-      // FutureBuilder pour charger les données
-      body: FutureBuilder<List<Alumnis>>(
-        future: _futureAlumnis,
-        builder: (context, snapshot) {
-          // Cas 1 : Chargement
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          // Cas 2 : Erreur
-          if (snapshot.hasError) {
-            return Center(child: Text("Erreur : ${snapshot.error}", style: const TextStyle(color: Colors.red)));
-          }
-          // Cas 3 : Pas de données
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Aucun résultat trouvé."));
-          }
-
-          final listeAlumnis = snapshot.data!;
-
-          // --- LE COEUR DE LA PAGE (FOCUS WIDGET) ---
-          return Focus(
-            autofocus: true, // Capture le clavier dès l'ouverture
-            onKeyEvent: (node, event) {
-              // On écoute l'appui sur les touches (KeyDown)
-              if (event is KeyDownEvent) {
-                if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-                  _changerSelectionClavier(1, listeAlumnis); // Descendre
-                  return KeyEventResult.handled;
-                } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-                  _changerSelectionClavier(-1, listeAlumnis); // Monter
-                  return KeyEventResult.handled;
-                }
-              }
-              return KeyEventResult.ignored; // Laisser passer les autres touches
-            },
-            child: Column(
-              children: [
-                // --- ZONE DE FILTRES (Partie Grise en haut) ---
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  color: Colors.grey[100],
-                  child: estGrandEcran
-                      ? Row(
-                          children: [
-                            SizedBox(width: 400, child: _champRecherche()),
-                            const Spacer(),
-                            const FilterChipExample(),
-                          ],
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _champRecherche(),
-                            const SizedBox(height: 15),
-                            const FilterChipExample(),
-                          ],
-                        ),
-                ),
-
-                // --- ZONE PRINCIPALE (Liste + Détail) ---
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      
+      body: _chargementEnCours
+          ? const Center(child: CircularProgressIndicator())
+          : CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.arrowDown): () {
+                  _changerSelectionClavier(1, _alumnisAffiches);
+                },
+                const SingleActivator(LogicalKeyboardKey.arrowUp): () {
+                  _changerSelectionClavier(-1, _alumnisAffiches);
+                },
+              },
+              child: Focus(
+                autofocus: true,
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      color: Colors.grey[100],
+                      child: estGrandEcran
+                ? Row(
                     children: [
-                      // --- COLONNE GAUCHE : LISTE ---
+                      SizedBox(width: 400, child: _champRecherche()),
+                      Padding(padding: const EdgeInsets.all(15)),
                       Expanded(
-                        flex: estGrandEcran ? 1 : 1, // 1/3 de l'écran sur PC
-                        child: Container(
-                          color: Colors.white,
-                          child: ListView.builder(
-                            controller: _scrollController, // IMPORTANT pour le scroll auto
-                            itemCount: listeAlumnis.length,
-                            padding: const EdgeInsets.all(10),
-                            itemBuilder: (context, index) {
-                              final eleve = listeAlumnis[index];
-                              // Vérifie si cet élève est celui sélectionné (pour le colorier)
-                              final estSelectionne = eleve == _eleveSelectionne;
-
-                              return _carteEleve(context, eleve, estSelectionne, estGrandEcran);
-                            },
-                          ),
+                        child: ZoneFiltres(
+                          promosDisponibles: _promosDisponibles,
+                          filieresDisponibles: _filieresDisponibles,
+                          promosSelectionnees: _filtresPromoSelectionnes,
+                          filieresSelectionnees: _filtresFiliereSelectionnes,
+                          onPromoChanged: (promo, estCoche) {
+                            setState(() {
+                              estCoche ? _filtresPromoSelectionnes.add(promo) : _filtresPromoSelectionnes.remove(promo);
+                              _filtrerResultats(_searchController.text);
+                            });
+                          },
+                          onFiliereChanged: (filiere, estCoche) {
+                             setState(() {
+                              estCoche ? _filtresFiliereSelectionnes.add(filiere) : _filtresFiliereSelectionnes.remove(filiere);
+                              _filtrerResultats(_searchController.text);
+                            });
+                          },
                         ),
                       ),
-
-                      // --- COLONNE DROITE : DÉTAIL (Seulement sur grand écran) ---
-                      if (estGrandEcran) ...[
-                        const VerticalDivider(width: 1, thickness: 1, color: Colors.grey),
-                        Expanded(
-                          flex: 1, // 2/3 de l'écran
-                          child: Container(
-                            color: Colors.grey[50],
-                            // Si aucun sélectionné, affiche message par défaut. Sinon, affiche la page détail.
-                            child: _eleveSelectionne == null
-                                ? _vueParDefaut()
-                                : AlumniPreview(alumni: _eleveSelectionne!),
-                          ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Trouver un mentor", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 15),
+                      _champRecherche(),
+                      const SizedBox(height: 15),
+                      ZoneFiltres(
+                          promosDisponibles: _promosDisponibles,
+                          filieresDisponibles: _filieresDisponibles,
+                          promosSelectionnees: _filtresPromoSelectionnes,
+                          filieresSelectionnees: _filtresFiliereSelectionnes,
+                          onPromoChanged: (promo, estCoche) {
+                            setState(() {
+                              estCoche ? _filtresPromoSelectionnes.add(promo) : _filtresPromoSelectionnes.remove(promo);
+                              _filtrerResultats(_searchController.text);
+                            });
+                          },
+                          onFiliereChanged: (filiere, estCoche) {
+                             setState(() {
+                              estCoche ? _filtresFiliereSelectionnes.add(filiere) : _filtresFiliereSelectionnes.remove(filiere);
+                              _filtrerResultats(_searchController.text);
+                            });
+                          },
                         ),
-                      ],
                     ],
                   ),
+          ),
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              color: Colors.white,
+                              child: _alumnisAffiches.isEmpty
+                                  ? const Center(child: Text("Aucun résultat"))
+                                  : ListView.builder(
+                                      controller: _scrollController,
+                                      itemCount: _alumnisAffiches.length,
+                                      padding: const EdgeInsets.all(10),
+                                      itemBuilder: (context, index) {
+                                        final eleve = _alumnisAffiches[index];
+                                        final estSelectionne = eleve == _eleveSelectionne;
+                                        return _carteEleve(context, eleve, estSelectionne, estGrandEcran);
+                                      },
+                                    ),
+                            ),
+                          ),
+                          if (estGrandEcran) ...[
+                            const VerticalDivider(width: 1),
+                            Expanded(
+                              flex: 2,
+                              child: _eleveSelectionne == null
+                                  ? _vueParDefaut()
+                                  : AlumniPreview(alumni: _eleveSelectionne!),
+                            ),
+                          ]
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+              ),
+            ),);
   }
 
-  // --- WIDGETS AUXILIAIRES ---
-
-  Widget _champRecherche() {
+ Widget _champRecherche() {
     return TextField(
+      controller: _searchController,
+      onChanged: (value) => _filtrerResultats(value),
       decoration: InputDecoration(
-        hintText: "Rechercher...",
+        hintText: "Recherche...",
         prefixIcon: const Icon(Icons.search),
+        suffixIcon: _searchController.text.isNotEmpty 
+            ? IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  _searchController.clear();
+                  _filtrerResultats('');
+                  FocusScope.of(context).unfocus(); 
+                },
+              ) 
+            : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         filled: true,
         fillColor: Colors.white,
@@ -246,8 +286,52 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
       ],
     );
   }
+  void _changerSelectionClavier(int direction, List<Alumnis> liste) {
+    if (liste.isEmpty) return;
+
+    if (_eleveSelectionne == null) {
+      setState(() {
+        _eleveSelectionne = liste.first;
+      });
+      return;
+    }
+
+    int indexActuel = liste.indexOf(_eleveSelectionne!);
+    
+    if (indexActuel == -1) {
+       setState(() {
+        _eleveSelectionne = liste.first;
+      });
+      return;
+    }
+
+    int nouvelIndex = indexActuel + direction;
+
+    if (nouvelIndex >= 0 && nouvelIndex < liste.length) {
+      setState(() {
+        _eleveSelectionne = liste[nouvelIndex];
+      });
+
+      if (_scrollController.hasClients) {
+        double positionCible = nouvelIndex * 90.0;
+        _scrollController.animateTo(
+          positionCible > 200 ? positionCible - 200 : positionCible, 
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    }
+  }
 
 Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, bool estGrandEcran) {
+  void _ouvrirPageComplete(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AlumniDetailPage(alumni: eleve),
+      ),
+    );
+  }
     return Card(
       elevation: estSelectionne ? 8 : 2,
       color: estSelectionne ? AppColors.ensiCyan.withOpacity(0.1) : Colors.white,
@@ -258,9 +342,8 @@ Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, boo
             ? const BorderSide(color: AppColors.ensiCyan, width: 2) 
             : BorderSide.none,
       ),
-      child: InkWell( // InkWell gère les clics
-        borderRadius: BorderRadius.circular(10), // Pour que l'effet visuel suive les bords arrondis
-        
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
         onTap: () {
           if (estGrandEcran) {
             setState(() {
@@ -297,7 +380,7 @@ Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, boo
                           color: Colors.black
                         ),
                         children: [
-                          if (eleve.promo != null)
+                          if (eleve.promo != 0)
                             TextSpan(
                               text: " - ${eleve.promo}",
                               style: TextStyle(
@@ -322,6 +405,16 @@ Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, boo
                   ],
                 ),
               ),
+              ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              ),
+              onPressed: () => _ouvrirPageComplete(context),
+              icon: const Icon(Icons.visibility, size: 18),
+              label: const Text("Voir", style: TextStyle(fontSize: 12)),
+            ),
             ],
           ),
         ),
@@ -329,10 +422,10 @@ Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, boo
     );
   }
 
-  // Petite fonction utilitaire pour éviter de répéter le code de navigation
   void _ouvrirPageDetail(BuildContext context, Alumnis eleve) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AlumniDetailPage(alumni: eleve)),
     );
-  }}
+  }
+}

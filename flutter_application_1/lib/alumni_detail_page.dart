@@ -38,12 +38,10 @@ class AlumniDetailPage extends StatelessWidget {
             ),
             const Divider(height: 40),
             
-            // --- C'EST ICI QUE CA CHANGE ---
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start, // Aligne les cartes en haut
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 
-                // COLONNE DE GAUCHE (Expanded force la largeur à 50%)
                 Expanded(
                   child: Card(
                     elevation: 2,
@@ -69,10 +67,9 @@ class AlumniDetailPage extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(width: 10), // Espace entre les deux colonnes
+                const SizedBox(width: 10),
 
-                // COLONNE DE DROITE
-                Expanded(
+                  Expanded(
                   child: Card(
                     elevation: 2,
                     child: Column(
@@ -86,17 +83,24 @@ class AlumniDetailPage extends StatelessWidget {
                           title: const Text("Ville"),
                           subtitle: Text(alumni.ville),
                         ),
-                        const Divider(height: 1),
-                        ListTile(
-                          leading: const Icon(Icons.email, color: Colors.green),
-                          title: const Text("Email"),
-                          subtitle: Text("email"),
-                        ),
+                        if (alumni.autor==1  && alumni.decede==0) ...[
+                          const Divider(height: 1),
+                          ListTile(
+                            leading: const Icon(Icons.email, color: Colors.green),
+                            title: const Text("Email"),
+                            subtitle: Text(alumni.email),
+                          ),
+                          const Divider(height: 1),
+                          ListTile(
+                            leading: const Icon(Icons.phone, color: Colors.amber),
+                            title: const Text("Téléphone"),
+                            subtitle: Text(alumni.tel),
+                          ),
+                        ],
                       ],
                     ),
                   ),
                 ),
-                
               ],
             )      
           ],

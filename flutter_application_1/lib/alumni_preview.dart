@@ -20,19 +20,17 @@ class AlumniPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // GestureDetector gère le double clic sur toute la zone
     return GestureDetector(
       onDoubleTap: () => _ouvrirPageComplete(context),
       child: Container(
         padding: const EdgeInsets.all(30),
-        color: Colors.white, // Fond blanc pour faire propre
+        color: Colors.white,
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 1. Photo géante
-            Hero( // "Hero" permet une animation fluide de l'image vers l'autre page
-              tag: "email", // Doit être unique par élève
+            Hero(
+              tag: alumni.email,
               child: CircleAvatar(
                 radius: 70,
                 backgroundColor: AppColors.ensiCyan,
@@ -44,7 +42,6 @@ class AlumniPreview extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // 2. Infos principales uniquement
             Text(
               alumni.nomComplet,
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -58,18 +55,16 @@ class AlumniPreview extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
-            // 3. Petit résumé visuel
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _infoBulle(Icons.school, alumni.promo.toString()),
-                _infoBulle(Icons.location_on, alumni.ville),
+                _infoBulle(Icons.school, alumni.promo.toString(), Colors.orangeAccent),
+                _infoBulle(Icons.location_on, alumni.ville, Colors.red),
               ],
             ),
 
-            const Spacer(), // Pousse le bouton vers le bas
+            const Spacer(),
 
-            // 4. Le Bouton "Voir plus"
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.ensiCyan,
@@ -82,20 +77,16 @@ class AlumniPreview extends StatelessWidget {
               label: const Text("Voir la fiche complète"),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "(Double-cliquez pour ouvrir)",
-              style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _infoBulle(IconData icon, String text) {
+  Widget _infoBulle(IconData icon, String text, Color color) {
     return Column(
       children: [
-        Icon(icon, size: 30, color: AppColors.ensiCyan),
+        Icon(icon, size: 30, color: color),
         const SizedBox(height: 5),
         Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
