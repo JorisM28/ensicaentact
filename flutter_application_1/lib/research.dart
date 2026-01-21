@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/colors.dart';
-import 'package:flutter_application_ensicaentact/alumni_detail_page.dart';
+import 'colors.dart';
+import 'alumni_detail_page.dart';
 import 'filtre.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
-import 'api_service.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MonReseauAlumni());
@@ -174,15 +174,13 @@ class PageAnnuaire extends StatelessWidget {
     );
   }
 
-  // Ajoute 'BuildContext context' dans les paramètres
   Widget _carteEleve(BuildContext context, Alumnis eleve) {
     return Card(
       elevation: 3,
       margin: const EdgeInsets.only(bottom: 15),
-      clipBehavior: Clip.antiAlias, // Nécessaire pour que l'effet visuel du clic reste dans la carte
-      child: InkWell( // InkWell ajoute un effet visuel au clic (vague)
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: () {
-          // C'est ICI que se fait le lien vers la page détail
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -228,7 +226,6 @@ class PageAnnuaire extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.send, color: AppColors.ensiCyan),
                 onPressed: () { 
-                  // Action rapide (ex: envoyer un mail direct)
                 },
               ),
             ],

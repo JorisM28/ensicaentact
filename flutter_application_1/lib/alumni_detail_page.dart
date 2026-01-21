@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'colors.dart'; // Vérifie que ce fichier existe aussi, sinon remplace par Colors.cyan
-import 'alumnis.dart'; // Important : Importe ton modèle
+import 'colors.dart';
+import 'alumnis.dart';
 
 class AlumniDetailPage extends StatelessWidget {
   final Alumnis alumni;
@@ -12,16 +12,16 @@ class AlumniDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(alumni.nomComplet),
-        backgroundColor: AppColors.ensiCyan, // Ou Colors.cyan si erreur
+        backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView( // Ajouté pour éviter que ça dépasse sur petits écrans
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             CircleAvatar(
               radius: 60,
-              backgroundColor: AppColors.ensiCyan, // Ou Colors.cyan
+              backgroundColor: AppColors.ensiCyan,
               child: Text(
                 alumni.prenom.isNotEmpty ? alumni.prenom[0] : "?",
                 style: const TextStyle(fontSize: 50, color: Colors.white),
@@ -38,37 +38,67 @@ class AlumniDetailPage extends StatelessWidget {
             ),
             const Divider(height: 40),
             
-            // Carte d'infos
-            Card(
-              elevation: 2,
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.work, color: Colors.blue),
-                    title: const Text("Poste actuel"),
-                    subtitle: Text("${alumni.job} chez ${alumni.entreprise}"),
+            // --- C'EST ICI QUE CA CHANGE ---
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start, // Aligne les cartes en haut
+              children: [
+                
+                // COLONNE DE GAUCHE (Expanded force la largeur à 50%)
+                Expanded(
+                  child: Card(
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text("Informations Pro", style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.work, color: Colors.blue),
+                          title: const Text("Poste actuel"),
+                          subtitle: Text("${alumni.job} chez ${alumni.entreprise}"),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.school, color: Colors.orange),
+                          title: const Text("Filière"),
+                          subtitle: Text(alumni.filiere),
+                        ),
+                      ],
+                    ),
                   ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.school, color: Colors.orange),
-                    title: const Text("Filière"),
-                    subtitle: Text(alumni.filiere),
+                ),
+
+                const SizedBox(width: 10), // Espace entre les deux colonnes
+
+                // COLONNE DE DROITE
+                Expanded(
+                  child: Card(
+                    elevation: 2,
+                    child: Column(
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text("Coordonnées", style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.location_on, color: Colors.red),
+                          title: const Text("Ville"),
+                          subtitle: Text(alumni.ville),
+                        ),
+                        const Divider(height: 1),
+                        ListTile(
+                          leading: const Icon(Icons.email, color: Colors.green),
+                          title: const Text("Email"),
+                          subtitle: Text("email"),
+                        ),
+                      ],
+                    ),
                   ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.location_on, color: Colors.red),
-                    title: const Text("Ville"),
-                    subtitle: Text(alumni.ville),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.email, color: Colors.green),
-                    title: const Text("Email"),
-                    subtitle: Text("email"),
-                  ),
-                ],
-              ),
-            ),
+                ),
+                
+              ],
+            )      
           ],
         ),
       ),
