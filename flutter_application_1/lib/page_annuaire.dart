@@ -26,8 +26,16 @@ class MonReseauAlumni extends StatelessWidget {
 }
 
 class PageAnnuaire extends StatefulWidget {
-  const PageAnnuaire({super.key});
-
+  final Map<String, dynamic> user;
+  const PageAnnuaire({
+    super.key, 
+    this.user = const {
+      'prenom': 'Visiteur',
+      'nom': '',
+      'email': '',
+      'role': 'guest', /// a voir apres !!!
+    },
+  });
   @override
   State<PageAnnuaire> createState() => _PageAnnuaireState();
 }
@@ -41,6 +49,8 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
   final Set<String> _filtresFiliereSelectionnes = {};
   bool _chargementEnCours = true;
   TextEditingController _searchController = TextEditingController();
+
+  bool get estAdmin => widget.user['role'] == 'admin';
 
   @override
   void initState() {
@@ -233,7 +243,7 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
                               flex: 2,
                               child: _eleveSelectionne == null
                                   ? _vueParDefaut()
-                                  : AlumniPreview(alumni: _eleveSelectionne!),
+                                  : AlumniPreview(alumni: _eleveSelectionne!, user: widget.user,),
                             ),
                           ]
                         ],
@@ -329,7 +339,7 @@ Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, boo
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AlumniDetailPage(alumni: eleve),
+        builder: (context) => AlumniDetailPage(alumni: eleve, user: widget.user),
       ),
     );
   }
@@ -426,7 +436,7 @@ Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, boo
   void _ouvrirPageDetail(BuildContext context, Alumnis eleve) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AlumniDetailPage(alumni: eleve)),
+      MaterialPageRoute(builder: (context) => AlumniDetailPage(alumni: eleve, user: widget.user)),
     );
   }
 }

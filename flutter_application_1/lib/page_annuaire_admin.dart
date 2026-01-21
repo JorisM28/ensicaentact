@@ -6,32 +6,54 @@ import 'database_service.dart';
 import 'alumni_detail_page_admin.dart';
 import 'alumni_preview.dart';
 import 'filtre_widget.dart';
-import 'add_alumni.dart'; // J'ai remis le nom que je t'avais donné, vérifie ton nom de fichier !
+import 'add_alumni.dart'; 
 
 void main() {
-  // Ici, tu peux mettre true ou false pour tester le mode admin
-  runApp(const MonReseauAlumni(estAdmin: true)); 
+  runApp(const MonReseauAlumni()); 
 }
 
 class MonReseauAlumni extends StatelessWidget {
   final bool estAdmin;
-  const MonReseauAlumni({super.key, this.estAdmin = false});
+  final Map<String, dynamic> user;
+  
+  const MonReseauAlumni({
+    super.key, 
+    this.estAdmin = true, 
+    this.user = const {
+      'prenom': 'Super',
+      'nom': 'Admin',
+      'role': 'admin'
+    }
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: AppColors.ensiCyan),
-      // CORRECTION 1 : On passe la variable estAdmin à la page
-      home: PageAnnuaireAdmin(estAdmin: estAdmin), 
+      // CORRECTION 1 : On passe le user à la page d'accueil
+      home: PageAnnuaireAdmin(estAdmin: estAdmin, user: user), 
     );
   }
 }
 
 class PageAnnuaireAdmin extends StatefulWidget {
-  // CORRECTION 2 : On accepte la variable dans le constructeur
-  final bool estAdmin; 
-  const PageAnnuaireAdmin({super.key, this.estAdmin = false});
+  final bool estAdmin;
+  
+  // CORRECTION 2 : C'est la ligne qui te manquait !
+  // Sans ça, "widget.user" n'existe pas plus bas.
+  final Map<String, dynamic> user; 
+
+  const PageAnnuaireAdmin({
+    super.key, 
+    this.estAdmin = true,
+    // On met une valeur par défaut de sécurité
+    this.user = const {
+      'prenom': 'Admin',
+      'nom': 'Système',
+      'role': 'admin'
+    }
+  });
 
   @override
   State<PageAnnuaireAdmin> createState() => _PageAnnuaireAdminState();
@@ -94,7 +116,6 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
   void _filtrerResultats(String recherche) {
     List<Alumnis> resultats = _tousLesAlumnis;
 
-    // Filtre texte
     if (recherche.isNotEmpty) {
       resultats = resultats.where((eleve) {
         final nomLower = eleve.nomComplet.toLowerCase();
@@ -108,14 +129,12 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
       }).toList();
     }
 
-    // Filtre Promo
     if (_filtresPromoSelectionnes.isNotEmpty) {
       resultats = resultats.where((eleve) {
         return _filtresPromoSelectionnes.contains(eleve.promo.toString());
       }).toList();
     }
 
-    // Filtre Filière
     if (_filtresFiliereSelectionnes.isNotEmpty) {
       resultats = resultats.where((eleve) {
         return _filtresFiliereSelectionnes.contains(eleve.filiere);
@@ -137,7 +156,7 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("ENSIcaentact"),
+        title: const Text("ENSIcaentact (Admin)"),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
@@ -149,30 +168,31 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
       ),
       
       floatingActionButton: FloatingActionButton(
-              backgroundColor: AppColors.ensiCyan,
-              child: const Icon(Icons.add, color: Colors.white),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Nouvel Alumni"),
-                    content: SizedBox(
-                      width: 500,
-                      child: AddAlumniForm(
-                        onSuccess: () {
-                          Navigator.pop(context);
-                          // On recharge la page proprement
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => PageAnnuaireAdmin())); // On repasse l'état admin
-                        },
-                      ),
-                    ),
-                  ),
-                );
-              },
+        backgroundColor: AppColors.ensiCyan,
+        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Nouvel Alumni"),
+              content: SizedBox(
+                width: 500,
+                child: AddAlumniForm(
+                  onSuccess: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          // CORRECTION 3 : On n'oublie pas de repasser le user ici aussi !
+                          builder: (context) => PageAnnuaireAdmin(user: widget.user)
+                        )); 
+                  },
+                ),
+              ),
             ),
+          );
+        },
+      ),
 
       body: _chargementEnCours
           ? const Center(child: CircularProgressIndicator())
@@ -284,7 +304,8 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
                               flex: 2,
                               child: _eleveSelectionne == null
                                   ? _vueParDefaut()
-                                  : AlumniPreview(alumni: _eleveSelectionne!),
+                                  // Maintenant widget.user va fonctionner !
+                                  : AlumniPreview(alumni: _eleveSelectionne!, user: widget.user), 
                             ),
                           ]
                         ],
@@ -342,30 +363,18 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
 
   void _changerSelectionClavier(int direction, List<Alumnis> liste) {
     if (liste.isEmpty) return;
-
     if (_eleveSelectionne == null) {
-      setState(() {
-        _eleveSelectionne = liste.first;
-      });
+      setState(() => _eleveSelectionne = liste.first);
       return;
     }
-
     int indexActuel = liste.indexOf(_eleveSelectionne!);
-
     if (indexActuel == -1) {
-      setState(() {
-        _eleveSelectionne = liste.first;
-      });
+      setState(() => _eleveSelectionne = liste.first);
       return;
     }
-
     int nouvelIndex = indexActuel + direction;
-
     if (nouvelIndex >= 0 && nouvelIndex < liste.length) {
-      setState(() {
-        _eleveSelectionne = liste[nouvelIndex];
-      });
-
+      setState(() => _eleveSelectionne = liste[nouvelIndex]);
       if (_scrollController.hasClients) {
         double positionCible = nouvelIndex * 90.0;
         _scrollController.animateTo(
@@ -377,62 +386,59 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
     }
   }
 
-    void _afficherHistorique(BuildContext context) async {
-  // On récupère les logs depuis le service
-  final logs = await DatabaseService().getHistorique();
-
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Row(
-        children: [
-          Icon(Icons.history, color: AppColors.ensiCyan),
-          SizedBox(width: 10),
-          Text("Historique des actions"),
+  void _afficherHistorique(BuildContext context) async {
+    final logs = await DatabaseService().getHistorique();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.history, color: AppColors.ensiCyan),
+            SizedBox(width: 10),
+            Text("Historique des actions"),
+          ],
+        ),
+        content: SizedBox(
+          width: 500,
+          height: 400,
+          child: logs.isEmpty
+              ? const Center(child: Text("Aucune action enregistrée."))
+              : ListView.builder(
+                  itemCount: logs.length,
+                  itemBuilder: (context, index) {
+                    final log = logs[index];
+                    final bool isDelete = log['action'] == 'SUPPRESSION';
+                    
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
+                        child: Icon(
+                          isDelete ? Icons.delete_forever : Icons.person_add,
+                          color: isDelete ? Colors.red : Colors.green,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        "${log['prenom_alumni']} ${log['nom_alumni']}",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        "${log['action']} le ${log['date_action']}",
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Fermer"),
+          ),
         ],
       ),
-      content: SizedBox(
-        width: 500,
-        height: 400,
-        child: logs.isEmpty
-            ? const Center(child: Text("Aucune action enregistrée."))
-            : ListView.builder(
-                itemCount: logs.length,
-                itemBuilder: (context, index) {
-                  final log = logs[index];
-                  final bool isDelete = log['action'] == 'SUPPRESSION';
-                  
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
-                      child: Icon(
-                        isDelete ? Icons.delete_forever : Icons.person_add,
-                        color: isDelete ? Colors.red : Colors.green,
-                        size: 20,
-                      ),
-                    ),
-                    title: Text(
-                      "${log['prenom_alumni']} ${log['nom_alumni']}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      "${log['action']} le ${log['date_action']}",
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  );
-                },
-              ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text("Fermer"),
-        ),
-      ],
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, bool estGrandEcran) {
     void _ouvrirPageComplete(BuildContext context) {
@@ -557,10 +563,11 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
 
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const PageAnnuaireAdmin())
+                      // CORRECTION 4 : On repasse bien le user ici aussi !
+                      MaterialPageRoute(builder: (context) => PageAnnuaireAdmin(user: widget.user)) 
                     );
                   }
-                  },
+                },
               ),
             ],
           ),

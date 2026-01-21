@@ -5,15 +5,15 @@ import 'alumni_detail_page.dart'; // Importe la page complète pour la navigatio
 
 class AlumniPreview extends StatelessWidget {
   final Alumnis alumni;
-
-  const AlumniPreview({super.key, required this.alumni});
+  final Map<String, dynamic> user;
+  const AlumniPreview({super.key, required this.alumni, required this.user});
 
   // Fonction pour aller vers la page complète
   void _ouvrirPageComplete(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AlumniDetailPage(alumni: alumni),
+        builder: (context) => AlumniDetailPage(alumni: alumni, user: user),
       ),
     );
   }

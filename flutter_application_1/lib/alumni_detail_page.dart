@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/profileBadge.dart';
 import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
 
 class AlumniDetailPage extends StatelessWidget {
   final Alumnis alumni;
-
-  const AlumniDetailPage({super.key, required this.alumni});
+  final Map<String, dynamic> user;
+  const AlumniDetailPage({super.key, required this.alumni, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -20,14 +21,7 @@ class AlumniDetailPage extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: AppColors.ensiCyan,
-              child: Text(
-                alumni.prenom.isNotEmpty ? alumni.prenom[0] : "?",
-                style: const TextStyle(fontSize: 50, color: Colors.white),
-              ),
-            ),
+            ProfileBadge(user: user),
             const SizedBox(height: 20),
             Text(
               alumni.nomComplet,
