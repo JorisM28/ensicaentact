@@ -12,7 +12,8 @@ void main() {
 }
 
 class MonReseauAlumni extends StatelessWidget {
-  const MonReseauAlumni({super.key});
+  final bool estAdmin;
+  const MonReseauAlumni({super.key, this.estAdmin = false});
 
   @override
   Widget build(BuildContext context) {

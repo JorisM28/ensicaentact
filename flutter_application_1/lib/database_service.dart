@@ -4,7 +4,7 @@ import 'alumnis.dart';
 
 class DatabaseService {
 
-  static const String apiUrl = 'http://localhost/api_alumni/get_alumni.php';
+  static const String apiUrl = 'https://alumni.theo-airey.fr/get_alumni.php';
 
   Future<List<Alumnis>> getTousLesEleves() async {
     try {
@@ -28,7 +28,7 @@ class DatabaseService {
   Future<void> supprimerEleve(String nom, String prenom) async {
     try {
       
-      final url = Uri.parse('http://localhost/api_alumni/delete_alumni.php');
+      final url = Uri.parse('https://alumni.theo-airey.fr/delete_alumni.php');
       
       await http.post(
         url,
@@ -45,7 +45,7 @@ class DatabaseService {
 
   Future<void> ajouterEleve(Map<String, dynamic> donneesEleve) async {
     try {
-      final url = Uri.parse('http://localhost/api_alumni/add_alumni.php');
+      final url = Uri.parse('https://alumni.theo-airey.fr/add_alumni.php');
       
       final response = await http.post(
         url,
@@ -61,7 +61,7 @@ class DatabaseService {
 
   Future<List<Map<String, dynamic>>> getHistorique() async {
   try {
-    final response = await http.get(Uri.parse('http://localhost/api_alumni/get_history.php'));
+    final response = await http.get(Uri.parse('https://alumni.theo-airey.fr/get_alumni.php'));
     if (response.statusCode == 200) {
       return List<Map<String, dynamic>>.from(jsonDecode(response.body));
     }
@@ -74,7 +74,7 @@ class DatabaseService {
 
 Future<void> modifierEleve(Map<String, dynamic> donnees) async {
     try {
-      final url = Uri.parse('http://localhost/api_alumni/update_alumni.php');
+      final url = Uri.parse('https://alumni.theo-airey.fr/update_alumni.php');
       print("Envoi modification pour ${donnees['nom']}..."); // Debug
 
       final response = await http.post(

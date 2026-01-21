@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/login.dart';
+<<<<<<< Updated upstream
 import 'package:flutter_application_ensicaentact/research.dart'; // Décommentez si votre page est là-bas
 import 'login_check.dart';
+=======
+import 'package:flutter_application_ensicaentact/page_annuaire.dart';
+import 'page_annuaire_admin.dart';
+>>>>>>> Stashed changes
 
 void main() {
   runApp(const MyApp());
@@ -60,6 +65,15 @@ class PageAccueil extends StatelessWidget {
                 );
               },
               child: const Text('Login'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PageAnnuaireAdmin()),
+                );
+              },
+              child: const Text('Version Admin'),
             ),
           ],
         ),
