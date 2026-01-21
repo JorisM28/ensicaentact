@@ -5,7 +5,7 @@ pages:
   script:
     - cd flutter_application_1
     - flutter pub get
-    - flutter build web --release --base-href "/ENSICaentact/"
+    - flutter build web --release
     - cd ..
     - rm -rf public
     - mkdir public
