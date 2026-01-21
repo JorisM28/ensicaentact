@@ -4,7 +4,6 @@ import 'package:flutter_application_ensicaentact/alumni_detail_page.dart';
 import 'filtre.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
-import 'api_service.dart';
 
 void main() {
   runApp(const MonReseauAlumni());
