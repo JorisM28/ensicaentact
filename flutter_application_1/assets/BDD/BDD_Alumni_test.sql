@@ -35,6 +35,9 @@ CREATE TABLE UTILISATEUR (
     prenom VARCHAR(255) NOT NULL,
     sexe ENUM('M','F','I'),
     age INT,
+    tel VARCHAR(20),
+    mail VARCHAR(50),
+    autor TINYINT(1) DEFAULT 0,
     decede TINYINT(1) DEFAULT 0
 );
 
@@ -92,12 +95,22 @@ INSERT INTO DATE_TABLE (debut, fin) VALUES
 ('2025-09-01', '2026-09-01'), ('2022-03-01', '2022-09-01'),
 ('2023-10-01', '2024-04-01');
 
-INSERT INTO UTILISATEUR (nom, prenom, sexe, age) VALUES
-('Dupont', 'Jean', 'M', 23), ('Martin', 'Alice', 'F', 22), ('Lefebvre', 'Thomas', 'M', 24),
-('Moreau', 'Sonia', 'F', 23), ('Simon', 'Luc', 'M', 25), ('Laurent', 'Julie', 'F', 22),
-('Michel', 'Benoit', 'M', 24), ('Garcia', 'Maria', 'F', 23), ('Muller', 'Hans', 'M', 26),
-('Roux', 'Nicolas', 'M', 24), ('David', 'Emma', 'F', 21), ('Bertrand', 'Hugo', 'M', 25),
-('Rousseau', 'Chloé', 'F', 22), ('Blanc', 'Mathieu', 'M', 23), ('Guerin', 'Léa', 'F', 24);
+INSERT INTO UTILISATEUR (nom, prenom, sexe, age, tel, mail, autor, decede) VALUES
+('Moczygepasdemeuf', 'Joris', 'M', 23, '0601010101', 'Joris.moczygepasdemeuf@ecole.ensicaen.fr', 0, 1),
+('Martin', 'Alice', 'F', 22, '0602020202', 'alice.martin@ecole.ensicaen.fr', 0, 0),
+('Lefebvre', 'Thomas', 'M', 24, '0603030303', 'thomas.lefebvre@ecole.ensicaen.fr', 0, 0),
+('Moreau', 'Sonia', 'F', 23, '0604040404', 'sonia.moreau@ecole.ensicaen.fr', 0, 0),
+('Simon', 'Luc', 'M', 25, '0605050505', 'luc.simon@ecole.ensicaen.fr', 0, 0),
+('Laurent', 'Julie', 'F', 22, '0606060606', 'julie.laurent@ecole.ensicaen.fr', 0, 0),
+('Michel', 'Benoit', 'M', 24, '0607070707', 'benoit.michel@ecole.ensicaen.fr', 0, 0),
+('Garcia', 'Maria', 'F', 23, '0608080808', 'maria.garcia@ecole.ensicaen.fr', 0, 0),
+('Muller', 'Hans', 'M', 26, '0609090909', 'hans.muller@ecole.ensicaen.fr', 1, 0),
+('Roux', 'Nicolas', 'M', 24, '0610101010', 'nicolas.roux@ecole.ensicaen.fr', 1, 0),
+('David', 'Emma', 'F', 21, '0611111111', 'emma.david@ecole.ensicaen.fr', 1, 0),
+('Bertrand', 'Hugo', 'M', 25, '0612121212', 'hugo.bertrand@ecole.ensicaen.fr', 1, 0),
+('Rousseau', 'Chloé', 'F', 22, '0613131313', 'chloe.rousseau@ecole.ensicaen.fr', 1, 0),
+('Blanc', 'Mathieu', 'M', 23, '0614141414', 'mathieu.blanc@ecole.ensicaen.fr', 1, 0),
+('Guerin', 'Léa', 'F', 24, '0615151515', 'lea.guerin@ecole.ensicaen.fr', 1, 0);
 
 INSERT INTO EDUCATION (majeure, option_, ddiplome, id_promo, id_user) VALUES
 ('Développement', 'Fullstack', 'Ingénieur', 1, 1), ('Développement', 'Cloud', 'Master M2', 1, 2),
