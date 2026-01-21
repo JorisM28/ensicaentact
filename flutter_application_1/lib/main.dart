@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/login.dart';
-import 'package:flutter_application_ensicaentact/page_annuaire.dart'; // Décommentez si votre page est là-bas
+<<<<<<< Updated upstream
+import 'package:flutter_application_ensicaentact/research.dart'; // Décommentez si votre page est là-bas
+import 'login_check.dart';
+=======
+import 'package:flutter_application_ensicaentact/page_annuaire.dart';
+import 'page_annuaire_admin.dart';
+>>>>>>> Stashed changes
 
 void main() {
   runApp(const MyApp());
@@ -13,9 +19,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Réseau Alumni',
-      // Au lieu de mettre le Scaffold ici, on appelle une autre classe
       home: const PageAccueil(), 
     );
   }
@@ -40,7 +46,13 @@ class PageAccueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PageAnnuaire()),
+                  MaterialPageRoute(builder: (context) => const PageAnnuaire(user: {
+                      'prenom': 'Visiteur',
+                      'nom': '',
+                      'email': '',
+                      'role': 'guest'
+                    },
+                  )),
                 );
               },
               child: const Text('Contacter un ancien élève'),
@@ -53,6 +65,15 @@ class PageAccueil extends StatelessWidget {
                 );
               },
               child: const Text('Login'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PageAnnuaireAdmin()),
+                );
+              },
+              child: const Text('Version Admin'),
             ),
           ],
         ),
