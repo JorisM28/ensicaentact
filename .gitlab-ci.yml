@@ -1,20 +1,10 @@
-pages:
-  stage: deploy
-  dependencies:
-    - build_web # Optionnel : si vous avez un job de build séparé
-  script:
-    # 1. On build l'application pour le web
-    # Remplacez /nom-du-projet/ par le nom de votre dépôt GitLab (important pour les liens)
-    - flutter build web --release --base-href "/votre-nom-depot/"
-    
-    # 2. On crée le dossier public requis par GitLab
-    - rm -rf public
-    - mkdir public
-    
-    # 3. On déplace le résultat du build vers le dossier public
-    - cp -r build/web/* public/
-  artifacts:
-    paths:
-      - public # Obligatoire
-  only:
-    - master # On ne déploie que depuis la branche principale
+# The Docker image that will be used to build your app
+image: ghcr.io/cirruslabs/flutter:stable
+create-pages:
+  pages:
+    # The folder that contains the files to be exposed at the Page URL
+    publish: public
+  rules:
+    # This ensures that only pushes to the default branch will trigger
+    # a pages deploy
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
