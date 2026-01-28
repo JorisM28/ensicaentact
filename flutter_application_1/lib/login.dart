@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'login_check.dart';
-import 'admin_page.dart';
 import 'page_annuaire.dart';
 
 class Login extends StatefulWidget {
@@ -18,7 +17,7 @@ class _LoginState extends State<Login> {
 
   bool isForgotPassword = false;
   bool _isLoading = false;
-
+  bool _isObscure = true;
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +71,7 @@ class _LoginState extends State<Login> {
                   if (!value.contains('@')) return "Invalid email";
                   return null;
                 },
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 15),
 
@@ -89,6 +89,8 @@ class _LoginState extends State<Login> {
                   }
                   return null;
                 },
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _submitLogin(),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 5.0, bottom: 5.0),
@@ -107,36 +109,7 @@ class _LoginState extends State<Login> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : () async {
-                    if (_formkey.currentState!.validate()) {
-                      setState(() => _isLoading = true);
-                      final userData = await EnsiCaenConnection().signIn(_emailController.text.trim(), _passwordController.text);
-
-                      if (!mounted) return;
-                      
-                      setState(() => _isLoading = false);
-
-                      if (userData['status'] == 'success') {
-                        String role = userData['role'];
-                        String name = userData['name'];
-                        
-                        if (role == 'admin') {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => AdminPage(user: userData)));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome $name")));
-                        } else if (role == 'student') {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PageAnnuaire(user: userData)));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome $name")));
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Unauthorized account !"),));
-                        }
-                      } else {
-                        if (!mounted) return;  
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(userData['message'] ?? "Unknown error"), backgroundColor: Colors.red),
-                        );
-                      }
-                    }
-                  },
+                  onPressed: _isLoading ? null : () => _submitLogin(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.ensiCyan,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -163,25 +136,9 @@ class _LoginState extends State<Login> {
           width: double.infinity,
           height: 50,
           child: OutlinedButton.icon(
-            onPressed: _isLoading ? null : () async { 
-              setState(() => _isLoading = true);
-              final userData = await MicrosoftConnection().signIn();
-              
-              if (!mounted) return;
-
-              setState(() => _isLoading = false);
-
-              if (userData != null && userData['status'] == 'success') {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: ((_) => PageAnnuaire(user: userData))));
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Welcome ${userData['name']}"),));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Microsoft connection failed..."),));            
-              }
-            },
-
+            onPressed: _isLoading ? null : () => _submitLogin(isMicrosoftConnection: true),
             icon: const Icon(Icons.window, color: Colors.white),
             label: const Text("Connect with Microsoft 365", style: TextStyle(color:  Colors.white)),
-            
             style: OutlinedButton.styleFrom(
               backgroundColor: AppColors.microsoftCyan,
               foregroundColor: Colors.white,
@@ -261,12 +218,20 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Widget _buildTextField(IconData icon, String label, {bool isPassword = false, Color? textColor, 
-  TextEditingController? controller, String? Function(String?)? validator,}) {
+  Widget _buildTextField(IconData icon, String label, {
+    bool isPassword = false, Color? textColor,
+    TextEditingController? controller,
+    String? Function(String?)? validator,
+    TextInputAction? textInputAction,
+    Function(String)? onSubmitted,}) {
     return TextFormField(
       controller: controller,
       validator: validator,
-      obscureText: isPassword,
+      obscureText: isPassword ? _isObscure : false,
+
+      textInputAction: textInputAction,
+      onFieldSubmitted: onSubmitted,
+
       style: TextStyle(color: textColor ?? Colors.black),
       cursorColor: textColor ?? Colors.black,
       cursorWidth: 1.5,
@@ -276,6 +241,26 @@ class _LoginState extends State<Login> {
         labelText: label,
         labelStyle: TextStyle(color: textColor),
         prefixIcon: Icon(icon, color: textColor),
+
+        suffixIcon: isPassword
+            ? IconButton(
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            child: Icon(
+              _isObscure ? Icons.visibility_off : Icons.visibility,
+              key: ValueKey<bool>(_isObscure),
+              color: Colors.grey,
+            ),
+          ),
+          onPressed: () {
+            setState(() {
+              _isObscure = !_isObscure;
+            });
+          },
+        ): null,
 
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -300,9 +285,49 @@ class _LoginState extends State<Login> {
             width: 1.0,
           ),
         ),
+
         filled: true,
         fillColor: Colors.grey[50],
       ),
     );
+  }
+
+  void _submitLogin({bool isMicrosoftConnection = false}) async {
+    if (_isLoading) return;
+
+    Map<String, dynamic>? userData;
+    if (isMicrosoftConnection) {
+      setState(() => _isLoading = true);
+      userData = await MicrosoftConnection().signIn();
+    } else {
+      if (_formkey.currentState!.validate()) {
+        setState(() => _isLoading = true);
+        userData = await EnsiCaenConnection().signIn(
+            _emailController.text.trim(),
+            _passwordController.text
+        );
+      } else {
+        return;
+      }
+    }
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    if (userData == null) return;
+
+    if (userData['status'] == 'success') {
+      String role = userData['role'];
+
+      if (role == 'admin' || role == 'student' || role == 'alumni') {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PageAnnuaire(user: userData!)));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connexion Impossible !"), backgroundColor: Colors.red));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(userData['message'] ?? "Erreur inconnue"), backgroundColor: Colors.red),
+      );
+    }
   }
 }
