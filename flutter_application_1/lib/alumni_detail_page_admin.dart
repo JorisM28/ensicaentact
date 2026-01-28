@@ -5,8 +5,9 @@ import 'database_service.dart';
 
 class AlumniDetailPageAdmin extends StatefulWidget {
   final Alumnis alumni;
+  final VoidCallback? onSave;
 
-  const AlumniDetailPageAdmin({super.key, required this.alumni});
+  const AlumniDetailPageAdmin({super.key, required this.alumni, this.onSave});
 
   @override
   State<AlumniDetailPageAdmin> createState() => _AlumniDetailPageAdminState();
@@ -14,6 +15,7 @@ class AlumniDetailPageAdmin extends StatefulWidget {
 
 class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   bool _enEdition = false;
+  bool _modifiee = false;
 
   late TextEditingController _posteCtrl;
   late TextEditingController _entrepriseCtrl;
@@ -59,8 +61,9 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
     super.dispose();
   }
 
-  void _sauvegarder() async {
+void _sauvegarder() async {
     await DatabaseService().modifierEleve({
+      "id": widget.alumni.id, 
       "nom": widget.alumni.nom,
       "prenom": widget.alumni.prenom,
       "poste": _posteCtrl.text,
@@ -71,6 +74,12 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
       "tel": _telCtrl.text,
     });
 
+    if (widget.onSave != null) {
+      print("Appel du callback de rechargement...");
+      widget.onSave!(); 
+    }
+    if (!mounted) return;
+
     setState(() {
       posteActuel = _posteCtrl.text;
       entrepriseActuelle = _entrepriseCtrl.text;
@@ -79,6 +88,7 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
       emailActuel = _emailCtrl.text;
       telActuel = _telCtrl.text;
       _enEdition = false;
+      _modifiee = true;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -92,10 +102,16 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.alumni.nomComplet),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
+        appBar: AppBar(
+          title: Text(widget.alumni.nomComplet),
+          backgroundColor: AppColors.ensiCyan,
+          foregroundColor: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context, _modifiee);
+            },
+          ),
         actions: [
           IconButton(
             icon: Icon(_enEdition ? Icons.save : Icons.edit),
