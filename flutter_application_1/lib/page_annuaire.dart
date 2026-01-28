@@ -33,7 +33,7 @@ class PageAnnuaire extends StatefulWidget {
       'prenom': 'Visiteur',
       'nom': '',
       'email': '',
-      'role': 'guest', /// a voir apres !!!
+      'role': 'guest',
     },
   });
   @override
@@ -45,8 +45,12 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
   final ScrollController _scrollController = ScrollController();
   List<Alumnis> _tousLesAlumnis = [];
   List<Alumnis> _alumnisAffiches = [];
+  
+  // --- FILTRES ETAT ---
   final Set<String> _filtresPromoSelectionnes = {};
   final Set<String> _filtresFiliereSelectionnes = {};
+  final Set<String> _filtresPaysStageSelectionnes = {}; // <--- NOUVEAU
+  
   bool _chargementEnCours = true;
   TextEditingController _searchController = TextEditingController();
 
@@ -57,6 +61,8 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
     super.initState();
     _chargerDonneesInitiales();
   }
+
+  // --- GETTERS POUR LES FILTRES ---
 
   List<String> get _promosDisponibles {
     final promos = _tousLesAlumnis
@@ -78,6 +84,23 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
     return filieres;
   }
 
+  // <--- NOUVEAU GETTER : Parcours les stages pour trouver les pays uniques
+  List<String> get _paysStageDisponibles {
+    final Set<String> paysTrouves = {};
+    
+    for (var alumni in _tousLesAlumnis) {
+      for (var stage in alumni.stages) {
+        if (stage.pays.isNotEmpty && stage.pays != "Non renseigné") {
+          paysTrouves.add(stage.pays);
+        }
+      }
+    }
+    
+    final listeTriee = paysTrouves.toList();
+    listeTriee.sort();
+    return listeTriee;
+  }
+
   void _chargerDonneesInitiales() async {
     try {
       var donnees = await DatabaseService().getTousLesEleves();
@@ -97,6 +120,7 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
  void _filtrerResultats(String recherche) {
     List<Alumnis> resultats = _tousLesAlumnis;
 
+    // 1. Filtre Recherche Texte
     if (recherche.isNotEmpty) {
       resultats = resultats.where((eleve) {
         final nomLower = eleve.nomComplet.toLowerCase();
@@ -110,15 +134,30 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
       }).toList();
     }
 
+    // 2. Filtre Promo
     if (_filtresPromoSelectionnes.isNotEmpty) {
       resultats = resultats.where((eleve) {
         return _filtresPromoSelectionnes.contains(eleve.promo.toString());
       }).toList();
     }
 
+    // 3. Filtre Filière
     if (_filtresFiliereSelectionnes.isNotEmpty) {
       resultats = resultats.where((eleve) {
         return _filtresFiliereSelectionnes.contains(eleve.filiere);
+      }).toList();
+    }
+
+    // 4. Filtre Pays Stage (NOUVEAU)
+    if (_filtresPaysStageSelectionnes.isNotEmpty) {
+      resultats = resultats.where((eleve) {
+        // On garde l'élève s'il a au moins UN stage dans un des pays sélectionnés
+        for (var stage in eleve.stages) {
+          if (_filtresPaysStageSelectionnes.contains(stage.pays)) {
+            return true; 
+          }
+        }
+        return false;
       }).toList();
     }
 
@@ -162,24 +201,37 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
                       color: Colors.grey[100],
                       child: estGrandEcran
                 ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.start, // Alignement haut
                     children: [
                       SizedBox(width: 400, child: _champRecherche()),
-                      Padding(padding: const EdgeInsets.all(15)),
+                      const Padding(padding: EdgeInsets.all(15)),
                       Expanded(
+                        // --- ZONE FILTRE DESKTOP ---
                         child: ZoneFiltres(
+                          // Promos
                           promosDisponibles: _promosDisponibles,
-                          filieresDisponibles: _filieresDisponibles,
                           promosSelectionnees: _filtresPromoSelectionnes,
-                          filieresSelectionnees: _filtresFiliereSelectionnes,
                           onPromoChanged: (promo, estCoche) {
                             setState(() {
                               estCoche ? _filtresPromoSelectionnes.add(promo) : _filtresPromoSelectionnes.remove(promo);
                               _filtrerResultats(_searchController.text);
                             });
                           },
+                          // Filières
+                          filieresDisponibles: _filieresDisponibles,
+                          filieresSelectionnees: _filtresFiliereSelectionnes,
                           onFiliereChanged: (filiere, estCoche) {
                              setState(() {
                               estCoche ? _filtresFiliereSelectionnes.add(filiere) : _filtresFiliereSelectionnes.remove(filiere);
+                              _filtrerResultats(_searchController.text);
+                            });
+                          },
+                          // Pays Stage (NOUVEAU)
+                          paysStageDisponibles: _paysStageDisponibles,
+                          paysStageSelectionnees: _filtresPaysStageSelectionnes,
+                          onPaysStageChanged: (pays, estCoche) {
+                            setState(() {
+                              estCoche ? _filtresPaysStageSelectionnes.add(pays) : _filtresPaysStageSelectionnes.remove(pays);
                               _filtrerResultats(_searchController.text);
                             });
                           },
@@ -194,20 +246,32 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
                       const SizedBox(height: 15),
                       _champRecherche(),
                       const SizedBox(height: 15),
+                      // --- ZONE FILTRE MOBILE ---
                       ZoneFiltres(
+                          // Promos
                           promosDisponibles: _promosDisponibles,
-                          filieresDisponibles: _filieresDisponibles,
                           promosSelectionnees: _filtresPromoSelectionnes,
-                          filieresSelectionnees: _filtresFiliereSelectionnes,
                           onPromoChanged: (promo, estCoche) {
                             setState(() {
                               estCoche ? _filtresPromoSelectionnes.add(promo) : _filtresPromoSelectionnes.remove(promo);
                               _filtrerResultats(_searchController.text);
                             });
                           },
+                          // Filières
+                          filieresDisponibles: _filieresDisponibles,
+                          filieresSelectionnees: _filtresFiliereSelectionnes,
                           onFiliereChanged: (filiere, estCoche) {
                              setState(() {
                               estCoche ? _filtresFiliereSelectionnes.add(filiere) : _filtresFiliereSelectionnes.remove(filiere);
+                              _filtrerResultats(_searchController.text);
+                            });
+                          },
+                          // Pays Stage (NOUVEAU)
+                          paysStageDisponibles: _paysStageDisponibles,
+                          paysStageSelectionnees: _filtresPaysStageSelectionnes,
+                          onPaysStageChanged: (pays, estCoche) {
+                            setState(() {
+                              estCoche ? _filtresPaysStageSelectionnes.add(pays) : _filtresPaysStageSelectionnes.remove(pays);
                               _filtrerResultats(_searchController.text);
                             });
                           },
@@ -255,6 +319,8 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
             ),);
   }
 
+ // ... Le reste du fichier (widgets internes) reste inchangé
+ 
  Widget _champRecherche() {
     return TextField(
       controller: _searchController,
@@ -334,15 +400,15 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
     }
   }
 
-Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, bool estGrandEcran) {
-  void _ouvrirPageComplete(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AlumniDetailPage(alumni: eleve, user: widget.user),
-      ),
-    );
-  }
+  Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, bool estGrandEcran) {
+    void _ouvrirPageComplete(BuildContext context) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AlumniDetailPage(alumni: eleve, user: widget.user),
+        ),
+      );
+    }
     return Card(
       elevation: estSelectionne ? 8 : 2,
       color: estSelectionne ? AppColors.ensiCyan.withOpacity(0.1) : Colors.white,
