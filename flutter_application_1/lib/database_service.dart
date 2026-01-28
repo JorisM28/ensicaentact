@@ -8,23 +8,26 @@ class DatabaseService {
 
   Future<List<Alumnis>> getTousLesEleves() async {
     try {
-      print("Tentative de connexion vers : $apiUrl");
-      final response = await http.get(Uri.parse(apiUrl));
+      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final urlString = '$apiUrl?t=$timestamp';
+      
+      print("Tentative de connexion (No-Cache) : $urlString");
+      
+      final response = await http.get(Uri.parse(urlString));
 
       if (response.statusCode == 200) {
-
-        List<dynamic> body = jsonDecode(response.body);
-  
+        String responseBody = utf8.decode(response.bodyBytes);
+        List<dynamic> body = jsonDecode(responseBody);
         return body.map((item) => Alumnis.fromMap(item)).toList();
       } else {
         throw Exception("Erreur serveur : ${response.statusCode}");
       }
     } catch (e) {
       print("Erreur critique : $e");
-
       return []; 
     }
   }
+
   Future<void> supprimerEleve(String nom, String prenom) async {
     try {
       
@@ -40,8 +43,6 @@ class DatabaseService {
       print("Erreur lors de la suppression : $e");
     }
   }
-
-
 
   Future<void> ajouterEleve(Map<String, dynamic> donneesEleve) async {
     try {
@@ -75,7 +76,7 @@ class DatabaseService {
 Future<void> modifierEleve(Map<String, dynamic> donnees) async {
     try {
       final url = Uri.parse('https://alumni.theo-airey.fr/update_alumni.php');
-      print("Envoi modification pour ${donnees['nom']}..."); // Debug
+      print("Envoi modification pour ${donnees['nom']}...");
 
       final response = await http.post(
         url,

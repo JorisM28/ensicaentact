@@ -1,21 +1,33 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'alumnis.dart';
-import 'alumni_detail_page.dart'; // Importe la page complète pour la navigation
+import 'alumni_detail_page.dart';
+import 'alumni_detail_page_admin.dart';
 
 class AlumniPreview extends StatelessWidget {
   final Alumnis alumni;
   final Map<String, dynamic> user;
   const AlumniPreview({super.key, required this.alumni, required this.user});
+  bool get estAdmin => user['role'] == 'admin';
+
 
   // Fonction pour aller vers la page complète
   void _ouvrirPageComplete(BuildContext context) {
+    if (estAdmin) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AlumniDetailPageAdmin(alumni: alumni),
+        ),
+      );
+    }else{
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AlumniDetailPage(alumni: alumni, user: user),
       ),
     );
+    }
   }
 
   @override

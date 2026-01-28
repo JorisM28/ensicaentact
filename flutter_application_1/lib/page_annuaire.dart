@@ -4,11 +4,11 @@ import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
 import 'filtre_widget.dart';
-// Importez vos deux pages de détails (Admin et Normale)
 import 'alumni_detail_page.dart'; 
 import 'alumni_detail_page_admin.dart';
 import 'alumni_preview.dart';
 import 'add_alumni.dart'; 
+import 'navigation.dart';
 
 void main() {
   runApp(const MonReseauAlumni());
@@ -19,11 +19,10 @@ class MonReseauAlumni extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Simulation d'un utilisateur connecté (Changez le role ici pour tester 'admin' ou 'guest')
     const userConnecte = {
       'prenom': 'Test',
       'nom': 'Guest',
-      'role': 'guest', // Mettre 'guest' pour voir la version normale
+      'role': 'guest',
       'email': 'guest@test.fr'
     };
 
@@ -47,12 +46,12 @@ class PageAnnuaire extends StatefulWidget {
   State<PageAnnuaire> createState() => _PageAnnuaireState();
 }
 
-class _PageAnnuaireState extends State<PageAnnuaire> {
-  // --- ETAT ---
+class _PageAnnuaireState extends State<PageAnnuaire> with RouteAware{
   Alumnis? _eleveSelectionne;
   final ScrollController _scrollController = ScrollController();
   List<Alumnis> _tousLesAlumnis = [];
   List<Alumnis> _alumnisAffiches = [];
+  bool _filtresOuverts = false;
   
   final Set<String> _filtresPromoSelectionnes = {};
   final Set<String> _filtresFiliereSelectionnes = {};
@@ -61,17 +60,28 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
   bool _chargementEnCours = true;
   final TextEditingController _searchController = TextEditingController();
 
-  // --- LOGIQUE ADMIN ---
-  // C'est ce getter qui détermine tout l'affichage conditionnel
   bool get estAdmin => widget.user['role'] == 'admin';
+@override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
+}
 
+@override
+void dispose() {
+  routeObserver.unsubscribe(this);
+  super.dispose();
+}
   @override
   void initState() {
     super.initState();
     _chargerDonneesInitiales();
   }
+  @override
+void didPopNext() {
+  _chargerDonneesInitiales();
+}
 
-  // --- GETTERS DONNEES ---
   List<String> get _promosDisponibles {
     final promos = _tousLesAlumnis
         .map((e) => e.promo.toString())
@@ -106,22 +116,29 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
     return listeTriee;
   }
 
-  // --- LOGIQUE METIER ---
   void _chargerDonneesInitiales() async {
+    print("rechargement de la page");
     try {
-      var donnees = await DatabaseService().getTousLesEleves();
+        var donnees = await DatabaseService().getTousLesEleves();
+      
+      if (!mounted) return;
+
       setState(() {
         _tousLesAlumnis = donnees;
         _alumnisAffiches = donnees;
         _chargementEnCours = false;
+        
+        if (_searchController.text.isNotEmpty || 
+            _filtresPromoSelectionnes.isNotEmpty || 
+            _filtresFiliereSelectionnes.isNotEmpty ||
+            _filtresPaysStageSelectionnes.isNotEmpty) {
+            
+            _filtrerResultats(_searchController.text); 
+        }
       });
-      // Réappliquer les filtres si nécessaire après rechargement
-      if (_searchController.text.isNotEmpty || _filtresPromoSelectionnes.isNotEmpty) {
-        _filtrerResultats(_searchController.text);
-      }
     } catch (e) {
       print("Erreur de chargement : $e");
-      setState(() => _chargementEnCours = false);
+      if (mounted) setState(() => _chargementEnCours = false);
     }
   }
 
@@ -163,7 +180,29 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
     });
   }
 
-  // --- INTERFACE GRAPHIQUE ---
+  Widget _boutonFiltre() {
+  return Container(
+    margin: const EdgeInsets.only(left: 10),
+    decoration: BoxDecoration(
+      color: _filtresOuverts ? AppColors.ensiCyan : Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: Colors.grey.shade300),
+    ),
+    child: IconButton(
+      icon: Icon(
+        _filtresOuverts ? Icons.filter_list_off : Icons.filter_list,
+        color: _filtresOuverts ? Colors.white : Colors.grey[700],
+      ),
+      tooltip: _filtresOuverts ? "Masquer les filtres" : "Afficher les filtres",
+      onPressed: () {
+        setState(() {
+          _filtresOuverts = !_filtresOuverts;
+        });
+      },
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     double largeurEcran = MediaQuery.of(context).size.width;
@@ -175,7 +214,6 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
-          // CONDITION 1 : Bouton Historique seulement si Admin
           if (estAdmin)
             IconButton(
               icon: const Icon(Icons.history),
@@ -184,15 +222,13 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
             ),
         ],
       ),
-      
-      // CONDITION 2 : Bouton Ajouter seulement si Admin
       floatingActionButton: estAdmin 
           ? FloatingActionButton(
               backgroundColor: AppColors.ensiCyan,
               child: const Icon(Icons.add, color: Colors.white),
               onPressed: _ouvrirModalAjout,
             )
-          : null, // Pas de bouton pour les non-admins
+          : null,
 
       body: _chargementEnCours
           ? const Center(child: CircularProgressIndicator())
@@ -205,32 +241,43 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
                 autofocus: true,
                 child: Column(
                   children: [
-                    // --- ZONE DU HAUT (RECHERCHE + FILTRES) ---
                     Container(
                       padding: const EdgeInsets.all(20),
                       color: Colors.grey[100],
                       child: estGrandEcran
                           ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(width: 400, child: _champRecherche()),
                                 const Padding(padding: EdgeInsets.all(15)),
-                                Expanded(child: _construireFiltres()),
+                                _boutonFiltre(),
+                                const Padding(padding: EdgeInsets.all(15)),
+                                if (_filtresOuverts) 
+                                  Expanded(
+                                    child: _construireFiltres()
+                                  ),
                               ],
                             )
                           : Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text("Trouver un mentor", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 15),
-                                _champRecherche(),
+                              const Text("Trouver un mentor", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 15),
+                              
+                              Row(
+                                children: [
+                                  Expanded(child: _champRecherche()),
+                                  _boutonFiltre(),
+                                ],
+                              ),
+                              
+                              if (_filtresOuverts) ...[
                                 const SizedBox(height: 15),
                                 _construireFiltres(),
-                              ],
+                              ]
+                            ],
                             ),
                     ),
                     
-                    // --- ZONE DU BAS (LISTE + DETAIL) ---
                     Expanded(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,14 +299,12 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
                                     ),
                             ),
                           ),
-                          // CONDITION 3 : Preview à droite
                           if (estGrandEcran) ...[
                             const VerticalDivider(width: 1),
                             Expanded(
                               flex: 2,
                               child: _eleveSelectionne == null
                                   ? _vueParDefaut()
-                                  // Le widget Preview reçoit le user, il saura s'il faut afficher les boutons d'édition
                                   : AlumniPreview(alumni: _eleveSelectionne!, user: widget.user), 
                             ),
                           ]
@@ -272,8 +317,6 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
             ),
     );
   }
-
-  // --- WIDGETS INTERNES ---
 
   Widget _construireFiltres() {
     return ZoneFiltres(
@@ -330,8 +373,6 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
 
   Widget _carteEleve(BuildContext context, Alumnis eleve, bool estGrandEcran) {
     final estSelectionne = eleve == _eleveSelectionne;
-
-    // Navigation conditionnelle
     void ouvrirDetail() {
       if (estGrandEcran) {
         setState(() => _eleveSelectionne = eleve);
@@ -340,10 +381,12 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
           context,
           MaterialPageRoute(
             builder: (context) => estAdmin
-                ? AlumniDetailPageAdmin(alumni: eleve) // Page avec édition
-                : AlumniDetailPage(alumni: eleve, user: widget.user), // Page lecture seule
+                ? AlumniDetailPageAdmin(alumni: eleve)
+                : AlumniDetailPage(alumni: eleve, user: widget.user),
           ),
-        );
+        ).then((resultat) {
+            _chargerDonneesInitiales();
+        });
       }
     }
 
@@ -402,7 +445,6 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
                 ),
               ),
               
-              // Bouton VOIR (Toujours là)
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
@@ -410,7 +452,6 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 ),
                 onPressed: () {
-                  // Sur mobile on ouvre la page, sur desktop on sélectionne juste
                   if (!estGrandEcran) {
                      ouvrirDetail();
                   } else {
@@ -428,7 +469,6 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
                 label: const Text("Voir", style: TextStyle(fontSize: 12)),
               ),
 
-              // CONDITION 4 : Bouton Supprimer seulement si Admin
               if (estAdmin) 
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
@@ -439,6 +479,7 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
         ),
       ),
     );
+    
   }
 
   Widget _vueParDefaut() {
@@ -454,7 +495,6 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
     );
   }
 
-  // --- ACTIONS ADMIN ---
 
   void _ouvrirModalAjout() {
     showDialog(
@@ -466,7 +506,7 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
           child: AddAlumniForm(
             onSuccess: () {
               Navigator.pop(context);
-              _chargerDonneesInitiales(); // Recharger la liste après ajout
+              _chargerDonneesInitiales();
             },
           ),
         ),
@@ -488,10 +528,8 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
     ) ?? false;
 
     if (confirmation) {
-      // Suppression via API (ID obligatoire)
       await DatabaseService().supprimerEleve(eleve.nom, eleve.prenom);
       
-      // Mise à jour locale (optimiste) pour la fluidité
       setState(() {
         _alumnisAffiches.removeWhere((e) => e.id == eleve.id);
         _tousLesAlumnis.removeWhere((e) => e.id == eleve.id);
@@ -500,8 +538,7 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
         }
       });
       
-      // Optionnel: Recharger depuis le serveur pour être sûr
-      // _chargerDonneesInitiales(); 
+      _chargerDonneesInitiales(); 
     }
   }
 
@@ -537,7 +574,6 @@ class _PageAnnuaireState extends State<PageAnnuaire> {
     );
   }
 
-  // --- CLAVIER ---
   void _changerSelectionClavier(int direction, List<Alumnis> liste) {
     if (liste.isEmpty) return;
     if (_eleveSelectionne == null) {

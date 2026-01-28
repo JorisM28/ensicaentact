@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/profileBadge.dart';
 import 'colors.dart';
 import 'alumnis.dart';
-import 'database_service.dart';
 
 class AlumniDetailPage extends StatelessWidget {
   final Alumnis alumni;
