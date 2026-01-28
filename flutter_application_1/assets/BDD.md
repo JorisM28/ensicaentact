@@ -6,33 +6,37 @@ Voici la mise à jour complète de votre document Markdown. J'ai synchronisé la
 
 ## 1. Dictionnaire des données
 
-| Nom Information                 | Code SQL         | Type / Format | Commentaires           |
-|---------------------------------|------------------|---------------|------------------------|
-| **Utilisateur**                 |                  |               |                        |
-| ID Utilisateur                  | id_user          | INT (PK)      | Auto-incrémenté        |
-| Nom Alumni                      | nom              | VARCHAR(50)   | NOT NULL               |
-| Prénom Alumni                   | prenom           | VARCHAR(50)   | NOT NULL               |
-| Sexe                            | sexe             | CHAR(1)       | 'M', 'F' ou 'I'        |
-| Âge                             | age              | INT           | Entre 18 et 100 ans    |
-| Numéro de téléphone             | tel              | VARCHAR(20)   |                        |
-| Adresse mail                    | mail             | VARCHAR(50)   |                        |
-| Autorisation partage du contact | autor            | BOOLEAN       | Défaut : FALSE (0)     |
-| Décédé                          | decede           | BOOLEAN       | Défaut : FALSE (0)     |
-| **Éducation / Promo**           |                  |               |                        |
-| ID Éducation                    | id_education     | INT (PK)      |                        |
-| Majeure                         | majeure          | VARCHAR(25)   | NOT NULL               |
-| Option                          | option_          | VARCHAR(50)   | Nommé `option_` en SQL |
-| Intitulé double diplôme         | ddiplome         | VARCHAR(50)   |                        |
-| Promo (Année)                   | promo            | INT           | Entre 1900 et 2100     |
-| Filière                         | filière          | VARCHAR(50)   |                        |
-| Formation                       | formation        | VARCHAR(4)    | FISE, FISA ou MTS      |
-| **Expériences (Stage/Travail)** |                  |               |                        |
-| Intitullé Poste/Stage           | poste / intitule | VARCHAR       |                        |
-| Nom entreprise                  | entreprise       | VARCHAR(50)   | Table LIEU             |
-| Ville                           | ville            | VARCHAR(25)   | Table LIEU             |
-| Pays                            | pays             | VARCHAR(25)   | Table LIEU             |
-| Date Début                      | debut            | DATE          | Table DATE             |
-| Date Fin                        | fin              | DATE          | Table DATE             |
+| Nom Information                   | Code SQL             | Type / Format | Commentaires           |
+|-----------------------------------|----------------------|---------------|------------------------|
+| **Utilisateur**                   |                      |               |                        |
+| ID Utilisateur                    | id_user              | INT (PK)      | Auto-incrémenté        |
+| Nom Alumni                        | nom                  | VARCHAR(50)   | NOT NULL               |
+| Prénom Alumni                     | prenom               | VARCHAR(50)   | NOT NULL               |
+| Sexe                              | sexe                 | CHAR(1)       | 'M', 'F' ou 'I'        |
+| Âge                               | age                  | INT           | Entre 18 et 100 ans    |
+| Numéro de téléphone               | tel                  | VARCHAR(20)   |                        |
+| Adresse mail                      | mail                 | VARCHAR(50)   |                        |
+| Autorisation partage du contact   | autor                | BOOLEAN       | Défaut : FALSE (0)     |
+| Décédé                            | decede               | BOOLEAN       | Défaut : FALSE (0)     |
+| **Éducation / Promo**             |                      |               |                        |
+| ID Éducation                      | id_education         | INT (PK)      |                        |
+| Majeure                           | majeure              | VARCHAR(25)   | NOT NULL               |
+| Option                            | option_              | VARCHAR(50)   | Nommé `option_` en SQL |
+| Intitulé double diplôme           | ddiplome             | VARCHAR(50)   |                        |
+| Promo (Année)                     | promo                | INT           | Entre 1900 et 2100     |
+| Filière                           | filière              | VARCHAR(50)   |                        |
+| Formation                         | formation            | VARCHAR(4)    | FISE, FISA ou MTS      |
+| **Expériences (Stage/Travail)**   |                      |               |                        |
+| Intitullé Poste/Stage             | poste / intitule     | VARCHAR       |                        |
+| Année de stage                    | annee                | VARCHAR       | '1A', '2A' ou '3A'     |
+| Stage universitaire ou entreprise | entrepriseUniversité | VARCHAR(1)    | 'E', 'U' ou 'I'        |
+| Description du stage              | description          | TEXT          | max 65 535 octets      |
+| Description du poste              | description          | TEXT          | max 65 535 octets      |
+| Nom entreprise                    | entreprise           | VARCHAR(50)   | Table LIEU             |
+| Ville                             | ville                | VARCHAR(25)   | Table LIEU             |
+| Pays                              | pays                 | VARCHAR(25)   | Table LIEU             |
+| Date Début                        | debut                | DATE          | Table DATE             |
+| Date Fin                          | fin                  | DATE          | Table DATE             |
 
 ---
 
@@ -79,6 +83,9 @@ erDiagram
 
     STAGE {
         int id_stage PK
+        varchar annee
+        text description 
+        varchar entrepriseUniversite 
         int id_user FK
         int id_date FK
         int id_lieu FK
@@ -87,6 +94,7 @@ erDiagram
 
     TRAVAIL {
         int id_travail PK
+        text description
         int id_user FK
         int id_date FK
         int id_lieu FK
