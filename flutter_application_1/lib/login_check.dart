@@ -7,8 +7,8 @@ import 'dart:convert';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final Config config = Config(
-  tenant: "ID EnsiCaen", // Tenant ID donner par l'école
-  clientId: "ID Azure",  // Client ID donner par l'école
+  tenant: "ID EnsiCaen",
+  clientId: "ID Azure",
   scope: "openid profile User.Read",
   redirectUri: "http://localhost:39019/redirect.html",
   navigatorKey: navigatorKey,
@@ -30,17 +30,13 @@ class MicrosoftConnection {
           idToken = _decodeJWT(rawIdToken);
         }
 
-        // DEBUG :
-        // print("Token Microsoft: $idToken");
-
         return {
           'status': 'success',
           'name': idToken?['given_name']?.toString() ?? "Utilisateur",
           'family_name': idToken?['family_name']?.toString() ?? "",
           'email': idToken?['preferred_username']?.toString() ?? "",
-          
-          // Par défaut, une connexion Microsoft = un étudiant/membre de l'école
-          'role': 'student', 
+          'phone': "",
+          'role': 'student',
         };
       }
     } catch (exception) {
@@ -63,11 +59,12 @@ class MicrosoftConnection {
 }
 
 class EnsiCaenConnection {
-  final String loginUrl = 'http://localhost/api_alumni/login_local.php';
+  final String loginUrl = 'https://alumni.theo-airey.fr/login_local.php';
 
   Future<Map<String, dynamic>> signIn(String email, String password) async {
     try {
       print("Tentative de connexion locale vers : $loginUrl");
+
       final response = await http.post(
         Uri.parse(loginUrl),
         body: {
@@ -78,19 +75,21 @@ class EnsiCaenConnection {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
+
+        // DEBUG : Affiche ce que le serveur renvoie vraiment
+        //print("Réponse du serveur : $data");
+
         if (data['status'] == 'success') {
-           return {
-             'status': 'success',
-             'name': data['prenom'] ?? 'Admin',
-             'family_name': data['nom'] ?? 'System',
-             'email': data['email'] ?? "",
-             'role': data['role'] ?? 'guest',
-           };
+          return {
+            'status': 'success',
+            'name': data['name'] ?? 'Utilisateur',
+            'family_name': data['family_name'] ?? '',
+            'email': data['email'] ?? "",
+            'phone': data['phone'] ?? "",
+            'role': data['role'] ?? '',
+          };
         } else {
-          // Erreur mauvais mot de passe renvoyée par le PHP
-          // Todo gérer les erreurs de mots de passe.
-          return data; 
+          return data;
         }
 
       } else {
