@@ -31,7 +31,6 @@ class MonReseauAlumni extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: AppColors.ensiCyan),
-      // CORRECTION 1 : On passe le user à la page d'accueil
       home: PageAnnuaireAdmin(estAdmin: estAdmin, user: user), 
     );
   }
@@ -39,15 +38,11 @@ class MonReseauAlumni extends StatelessWidget {
 
 class PageAnnuaireAdmin extends StatefulWidget {
   final bool estAdmin;
-  
-  // CORRECTION 2 : C'est la ligne qui te manquait !
-  // Sans ça, "widget.user" n'existe pas plus bas.
   final Map<String, dynamic> user; 
 
   const PageAnnuaireAdmin({
     super.key, 
     this.estAdmin = true,
-    // On met une valeur par défaut de sécurité
     this.user = const {
       'prenom': 'Admin',
       'nom': 'Système',
@@ -64,8 +59,12 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
   final ScrollController _scrollController = ScrollController();
   List<Alumnis> _tousLesAlumnis = [];
   List<Alumnis> _alumnisAffiches = [];
+  
+  // --- ETAT DES FILTRES ---
   final Set<String> _filtresPromoSelectionnes = {};
   final Set<String> _filtresFiliereSelectionnes = {};
+  final Set<String> _filtresPaysStageSelectionnes = {}; // <--- NOUVEAU
+
   bool _chargementEnCours = true;
   TextEditingController _searchController = TextEditingController();
 
@@ -95,6 +94,21 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
     filieres.sort();
     return filieres;
   }
+
+  // <--- NOUVEAU GETTER : Parcours les stages pour trouver les pays uniques
+  List<String> get _paysStageDisponibles {
+    final Set<String> paysTrouves = {};
+    for (var alumni in _tousLesAlumnis) {
+      for (var stage in alumni.stages) {
+        if (stage.pays.isNotEmpty && stage.pays != "Non renseigné") {
+          paysTrouves.add(stage.pays);
+        }
+      }
+    }
+    final listeTriee = paysTrouves.toList();
+    listeTriee.sort();
+    return listeTriee;
+  }
   // ---------------
 
   void _chargerDonneesInitiales() async {
@@ -116,6 +130,7 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
   void _filtrerResultats(String recherche) {
     List<Alumnis> resultats = _tousLesAlumnis;
 
+    // 1. Filtre Texte
     if (recherche.isNotEmpty) {
       resultats = resultats.where((eleve) {
         final nomLower = eleve.nomComplet.toLowerCase();
@@ -129,15 +144,30 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
       }).toList();
     }
 
+    // 2. Filtre Promo
     if (_filtresPromoSelectionnes.isNotEmpty) {
       resultats = resultats.where((eleve) {
         return _filtresPromoSelectionnes.contains(eleve.promo.toString());
       }).toList();
     }
 
+    // 3. Filtre Filière
     if (_filtresFiliereSelectionnes.isNotEmpty) {
       resultats = resultats.where((eleve) {
         return _filtresFiliereSelectionnes.contains(eleve.filiere);
+      }).toList();
+    }
+
+    // 4. Filtre Pays Stage (NOUVEAU)
+    if (_filtresPaysStageSelectionnes.isNotEmpty) {
+      resultats = resultats.where((eleve) {
+        // On garde l'élève s'il a au moins UN stage dans un des pays sélectionnés
+        for (var stage in eleve.stages) {
+          if (_filtresPaysStageSelectionnes.contains(stage.pays)) {
+            return true;
+          }
+        }
+        return false;
       }).toList();
     }
 
@@ -180,12 +210,9 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
                 child: AddAlumniForm(
                   onSuccess: () {
                     Navigator.pop(context);
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          // CORRECTION 3 : On n'oublie pas de repasser le user ici aussi !
-                          builder: (context) => PageAnnuaireAdmin(user: widget.user)
-                        )); 
+                    // On recharge juste les données au lieu de pushReplacement
+                    // c'est plus fluide
+                    _chargerDonneesInitiales();
                   },
                 ),
               ),
@@ -214,15 +241,16 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
                       color: Colors.grey[100],
                       child: estGrandEcran
                           ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(width: 400, child: _champRecherche()),
                                 const Padding(padding: EdgeInsets.all(15)),
                                 Expanded(
+                                  // --- FILTRES DESKTOP ---
                                   child: ZoneFiltres(
+                                    // Promos
                                     promosDisponibles: _promosDisponibles,
-                                    filieresDisponibles: _filieresDisponibles,
                                     promosSelectionnees: _filtresPromoSelectionnes,
-                                    filieresSelectionnees: _filtresFiliereSelectionnes,
                                     onPromoChanged: (promo, estCoche) {
                                       setState(() {
                                         estCoche
@@ -231,11 +259,25 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
                                         _filtrerResultats(_searchController.text);
                                       });
                                     },
+                                    // Filières
+                                    filieresDisponibles: _filieresDisponibles,
+                                    filieresSelectionnees: _filtresFiliereSelectionnes,
                                     onFiliereChanged: (filiere, estCoche) {
                                       setState(() {
                                         estCoche
                                             ? _filtresFiliereSelectionnes.add(filiere)
                                             : _filtresFiliereSelectionnes.remove(filiere);
+                                        _filtrerResultats(_searchController.text);
+                                      });
+                                    },
+                                    // Pays Stage (NOUVEAU)
+                                    paysStageDisponibles: _paysStageDisponibles,
+                                    paysStageSelectionnees: _filtresPaysStageSelectionnes,
+                                    onPaysStageChanged: (pays, estCoche) {
+                                      setState(() {
+                                        estCoche
+                                            ? _filtresPaysStageSelectionnes.add(pays)
+                                            : _filtresPaysStageSelectionnes.remove(pays);
                                         _filtrerResultats(_searchController.text);
                                       });
                                     },
@@ -251,11 +293,11 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
                                 const SizedBox(height: 15),
                                 _champRecherche(),
                                 const SizedBox(height: 15),
+                                // --- FILTRES MOBILE ---
                                 ZoneFiltres(
+                                  // Promos
                                   promosDisponibles: _promosDisponibles,
-                                  filieresDisponibles: _filieresDisponibles,
                                   promosSelectionnees: _filtresPromoSelectionnes,
-                                  filieresSelectionnees: _filtresFiliereSelectionnes,
                                   onPromoChanged: (promo, estCoche) {
                                     setState(() {
                                       estCoche
@@ -264,11 +306,25 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
                                       _filtrerResultats(_searchController.text);
                                     });
                                   },
+                                  // Filières
+                                  filieresDisponibles: _filieresDisponibles,
+                                  filieresSelectionnees: _filtresFiliereSelectionnes,
                                   onFiliereChanged: (filiere, estCoche) {
                                     setState(() {
                                       estCoche
                                           ? _filtresFiliereSelectionnes.add(filiere)
                                           : _filtresFiliereSelectionnes.remove(filiere);
+                                      _filtrerResultats(_searchController.text);
+                                    });
+                                  },
+                                  // Pays Stage (NOUVEAU)
+                                  paysStageDisponibles: _paysStageDisponibles,
+                                  paysStageSelectionnees: _filtresPaysStageSelectionnes,
+                                  onPaysStageChanged: (pays, estCoche) {
+                                    setState(() {
+                                      estCoche
+                                          ? _filtresPaysStageSelectionnes.add(pays)
+                                          : _filtresPaysStageSelectionnes.remove(pays);
                                       _filtrerResultats(_searchController.text);
                                     });
                                   },
@@ -559,13 +615,18 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
                   ) ?? false;
 
                   if (confirmation) {
-                    await DatabaseService().supprimerEleve(eleve.nom, eleve.prenom);
+                    // UTILISATION DE L'ID (CRUCIAL POUR PHP)
+                    //await DatabaseService().supprimerEleve(eleve.id, eleve.nom, eleve.prenom);
 
-                    Navigator.pushReplacement(
-                      context,
-                      // CORRECTION 4 : On repasse bien le user ici aussi !
-                      MaterialPageRoute(builder: (context) => PageAnnuaireAdmin(user: widget.user)) 
-                    );
+                    // Rechargement des données sans changer de page (plus fluide)
+                    _chargerDonneesInitiales();
+                    
+                    // Si on a supprimé celui qui était sélectionné à droite, on le déselectionne
+                    if (_eleveSelectionne == eleve) {
+                      setState(() {
+                         _eleveSelectionne = null;
+                      });
+                    }
                   }
                 },
               ),

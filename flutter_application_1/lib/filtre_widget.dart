@@ -4,25 +4,34 @@ import 'colors.dart';
 class ZoneFiltres extends StatelessWidget {
   final List<String> promosDisponibles;
   final List<String> filieresDisponibles;
+  final List<String> paysStageDisponibles;
+
   final Set<String> promosSelectionnees;
   final Set<String> filieresSelectionnees;
+  final Set<String> paysStageSelectionnees;
 
   final Function(String, bool) onPromoChanged;
   final Function(String, bool) onFiliereChanged;
+  final Function(String, bool) onPaysStageChanged;
 
   const ZoneFiltres({
     super.key,
     required this.promosDisponibles,
-    required this.filieresDisponibles,
-    required this.promosSelectionnees,
-    required this.filieresSelectionnees,
     required this.onPromoChanged,
+    required this.promosSelectionnees,
+
+    required this.filieresDisponibles,
+    required this.filieresSelectionnees,
     required this.onFiliereChanged,
+
+    required this.paysStageDisponibles,
+    required this.paysStageSelectionnees,
+    required this.onPaysStageChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (promosDisponibles.isEmpty && filieresDisponibles.isEmpty) {
+    if (promosDisponibles.isEmpty && filieresDisponibles.isEmpty && paysStageDisponibles.isEmpty) {
       return const SizedBox();
     }
 
@@ -41,7 +50,6 @@ class ZoneFiltres extends StatelessWidget {
                 label: Text(promo),
                 selected: estCoche,
                 onSelected: (bool selected) {
-                  // On prévient le parent !
                   onPromoChanged(promo, selected);
                 },
               );
@@ -69,6 +77,32 @@ class ZoneFiltres extends StatelessWidget {
                 onSelected: (bool selected) {
                   // On prévient le parent !
                   onFiliereChanged(filiere, selected);
+                },
+              );
+            }).toList(),
+          ),
+        ],
+        if (paysStageDisponibles.isNotEmpty) ...[
+          const Text("Pays Stage :", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          const SizedBox(height: 5),
+          Wrap(
+            spacing: 6.0,
+            runSpacing: 6.0,
+            children: paysStageDisponibles.map((pays) { // Variable itératrice = pays
+              // CORRECTION ICI : on vérifie dans paysStageSelectionnees avec la variable 'pays'
+              final estCoche = paysStageSelectionnees.contains(pays);
+              
+              return FilterChip(
+                label: Text(pays), // CORRECTION : Affiche 'pays'
+                selected: estCoche,
+                checkmarkColor: Colors.white,
+                selectedColor: AppColors.ensiCyan,
+                labelStyle: TextStyle(
+                  color: estCoche ? Colors.white : Colors.black
+                ),
+                onSelected: (bool selected) {
+                  // CORRECTION : Appelle le callback pour le pays
+                  onPaysStageChanged(pays, selected);
                 },
               );
             }).toList(),
