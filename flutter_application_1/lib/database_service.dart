@@ -29,7 +29,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     try {
       final url = Uri.parse('https://alumni.theo-airey.fr/delete_alumni.php');
       
-      // On attend la réponse du serveur
+    
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -102,6 +102,68 @@ Future<void> modifierEleve(Map<String, dynamic> donnees) async {
     }
   }
 
+
+
+  
+  Future<List<Map<String, dynamic>>> getOffres() async {
+    try {
+      final response = await http.get(Uri.parse('https://alumni.theo-airey.fr/offer/get_offers.php'));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("Erreur getOffres: $e");
+    }
+    return [];
+  }
+
+
+  Future<bool> ajouterOffre(Map<String, dynamic> offre) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://alumni.theo-airey.fr/offer/add_offer.php'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(offre),
+      );
+
+      print("Réponse serveur : ${response.body}");
+      
+      if (response.statusCode == 200) {
+        var res = jsonDecode(response.body);
+        return res['status'] == 'success';
+      }
+    } catch (e) {
+      print("Erreur ajouterOffre: $e");
+    }
+    return false;
+  }
+
+  Future<bool> supprimerOffre(String idOffre) async {
+    try {
+      final url = Uri.parse('https://alumni.theo-airey.fr/offer/delete_offer.php');
+      
+      // 1. On affiche ce qu'on va envoyer
+      String payload = jsonEncode({"id_offre": idOffre});
+      print("📤 ENVOI VERS PHP : $payload");
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: payload,
+      );
+
+      // 2. On affiche ce que le serveur répond VRAIMENT
+      print("📥 RÉPONSE DU PHP : ${response.body}");
+
+      if (response.statusCode == 200) {
+        var res = jsonDecode(response.body);
+        return res['status'] == 'success';
+      }
+    } catch (e) {
+      print("❌ Erreur supprimerOffre: $e");
+    }
+    return false;
+  }
 
 
 }
