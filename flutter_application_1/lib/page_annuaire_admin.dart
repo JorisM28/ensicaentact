@@ -497,13 +497,14 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
   }
 
   Widget _carteEleve(BuildContext context, Alumnis eleve, bool estSelectionne, bool estGrandEcran) {
-    void _ouvrirPageComplete(BuildContext context) {
-      Navigator.push(
+    void _ouvrirPageComplete(BuildContext context) async {
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => AlumniDetailPageAdmin(alumni: eleve),
         ),
       );
+      _chargerDonneesInitiales();
     }
 
     return Card(
@@ -637,10 +638,11 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
     );
   }
 
-  void _ouvrirPageDetail(BuildContext context, Alumnis eleve) {
-    Navigator.push(
+  void _ouvrirPageDetail(BuildContext context, Alumnis eleve) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AlumniDetailPageAdmin(alumni: eleve)),
     );
+    _chargerDonneesInitiales();
   }
 }

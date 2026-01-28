@@ -27,20 +27,28 @@ class DatabaseService {
       return []; 
     }
   }
-
-  Future<void> supprimerEleve(String nom, String prenom) async {
+Future<bool> supprimerEleve(String nom, String prenom) async {
     try {
-      
       final url = Uri.parse('https://alumni.theo-airey.fr/delete_alumni.php');
       
-      await http.post(
+      final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"nom": nom, "prenom": prenom}),
       );
-      print("Demande de suppression envoyée pour $nom $prenom");
+
+      print("Code retour HTTP : ${response.statusCode}");
+      print("Réponse du serveur (Suppression) : ${response.body}");
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> result = jsonDecode(response.body);
+        return result['status'] == 'success';
+      }
+      return false;
+
     } catch (e) {
-      print("Erreur lors de la suppression : $e");
+      print("Erreur critique lors de la suppression : $e");
+      return false;
     }
   }
 
@@ -62,7 +70,7 @@ class DatabaseService {
 
   Future<List<Map<String, dynamic>>> getHistorique() async {
   try {
-    final response = await http.get(Uri.parse('https://alumni.theo-airey.fr/get_alumni.php'));
+    final response = await http.get(Uri.parse('https://alumni.theo-airey.fr/get_history.php'));
     if (response.statusCode == 200) {
       return List<Map<String, dynamic>>.from(jsonDecode(response.body));
     }
@@ -92,7 +100,4 @@ Future<void> modifierEleve(Map<String, dynamic> donnees) async {
       print("Erreur modification critique : $e");
     }
   }
-
-
-
 }
