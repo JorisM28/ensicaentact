@@ -66,7 +66,13 @@ class PageAccueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PageAnnuaireAdmin()),
+                  MaterialPageRoute(builder: (context) => const PageAnnuaire(user: {
+                      'prenom': 'Admin',
+                      'nom': '',
+                      'email': '',
+                      'role': 'admin'
+                    },
+                  )),
                 );
               },
               child: const Text('Version Admin'),
