@@ -616,7 +616,7 @@ class _PageAnnuaireAdminState extends State<PageAnnuaireAdmin> {
 
                   if (confirmation) {
                     // UTILISATION DE L'ID (CRUCIAL POUR PHP)
-                    //await DatabaseService().supprimerEleve(eleve.id, eleve.nom, eleve.prenom);
+                    await DatabaseService().supprimerEleve(eleve.nom, eleve.prenom);
 
                     // Rechargement des données sans changer de page (plus fluide)
                     _chargerDonneesInitiales();
