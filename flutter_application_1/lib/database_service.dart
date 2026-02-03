@@ -8,13 +8,16 @@ class DatabaseService {
 
   Future<List<Alumnis>> getTousLesEleves() async {
     try {
-      print("Tentative de connexion vers : $apiUrl");
-      final response = await http.get(Uri.parse(apiUrl));
+      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final urlString = '$apiUrl?t=$timestamp';
+
+      print("Tentative de connexion (No-Cache) : $urlString");
+
+      final response = await http.get(Uri.parse(urlString));
 
       if (response.statusCode == 200) {
-
-        List<dynamic> body = jsonDecode(response.body);
-
+        String responseBody = utf8.decode(response.bodyBytes);
+        List<dynamic> body = jsonDecode(responseBody);
         return body.map((item) => Alumnis.fromMap(item)).toList();
       } else {
         throw Exception("Erreur serveur : ${response.statusCode}");
@@ -29,8 +32,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
 
     try {
       final url = Uri.parse('https://alumni.theo-airey.fr/delete_alumni.php');
-      
-      // On attend la réponse du serveur
+
       final response = await http.post(
 
         url,
@@ -39,11 +41,10 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
       );
 
       print("Code retour HTTP : ${response.statusCode}");
-      print("Réponse du serveur (Suppression) : ${response.body}"); // C'est ici qu'on verra l'erreur !
+      print("Réponse du serveur (Suppression) : ${response.body}");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> result = jsonDecode(response.body);
-        // On renvoie VRAI seulement si le serveur dit "success"
         return result['status'] == 'success';
       }
       return false;
@@ -53,7 +54,6 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
       return false;
     }
   }
-
 
   Future<void> ajouterEleve(Map<String, dynamic> donneesEleve) async {
     try {
@@ -87,7 +87,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   Future<void> modifierEleve(Map<String, dynamic> donnees) async {
     try {
       final url = Uri.parse('https://alumni.theo-airey.fr/update_alumni.php');
-      print("Envoi modification pour ${donnees['nom']}..."); // Debug
+      print("Envoi modification pour ${donnees['nom']}...");
 
       final response = await http.post(
         url,
@@ -103,7 +103,4 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
       print("Erreur modification critique : $e");
     }
   }
-
-
-
 }

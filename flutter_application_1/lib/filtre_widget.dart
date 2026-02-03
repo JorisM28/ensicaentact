@@ -82,18 +82,19 @@ class ZoneFiltres extends StatelessWidget {
             }).toList(),
           ),
         ],
+        const SizedBox(height: 15),
+
         if (paysStageDisponibles.isNotEmpty) ...[
           const Text("Pays Stage :", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,
             runSpacing: 6.0,
-            children: paysStageDisponibles.map((pays) { // Variable itératrice = pays
-              // CORRECTION ICI : on vérifie dans paysStageSelectionnees avec la variable 'pays'
+            children: paysStageDisponibles.map((pays) {
               final estCoche = paysStageSelectionnees.contains(pays);
               
               return FilterChip(
-                label: Text(pays), // CORRECTION : Affiche 'pays'
+                label: Text(pays),
                 selected: estCoche,
                 checkmarkColor: Colors.white,
                 selectedColor: AppColors.ensiCyan,

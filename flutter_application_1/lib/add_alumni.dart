@@ -1,6 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'database_service.dart';
 import 'colors.dart';
+
+class StageFormModel {
+  final Key key = UniqueKey();
+  
+  final TextEditingController intituleCtrl = TextEditingController();
+  final TextEditingController entrepriseCtrl = TextEditingController();
+  final TextEditingController villeCtrl = TextEditingController();
+  final TextEditingController paysCtrl = TextEditingController();
+  String anneeSelectionnee = '2A';
+
+  void dispose() {
+    intituleCtrl.dispose();
+    entrepriseCtrl.dispose();
+    villeCtrl.dispose();
+    paysCtrl.dispose();
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "intitule": intituleCtrl.text.trim(),
+      "annee": anneeSelectionnee,
+      "entreprise": entrepriseCtrl.text.trim(),
+      "ville": villeCtrl.text.trim(),
+      "pays": paysCtrl.text.trim(),
+    };
+  }
+}
+
 class AddAlumniForm extends StatefulWidget {
   final VoidCallback? onSuccess;
 
@@ -11,61 +40,99 @@ class AddAlumniForm extends StatefulWidget {
 }
 
 class _AddAlumniFormState extends State<AddAlumniForm> {
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+
   final _nomCtrl = TextEditingController();
   final _prenomCtrl = TextEditingController();
   final _ageCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _telCtrl = TextEditingController();
+  String _sexeSelectionne = 'I';
+
+  final _promoCtrl = TextEditingController();
+  //final _filiereCtrl = TextEditingController();
+  String _formationSelectionnee = 'FISE';
+   String _filiereSelectionnee = 'Informatique';
+
   final _posteCtrl = TextEditingController();
   final _entrepriseCtrl = TextEditingController();
   final _villeCtrl = TextEditingController();
-  final _stageCtrl = TextEditingController();
-  final _promoCtrl = TextEditingController();
-  final _filiereCtrl = TextEditingController();
+  final _paysCtrl = TextEditingController();
 
-  bool _isLoading = false;
+  final List<StageFormModel> _stages = [];
 
   @override
   void dispose() {
-    _nomCtrl.dispose();
-    _prenomCtrl.dispose();
-    _ageCtrl.dispose();
-    _posteCtrl.dispose();
-    _entrepriseCtrl.dispose();
-    _villeCtrl.dispose();
-    _stageCtrl.dispose();
-    _promoCtrl.dispose();
-    _filiereCtrl.dispose();
+    _nomCtrl.dispose(); _prenomCtrl.dispose(); _ageCtrl.dispose();
+    _emailCtrl.dispose(); _telCtrl.dispose();
+    _promoCtrl.dispose(); //_filiereCtrl.dispose();
+    _posteCtrl.dispose(); _entrepriseCtrl.dispose(); 
+    _villeCtrl.dispose(); _paysCtrl.dispose();
+    
+    for (var stage in _stages) {
+      stage.dispose();
+    }
     super.dispose();
   }
 
+  void _ajouterStage() {
+    setState(() {
+      _stages.add(StageFormModel());
+    });
+  }
+
+  void _supprimerStage(int index) {
+    setState(() {
+      _stages[index].dispose();
+      _stages.removeAt(index);
+    });
+  }
+
   Future<void> _soumettreFormulaire() async {
-    if (_nomCtrl.text.isEmpty || _prenomCtrl.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Nom et Prénom sont obligatoires")),
-      );
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      await DatabaseService().ajouterEleve({
-        "nom": _nomCtrl.text,
-        "prenom": _prenomCtrl.text,
-        "age": int.tryParse(_ageCtrl.text) ?? 22,
-        "annee_promo": int.tryParse(_promoCtrl.text) ?? 2024,
-        "filiere": _filiereCtrl.text,
-        "sujet_stage": _stageCtrl.text,
-        "poste": _posteCtrl.text,
-        "entreprise": _entrepriseCtrl.text,
-        "ville": _villeCtrl.text,
-      });
+      Map<String, dynamic> data = {
+        "nom": _nomCtrl.text.trim(),
+        "prenom": _prenomCtrl.text.trim(),
+        "age": int.tryParse(_ageCtrl.text) ?? 0,
+        "sexe": _sexeSelectionne,
+        "email": _emailCtrl.text.trim(),
+        "tel": _telCtrl.text.trim(),
+        "promo": int.tryParse(_promoCtrl.text) ?? 2024,
+        "filiere": _filiereSelectionnee,
+        "formation": _formationSelectionnee,
+        "job": _posteCtrl.text.trim(),
+        "poste": _posteCtrl.text.trim(),
+        "entreprise": _entrepriseCtrl.text.trim(),
+        "ville": _villeCtrl.text.trim(),
+        "pays": _paysCtrl.text.trim(),
+      };
+
+      if (_stages.isNotEmpty) {
+        data["stages"] = _stages.map((s) => s.toMap()).toList();
+      }
+
+      await DatabaseService().ajouterEleve(data);
 
       if (widget.onSuccess != null) {
         widget.onSuccess!();
       }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Alumni ajouté avec succès !"), backgroundColor: Colors.green),
+        );
+      }
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur lors de l'ajout : $e")),
+        SnackBar(content: Text("Erreur : $e"), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -77,61 +144,258 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text("Identité", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: TextField(controller: _nomCtrl, decoration: const InputDecoration(labelText: "Nom", border: OutlineInputBorder()))),
-                const SizedBox(width: 10),
-                Expanded(child: TextField(controller: _prenomCtrl, decoration: const InputDecoration(labelText: "Prénom", border: OutlineInputBorder()))),
-              ],
-            ),
-            const SizedBox(height: 10),
-            TextField(controller: _ageCtrl, decoration: const InputDecoration(labelText: "Âge", border: OutlineInputBorder()), keyboardType: TextInputType.number),
-            
-            const Padding(padding: EdgeInsets.symmetric(vertical: 15), child: Divider()),
-            
-            const Text("Parcours ENSI", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: TextField(controller: _promoCtrl, decoration: const InputDecoration(labelText: "Promo (ex: 2024)", border: OutlineInputBorder()), keyboardType: TextInputType.number)),
-                const SizedBox(width: 10),
-                Expanded(child: TextField(controller: _filiereCtrl, decoration: const InputDecoration(labelText: "Filière", border: OutlineInputBorder()))),
-              ],
-            ),
-            const SizedBox(height: 10),
-            TextField(controller: _stageCtrl, decoration: const InputDecoration(labelText: "Sujet de stage (PFE)", border: OutlineInputBorder())),
-
-            const Padding(padding: EdgeInsets.symmetric(vertical: 15), child: Divider()),
-
-            const Text("Poste Actuel", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 10),
-            TextField(controller: _posteCtrl, decoration: const InputDecoration(labelText: "Intitulé du poste", border: OutlineInputBorder())),
-            const SizedBox(height: 10),
-            TextField(controller: _entrepriseCtrl, decoration: const InputDecoration(labelText: "Entreprise", border: OutlineInputBorder())),
-            const SizedBox(height: 10),
-            TextField(controller: _villeCtrl, decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder())),
-
-            const SizedBox(height: 20),
-            
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.ensiCyan,
-                padding: const EdgeInsets.symmetric(vertical: 15),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _titreSection("Identité"),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _nomCtrl,
+                      decoration: const InputDecoration(labelText: "Nom *", border: OutlineInputBorder()),
+                      validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _prenomCtrl,
+                      decoration: const InputDecoration(labelText: "Prénom *", border: OutlineInputBorder()),
+                      validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                    ),
+                  ),
+                ],
               ),
-              onPressed: _isLoading ? null : _soumettreFormulaire,
-              icon: _isLoading 
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Icon(Icons.save, color: Colors.white),
-              label: Text(_isLoading ? "Enregistrement..." : "Enregistrer l'Alumni", style: const TextStyle(color: Colors.white)),
-            ),
-          ],
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _ageCtrl,
+                      decoration: const InputDecoration(labelText: "Âge", border: OutlineInputBorder()),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _sexeSelectionne,
+                      decoration: const InputDecoration(labelText: "Sexe", border: OutlineInputBorder()),
+                      items: const [
+                        DropdownMenuItem(value: 'I', child: Text("Inconnu")),
+                        DropdownMenuItem(value: 'M', child: Text("Homme")),
+                        DropdownMenuItem(value: 'F', child: Text("Femme")),
+                      ],
+                      onChanged: (v) => setState(() => _sexeSelectionne = v!),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _emailCtrl,
+                decoration: const InputDecoration(labelText: "Email", border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.email)),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _telCtrl,
+                decoration: const InputDecoration(labelText: "Téléphone", border: OutlineInputBorder(), prefixIcon: Icon(Icons.phone)),
+                keyboardType: TextInputType.phone,
+              ),
+
+              const Divider(height: 30),
+
+              _titreSection("Formation ENSI"),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _promoCtrl,
+                      decoration: const InputDecoration(labelText: "Promo (ex: 2024) *", border: OutlineInputBorder()),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _formationSelectionnee,
+                      decoration: const InputDecoration(labelText: "Formation", border: OutlineInputBorder()),
+                      items: const [
+                        DropdownMenuItem(value: 'FISE', child: Text("FISE (Etudiant)")),
+                        DropdownMenuItem(value: 'FISA', child: Text("FISA (Alternance)")),
+                        DropdownMenuItem(value: 'MTS', child: Text("MTS (Mastère)")),
+                      ],
+                      onChanged: (v) => setState(() => _formationSelectionnee = v!),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              Row (children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _filiereSelectionnee,
+                  decoration: const InputDecoration(labelText: "Filière", border: OutlineInputBorder()),
+                  items: const [
+                    DropdownMenuItem(value: 'Informatique', child: Text("Informatique")),
+                    DropdownMenuItem(value: 'Matériaux Chimie', child: Text("Matériaux Chimie")),
+                    DropdownMenuItem(value: 'Système Embarqué', child: Text("Système Embarqué")),
+                  ],
+                  onChanged: (v) => setState(() => _filiereSelectionnee = v!),
+                  validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                ),
+              ),
+              ],
+              ),
+
+              const Divider(height: 30),
+
+              _titreSection("Poste Actuel"),
+              TextFormField(
+                controller: _posteCtrl,
+                decoration: const InputDecoration(labelText: "Intitulé du poste", border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _entrepriseCtrl,
+                decoration: const InputDecoration(labelText: "Entreprise", border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _villeCtrl,
+                      decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _paysCtrl,
+                      decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()),
+                    ),
+                  ),
+                ],
+              ),
+
+              const Divider(height: 30),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _titreSection("Stages"),
+                  TextButton.icon(
+                    onPressed: _ajouterStage,
+                    icon: const Icon(Icons.add_circle, color: AppColors.ensiCyan),
+                    label: const Text("Ajouter un stage", style: TextStyle(color: AppColors.ensiCyan)),
+                  ),
+                ],
+              ),
+
+              if (_stages.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Text("Aucun stage ajouté (facultatif)", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                )
+              else
+                ..._stages.asMap().entries.map((entry) {
+                  int index = entry.key;
+                  StageFormModel stage = entry.value;
+
+                  return Card(
+                    key: stage.key,
+                    margin: const EdgeInsets.only(bottom: 15),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Stage #${index + 1}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                tooltip: "Supprimer ce stage",
+                                onPressed: () => _supprimerStage(index),
+                              ),
+                            ],
+                          ),
+                          DropdownButtonFormField<String>(
+                            value: stage.anneeSelectionnee,
+                            decoration: const InputDecoration(labelText: "Année du stage", border: OutlineInputBorder()),
+                            items: const [
+                              DropdownMenuItem(value: '1A', child: Text("1ère Année (1A)")),
+                              DropdownMenuItem(value: '2A', child: Text("2ème Année (2A)")),
+                              DropdownMenuItem(value: '3A', child: Text("PFE (3A)")),
+                            ],
+                            onChanged: (v) => stage.anneeSelectionnee = v!,
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: stage.intituleCtrl,
+                            decoration: const InputDecoration(labelText: "Sujet / Intitulé *", border: OutlineInputBorder()),
+                            validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: stage.entrepriseCtrl,
+                            decoration: const InputDecoration(labelText: "Entreprise / Labo", border: OutlineInputBorder()),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(child: TextFormField(controller: stage.villeCtrl, decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()))),
+                              const SizedBox(width: 10),
+                              Expanded(child: TextFormField(controller: stage.paysCtrl, decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()))),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+
+              const SizedBox(height: 20),
+
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.ensiCyan,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                onPressed: _isLoading ? null : _soumettreFormulaire,
+                icon: _isLoading 
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Icon(Icons.save, color: Colors.white),
+                label: Text(
+                  _isLoading ? "Enregistrement..." : "Enregistrer l'Alumni", 
+                  style: const TextStyle(color: Colors.white, fontSize: 16)
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _titreSection(String titre) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10, top: 10),
+      child: Text(
+        titre, 
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.ensiCyan)
       ),
     );
   }
