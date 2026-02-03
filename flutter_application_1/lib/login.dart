@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'colors.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
+
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -15,7 +17,6 @@ class _LoginState extends State<Login> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  bool isForgotPassword = false;
   bool _isLoading = false;
   bool _isObscure = true;
 
@@ -41,7 +42,7 @@ class _LoginState extends State<Login> {
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            child: isForgotPassword ? _buildRecoveryForm() : _buildLoginForm(),
+            child: _buildLoginForm(),
           ),
         ),
       ),
@@ -97,7 +98,13 @@ class _LoginState extends State<Login> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => setState(() => isForgotPassword = true),
+                    onPressed: () async {
+                      final Uri url = Uri.parse("https://monpasse.ensicaen.fr/?action=sendtoken");
+
+                      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                        throw Exception('Impossible de lancer $url');
+                      }
+                    },
                     child: const Text("Forget Password ?", style : TextStyle(color: AppColors.ensiCyan,),),
                   ),
                 ),
@@ -147,73 +154,6 @@ class _LoginState extends State<Login> {
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  // --- FORMULAIRE DE RÉCUPÉRATION ---
-  Widget _buildRecoveryForm() {
-    return Column(
-      key: const ValueKey(2),
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text(
-          "Recovery", 
-          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)
-        ),
-        
-        const SizedBox(height: 15),
-        
-        const Text(
-          "Enter your email to reset your password", 
-          textAlign: TextAlign.center, 
-          style: TextStyle(color: Colors.grey, fontSize: 15),
-        ),
-        
-        const SizedBox(height: 30),
-        
-        _buildTextField(
-          Icons.email, 
-          "Recovery Email", 
-          textColor: AppColors.ensiCyan
-        ),
-        
-        const SizedBox(height: 25),
-        
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: ElevatedButton(
-            onPressed: () {
-              setState(() => isForgotPassword = false);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.ensiCyan,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 2,
-            ),
-            child: const Text(
-              "Send Reset Link", 
-              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)
-            ),
-          ),
-        ),
-        
-        const SizedBox(height: 10),
-        
-        Padding(
-          padding: const EdgeInsets.only(top: 5.0),
-          child: TextButton(
-            onPressed: () => setState(() => isForgotPassword = false),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.grey[600],
-            ),
-            child: const Text(
-              "Back to Login",
-              style: TextStyle(decoration: TextDecoration.underline),
-            ),
-          ),
-        )
       ],
     );
   }
