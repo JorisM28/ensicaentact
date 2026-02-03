@@ -1,10 +1,11 @@
-// Petite classe pour gérer un stage individuel
 class Stage {
-  final String annee;      // "1A", "2A", "3A"
+  final String annee;
   final String intitule;
   final String ville;
   final String pays;
   final String entreprise;
+  final String description;
+
 
   Stage({
     required this.annee,
@@ -12,6 +13,7 @@ class Stage {
     required this.ville,
     required this.pays,
     required this.entreprise,
+    required this.description,
   });
 
   factory Stage.fromJson(Map<String, dynamic> json) {
@@ -21,6 +23,7 @@ class Stage {
       ville: json['ville']?.toString() ?? '',
       pays: json['pays']?.toString() ?? '',
       entreprise: json['entreprise']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
     );
   }
 }
@@ -47,7 +50,6 @@ class Alumnis {
   final String ville;
   final String pays;
 
-  // NOUVEAU : La liste des stages
   final List<Stage> stages;
 
   Alumnis({
@@ -71,13 +73,12 @@ class Alumnis {
     required this.entreprise,
     required this.ville,
     required this.pays,
-    required this.stages, // <---
+    required this.stages,
   });
 
   String get nomComplet => "${decede == 1 ? "† " : ""}$prenom $nom";
 
   factory Alumnis.fromMap(Map<String, dynamic> map) {
-    // Gestion de la liste des stages reçue du JSON
     var listStages = map['stages'] as List<dynamic>?;
     List<Stage> stagesList = listStages != null 
         ? listStages.map((i) => Stage.fromJson(i)).toList() 

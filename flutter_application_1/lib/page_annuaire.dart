@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'profileBadge.dart';
 import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
@@ -220,6 +221,7 @@ void didPopNext() {
               tooltip: "Historique des actions",
               onPressed: () => _afficherHistorique(context),
             ),
+            ProfileBadge(user: widget.user)
         ],
       ),
       floatingActionButton: estAdmin 
@@ -391,12 +393,12 @@ void didPopNext() {
     }
 
     return Card(
-      elevation: estSelectionne ? 8 : 2,
-      color: estSelectionne ? AppColors.ensiCyan.withOpacity(0.1) : Colors.white,
+      elevation: estSelectionne ? 5  : 2,
+      color: estSelectionne ? const Color.fromARGB(255, 210, 210, 210).withOpacity(1) : Colors.white,
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: estSelectionne ? const BorderSide(color: AppColors.ensiCyan, width: 2) : BorderSide.none,
+        side: estSelectionne ? const BorderSide(color: Color.fromARGB(255, 118, 118, 118), width: 0.5) : BorderSide.none,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
@@ -504,6 +506,7 @@ void didPopNext() {
         content: SizedBox(
           width: 500,
           child: AddAlumniForm(
+            isAdmin: true,
             onSuccess: () {
               Navigator.pop(context);
               _chargerDonneesInitiales();

@@ -100,4 +100,44 @@ Future<void> modifierEleve(Map<String, dynamic> donnees) async {
       print("Erreur modification critique : $e");
     }
   }
+
+  Future<void> demanderAjoutEleve(Map<String, dynamic> donneesEleve) async {
+    try {
+      final url = Uri.parse('https://alumni.theo-airey.fr/request_alumni.php');
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(donneesEleve),
+      );
+      print("Réponse Demande : ${response.body}");
+      if (response.statusCode != 200) throw Exception("Erreur serveur");
+    } catch (e) {
+      print("Erreur Demande : $e");
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDemandesEnAttente() async {
+    try {
+      final response = await http.get(Uri.parse('https://alumni.theo-airey.fr/get_requests.php'));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("Erreur getDemandes: $e");
+    }
+    return [];
+  }
+
+  Future<void> supprimerDemande(int idDemande) async {
+    try {
+      await http.post(
+        Uri.parse('https://alumni.theo-airey.fr/delete_request.php'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"id_demande": idDemande}),
+      );
+    } catch (e) {
+      print("Erreur suppression demande: $e");
+    }
+  }
 }

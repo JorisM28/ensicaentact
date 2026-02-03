@@ -10,6 +10,8 @@ class StageFormModel {
   final TextEditingController entrepriseCtrl = TextEditingController();
   final TextEditingController villeCtrl = TextEditingController();
   final TextEditingController paysCtrl = TextEditingController();
+  final TextEditingController descriptionCtrl = TextEditingController();
+
   String anneeSelectionnee = '2A';
 
   void dispose() {
@@ -17,6 +19,7 @@ class StageFormModel {
     entrepriseCtrl.dispose();
     villeCtrl.dispose();
     paysCtrl.dispose();
+    descriptionCtrl.dispose();
   }
 
   Map<String, dynamic> toMap() {
@@ -26,14 +29,16 @@ class StageFormModel {
       "entreprise": entrepriseCtrl.text.trim(),
       "ville": villeCtrl.text.trim(),
       "pays": paysCtrl.text.trim(),
+      "description": descriptionCtrl.text.trim(),
     };
   }
 }
 
 class AddAlumniForm extends StatefulWidget {
   final VoidCallback? onSuccess;
+  final bool isAdmin;
 
-  const AddAlumniForm({super.key, this.onSuccess});
+const AddAlumniForm({super.key, this.onSuccess, this.isAdmin=false});
 
   @override
   State<AddAlumniForm> createState() => _AddAlumniFormState();
@@ -42,6 +47,7 @@ class AddAlumniForm extends StatefulWidget {
 class _AddAlumniFormState extends State<AddAlumniForm> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool? consent = false;
 
   final _nomCtrl = TextEditingController();
   final _prenomCtrl = TextEditingController();
@@ -51,9 +57,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   String _sexeSelectionne = 'I';
 
   final _promoCtrl = TextEditingController();
-  //final _filiereCtrl = TextEditingController();
   String _formationSelectionnee = 'FISE';
-   String _filiereSelectionnee = 'Informatique';
+  String _filiereSelectionnee = 'Informatique';
 
   final _posteCtrl = TextEditingController();
   final _entrepriseCtrl = TextEditingController();
@@ -66,7 +71,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   void dispose() {
     _nomCtrl.dispose(); _prenomCtrl.dispose(); _ageCtrl.dispose();
     _emailCtrl.dispose(); _telCtrl.dispose();
-    _promoCtrl.dispose(); //_filiereCtrl.dispose();
+    _promoCtrl.dispose();
     _posteCtrl.dispose(); _entrepriseCtrl.dispose(); 
     _villeCtrl.dispose(); _paysCtrl.dispose();
     
@@ -104,6 +109,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
         "sexe": _sexeSelectionne,
         "email": _emailCtrl.text.trim(),
         "tel": _telCtrl.text.trim(),
+        "autor":consent,
         "promo": int.tryParse(_promoCtrl.text) ?? 2024,
         "filiere": _filiereSelectionnee,
         "formation": _formationSelectionnee,
@@ -118,16 +124,21 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
         data["stages"] = _stages.map((s) => s.toMap()).toList();
       }
 
-      await DatabaseService().ajouterEleve(data);
+      if (widget.isAdmin) {
+        await DatabaseService().ajouterEleve(data);
+      } else {
+        await DatabaseService().demanderAjoutEleve(data);
+      }
 
       if (widget.onSuccess != null) {
         widget.onSuccess!();
       }
       
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Alumni ajouté avec succès !"), backgroundColor: Colors.green),
-        );
+     if (mounted) {
+        String msg = widget.isAdmin 
+            ? "Alumni ajouté directement !" 
+            : "Demande envoyée pour validation.";
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.green));
       }
 
     } catch (e) {
@@ -149,7 +160,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _titreSection("Identité"),
+              _titreSection("Identité", Icons.person, Colors.purple),
               Row(
                 children: [
                   Expanded(
@@ -208,10 +219,20 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 decoration: const InputDecoration(labelText: "Téléphone", border: OutlineInputBorder(), prefixIcon: Icon(Icons.phone)),
                 keyboardType: TextInputType.phone,
               ),
+              CheckboxListTile(
+                title: Text("Consentir a ce que le téléphone et le mail soit visible"),
+                value: consent,
+                onChanged: (value) {
+                  setState(() {
+                    consent = value!;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
 
               const Divider(height: 30),
 
-              _titreSection("Formation ENSI"),
+              _titreSection("Formation ENSI", Icons.school, Colors.orange),
               Row(
                 children: [
                   Expanded(
@@ -247,7 +268,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   items: const [
                     DropdownMenuItem(value: 'Informatique', child: Text("Informatique")),
                     DropdownMenuItem(value: 'Matériaux Chimie', child: Text("Matériaux Chimie")),
-                    DropdownMenuItem(value: 'Système Embarqué', child: Text("Système Embarqué")),
+                    DropdownMenuItem(value: 'Systèmes Embarqués', child: Text("Systèmes Embarqués")),
                   ],
                   onChanged: (v) => setState(() => _filiereSelectionnee = v!),
                   validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
@@ -258,7 +279,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
               const Divider(height: 30),
 
-              _titreSection("Poste Actuel"),
+              _titreSection("Poste Actuel", Icons.work, Colors.indigo),
               TextFormField(
                 controller: _posteCtrl,
                 decoration: const InputDecoration(labelText: "Intitulé du poste", border: OutlineInputBorder()),
@@ -292,7 +313,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _titreSection("Stages"),
+                  _titreSection("Stages", Icons.work_history, Colors.green),
                   TextButton.icon(
                     onPressed: _ajouterStage,
                     icon: const Icon(Icons.add_circle, color: AppColors.ensiCyan),
@@ -361,6 +382,17 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                               Expanded(child: TextFormField(controller: stage.paysCtrl, decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()))),
                             ],
                           ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: stage.descriptionCtrl,
+                            decoration: const InputDecoration(
+                            labelText: "Description du stage", 
+                            border: OutlineInputBorder(),
+                            alignLabelWithHint: true,
+                            ),
+                            maxLines: 4,
+                            keyboardType: TextInputType.multiline,
+                            ),
                         ],
                       ),
                     ),
@@ -390,13 +422,23 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     );
   }
 
-  Widget _titreSection(String titre) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10, top: 10),
-      child: Text(
-        titre, 
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.ensiCyan)
-      ),
-    );
-  }
+ Widget _titreSection(String titre, IconData icon, Color color) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 15),
+    child: Row(
+      children: [
+        Icon(icon, color: color, size: 24),
+        const SizedBox(width: 10),
+        Text(
+          titre, 
+          style: const TextStyle(
+            fontWeight: FontWeight.bold, 
+            fontSize: 18, 
+            color: AppColors.ensiCyan
+          )
+        ),
+      ],
+    ),
+  );
+}
 }

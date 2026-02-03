@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Nécessaire pour inputFormatters
 import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
@@ -17,6 +18,10 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   bool _enEdition = false;
   bool _modifiee = false;
 
+  // Contrôleurs Texte
+  late TextEditingController _nomCtrl;
+  late TextEditingController _prenomCtrl;
+  late TextEditingController _promoCtrl;
   late TextEditingController _posteCtrl;
   late TextEditingController _entrepriseCtrl;
   late TextEditingController _villeCtrl;
@@ -24,6 +29,14 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   late TextEditingController _telCtrl;
   late TextEditingController _filiereCtrl;
 
+  // Variables d'état pour les Switchs (booléens)
+  late bool _autorSwitch;
+  late bool _decedeSwitch;
+
+  // Variables pour l'affichage (mise à jour locale)
+  late String nomActuel;
+  late String prenomActuel;
+  late int promoActuelle;
   late String posteActuel;
   late String entrepriseActuelle;
   late String filiereActuelle;
@@ -35,6 +48,10 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   void initState() {
     super.initState();
 
+    // Initialisation des valeurs d'affichage
+    nomActuel = widget.alumni.nom;
+    prenomActuel = widget.alumni.prenom;
+    promoActuelle = widget.alumni.promo;
     posteActuel = widget.alumni.job;
     entrepriseActuelle = widget.alumni.entreprise;
     villeActuelle = widget.alumni.ville;
@@ -42,16 +59,27 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
     emailActuel = widget.alumni.email;
     telActuel = widget.alumni.tel;
 
+    // Initialisation des Contrôleurs
+    _nomCtrl = TextEditingController(text: nomActuel);
+    _prenomCtrl = TextEditingController(text: prenomActuel);
+    _promoCtrl = TextEditingController(text: promoActuelle.toString());
     _posteCtrl = TextEditingController(text: posteActuel);
     _entrepriseCtrl = TextEditingController(text: entrepriseActuelle);
     _villeCtrl = TextEditingController(text: villeActuelle);
     _emailCtrl = TextEditingController(text: emailActuel);
     _telCtrl = TextEditingController(text: telActuel);
     _filiereCtrl = TextEditingController(text: filiereActuelle);
+
+    // Initialisation des booléens (1 = true, 0 = false)
+    _autorSwitch = widget.alumni.autor == 1;
+    _decedeSwitch = widget.alumni.decede == 1;
   }
 
   @override
   void dispose() {
+    _nomCtrl.dispose();
+    _prenomCtrl.dispose();
+    _promoCtrl.dispose();
     _posteCtrl.dispose();
     _entrepriseCtrl.dispose();
     _villeCtrl.dispose();
@@ -61,32 +89,48 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
     super.dispose();
   }
 
-void _sauvegarder() async {
+  void _sauvegarder() async {
+    // 1. Conversion des valeurs
+    int promoInt = int.tryParse(_promoCtrl.text) ?? promoActuelle;
+    int autorInt = _autorSwitch ? 1 : 0;
+    int decedeInt = _decedeSwitch ? 1 : 0;
+
+    // 2. Envoi BDD
     await DatabaseService().modifierEleve({
-      "id": widget.alumni.id, 
-      "nom": widget.alumni.nom,
-      "prenom": widget.alumni.prenom,
-      "poste": _posteCtrl.text,
-      "entreprise": _entrepriseCtrl.text,
-      "ville": _villeCtrl.text,
-      "filiere": _filiereCtrl.text,
-      "email": _emailCtrl.text,
-      "tel": _telCtrl.text,
+      "id": widget.alumni.id,
+      "nom": _nomCtrl.text.trim(),
+      "prenom": _prenomCtrl.text.trim(),
+      "promo": promoInt, // CORRECTION: C'était _posteCtrl avant
+      "autor": autorInt,
+      "decede": decedeInt,
+      "poste": _posteCtrl.text.trim(),
+      "entreprise": _entrepriseCtrl.text.trim(),
+      "ville": _villeCtrl.text.trim(),
+      "filiere": _filiereCtrl.text.trim(),
+      "email": _emailCtrl.text.trim(),
+      "tel": _telCtrl.text.trim(),
     });
 
+    // 3. Callback parent
     if (widget.onSave != null) {
-      print("Appel du callback de rechargement...");
-      widget.onSave!(); 
+      widget.onSave!();
     }
+    
     if (!mounted) return;
 
+    // 4. Mise à jour UI locale
     setState(() {
-      posteActuel = _posteCtrl.text;
-      entrepriseActuelle = _entrepriseCtrl.text;
-      villeActuelle = _villeCtrl.text;
-      filiereActuelle = _filiereCtrl.text;
-      emailActuel = _emailCtrl.text;
-      telActuel = _telCtrl.text;
+      nomActuel = _nomCtrl.text.trim();
+      prenomActuel = _prenomCtrl.text.trim();
+      promoActuelle = promoInt;
+      // autor et decede sont gérés par les switchs directement
+      posteActuel = _posteCtrl.text.trim();
+      entrepriseActuelle = _entrepriseCtrl.text.trim();
+      villeActuelle = _villeCtrl.text.trim();
+      filiereActuelle = _filiereCtrl.text.trim();
+      emailActuel = _emailCtrl.text.trim();
+      telActuel = _telCtrl.text.trim();
+      
       _enEdition = false;
       _modifiee = true;
     });
@@ -102,16 +146,16 @@ void _sauvegarder() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.alumni.nomComplet),
-          backgroundColor: AppColors.ensiCyan,
-          foregroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context, _modifiee);
-            },
-          ),
+      appBar: AppBar(
+        title: Text(_enEdition ? "Modifier Alumni" : "$prenomActuel $nomActuel"),
+        backgroundColor: AppColors.ensiCyan,
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, _modifiee);
+          },
+        ),
         actions: [
           IconButton(
             icon: Icon(_enEdition ? Icons.save : Icons.edit),
@@ -132,25 +176,89 @@ void _sauvegarder() async {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            // --- SECTION PHOTO & IDENTITÉ ---
             CircleAvatar(
               radius: 60,
               backgroundColor: AppColors.ensiCyan,
               child: Text(
-                widget.alumni.prenom.isNotEmpty ? widget.alumni.prenom[0] : "?",
+                prenomActuel.isNotEmpty ? prenomActuel[0] : "?",
                 style: const TextStyle(fontSize: 50, color: Colors.white),
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              widget.alumni.nomComplet,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "Promo ${widget.alumni.promo}",
-              style: const TextStyle(fontSize: 20, color: Colors.grey),
-            ),
+
+            if (_enEdition) ...[
+              // MODE ÉDITION : Champs Nom, Prénom, Promo
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _prenomCtrl,
+                      decoration: const InputDecoration(labelText: "Prénom", border: OutlineInputBorder()),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: _nomCtrl,
+                      decoration: const InputDecoration(labelText: "Nom", border: OutlineInputBorder()),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _promoCtrl,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: const InputDecoration(labelText: "Promo (Année)", border: OutlineInputBorder()),
+              ),
+            ] else ...[
+              // MODE VISUALISATION : Texte statique
+              Text(
+                "$prenomActuel $nomActuel",
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "Promo $promoActuelle",
+                style: const TextStyle(fontSize: 20, color: Colors.grey),
+              ),
+            ],
+
             const Divider(height: 40),
 
+            // --- SECTION STATUT (NOUVEAU) ---
+            if (_enEdition)
+              Card(
+                color: Colors.grey[100],
+                elevation: 0,
+                margin: const EdgeInsets.only(bottom: 20),
+                child: Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Statut Administrateur", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54)),
+                    ),
+                    SwitchListTile(
+                      title: const Text("Autorisation des données"),
+                      subtitle: Text(_autorSwitch ? "L'alumni accepte d'apparaître" : "L'alumni refuse/n'a pas répondu"),
+                      activeColor: Colors.green,
+                      value: _autorSwitch,
+                      onChanged: (val) => setState(() => _autorSwitch = val),
+                    ),
+                    const Divider(height: 1),
+                    SwitchListTile(
+                      title: const Text("Décédé"),
+                      subtitle: const Text("Marquer ce profil comme décédé"),
+                      activeColor: Colors.red,
+                      value: _decedeSwitch,
+                      onChanged: (val) => setState(() => _decedeSwitch = val),
+                    ),
+                  ],
+                ),
+              ),
+
+            // --- SECTION INFORMATIONS ---
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -170,55 +278,30 @@ void _sauvegarder() async {
                           leading: const Icon(Icons.work, color: Colors.blue),
                           title: const Text("Poste actuel"),
                           subtitle: _enEdition
-                              ? TextField(
-                                  controller: _posteCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                              ? TextField(controller: _posteCtrl, decoration: const InputDecoration(isDense: true))
                               : Text(posteActuel),
                         ),
                         const Divider(height: 1),
                         ListTile(
-                          leading: const Icon(
-                            Icons.school,
-                            color: Colors.orange,
-                          ),
+                          leading: const Icon(Icons.school, color: Colors.orange),
                           title: const Text("Filière"),
                           subtitle: _enEdition
-                              ? TextField(
-                                  controller: _filiereCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                              ? TextField(controller: _filiereCtrl, decoration: const InputDecoration(isDense: true))
                               : Text(filiereActuelle),
                         ),
                         const Divider(height: 1),
-
                         ListTile(
-                          leading: const Icon(
-                            Icons.business,
-                            color: Colors.indigo,
-                          ),
+                          leading: const Icon(Icons.business, color: Colors.indigo),
                           title: const Text("Entreprise"),
                           subtitle: _enEdition
-                              ? TextField(
-                                  controller: _entrepriseCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                              ? TextField(controller: _entrepriseCtrl, decoration: const InputDecoration(isDense: true))
                               : Text(entrepriseActuelle),
                         ),
                       ],
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 10),
-                const SizedBox(width: 10),
-
                 Expanded(
                   child: Card(
                     elevation: 2,
@@ -231,55 +314,32 @@ void _sauvegarder() async {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-
                         ListTile(
-                          leading: const Icon(
-                            Icons.location_on,
-                            color: Colors.red,
-                          ),
+                          leading: const Icon(Icons.location_on, color: Colors.red),
                           title: const Text("Ville"),
                           subtitle: _enEdition
-                              ? TextField(
-                                  controller: _villeCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                              ? TextField(controller: _villeCtrl, decoration: const InputDecoration(isDense: true))
                               : Text(villeActuelle),
                         ),
-
-                        if (widget.alumni.autor == 1 &&
-                            widget.alumni.decede == 0) ...[
+                        
+                        // Logique d'affichage conditionnel :
+                        // On affiche toujours en mode édition.
+                        // En mode lecture, on cache si pas autorisé ou décédé.
+                        if (_enEdition || (_autorSwitch && !_decedeSwitch)) ...[
                           const Divider(height: 1),
                           ListTile(
-                            leading: const Icon(
-                              Icons.email,
-                              color: Colors.green,
-                            ),
+                            leading: const Icon(Icons.email, color: Colors.green),
                             title: const Text("Email"),
                             subtitle: _enEdition
-                                ? TextField(
-                                    controller: _emailCtrl,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  )
+                                ? TextField(controller: _emailCtrl, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(isDense: true))
                                 : Text(emailActuel),
                           ),
                           const Divider(height: 1),
                           ListTile(
-                            leading: const Icon(
-                              Icons.phone,
-                              color: Colors.amber,
-                            ),
+                            leading: const Icon(Icons.phone, color: Colors.amber),
                             title: const Text("Téléphone"),
                             subtitle: _enEdition
-                                ? TextField(
-                                    controller: _telCtrl,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  )
+                                ? TextField(controller: _telCtrl, keyboardType: TextInputType.phone, decoration: const InputDecoration(isDense: true))
                                 : Text(telActuel),
                           ),
                         ],
