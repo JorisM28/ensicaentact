@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
-import 'page_annuaire_admin.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +17,7 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Réseau Alumni',
-      home: const PageAccueil(), 
+      home: const PageAccueil(),
     );
   }
 }
@@ -62,15 +61,7 @@ class PageAccueil extends StatelessWidget {
               },
               child: const Text('Login'),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PageAnnuaireAdmin()),
-                );
-              },
-              child: const Text('Version Admin'),
-            ),
+
           ],
         ),
       ),
