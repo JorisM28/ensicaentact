@@ -61,9 +61,9 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
     super.dispose();
   }
 
-void _sauvegarder() async {
+  void _sauvegarder() async {
     await DatabaseService().modifierEleve({
-      "id": widget.alumni.id, 
+      "id": widget.alumni.id,
       "nom": widget.alumni.nom,
       "prenom": widget.alumni.prenom,
       "poste": _posteCtrl.text,
@@ -76,7 +76,7 @@ void _sauvegarder() async {
 
     if (widget.onSave != null) {
       print("Appel du callback de rechargement...");
-      widget.onSave!(); 
+      widget.onSave!();
     }
     if (!mounted) return;
 
@@ -102,16 +102,16 @@ void _sauvegarder() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.alumni.nomComplet),
-          backgroundColor: AppColors.ensiCyan,
-          foregroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context, _modifiee);
-            },
-          ),
+      appBar: AppBar(
+        title: Text(widget.alumni.nomComplet),
+        backgroundColor: AppColors.ensiCyan,
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, _modifiee);
+          },
+        ),
         actions: [
           IconButton(
             icon: Icon(_enEdition ? Icons.save : Icons.edit),
@@ -171,11 +171,11 @@ void _sauvegarder() async {
                           title: const Text("Poste actuel"),
                           subtitle: _enEdition
                               ? TextField(
-                                  controller: _posteCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                            controller: _posteCtrl,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          )
                               : Text(posteActuel),
                         ),
                         const Divider(height: 1),
@@ -187,11 +187,11 @@ void _sauvegarder() async {
                           title: const Text("Filière"),
                           subtitle: _enEdition
                               ? TextField(
-                                  controller: _filiereCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                            controller: _filiereCtrl,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          )
                               : Text(filiereActuelle),
                         ),
                         const Divider(height: 1),
@@ -204,11 +204,11 @@ void _sauvegarder() async {
                           title: const Text("Entreprise"),
                           subtitle: _enEdition
                               ? TextField(
-                                  controller: _entrepriseCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                            controller: _entrepriseCtrl,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          )
                               : Text(entrepriseActuelle),
                         ),
                       ],
@@ -240,11 +240,11 @@ void _sauvegarder() async {
                           title: const Text("Ville"),
                           subtitle: _enEdition
                               ? TextField(
-                                  controller: _villeCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                            controller: _villeCtrl,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          )
                               : Text(villeActuelle),
                         ),
 
@@ -259,11 +259,11 @@ void _sauvegarder() async {
                             title: const Text("Email"),
                             subtitle: _enEdition
                                 ? TextField(
-                                    controller: _emailCtrl,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  )
+                              controller: _emailCtrl,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                              ),
+                            )
                                 : Text(emailActuel),
                           ),
                           const Divider(height: 1),
@@ -275,11 +275,11 @@ void _sauvegarder() async {
                             title: const Text("Téléphone"),
                             subtitle: _enEdition
                                 ? TextField(
-                                    controller: _telCtrl,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  )
+                              controller: _telCtrl,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                              ),
+                            )
                                 : Text(telActuel),
                           ),
                         ],

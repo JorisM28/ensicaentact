@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'alumnis.dart'; 
+import 'alumnis.dart';
 
 class DatabaseService {
 
@@ -10,9 +10,9 @@ class DatabaseService {
     try {
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       final urlString = '$apiUrl?t=$timestamp';
-      
+
       print("Tentative de connexion (No-Cache) : $urlString");
-      
+
       final response = await http.get(Uri.parse(urlString));
 
       if (response.statusCode == 200) {
@@ -24,14 +24,17 @@ class DatabaseService {
       }
     } catch (e) {
       print("Erreur critique : $e");
-      return []; 
+
+      return [];
     }
   }
 Future<bool> supprimerEleve(String nom, String prenom) async {
+
     try {
       final url = Uri.parse('https://alumni.theo-airey.fr/delete_alumni.php');
-      
+
       final response = await http.post(
+
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"nom": nom, "prenom": prenom}),
@@ -55,7 +58,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   Future<void> ajouterEleve(Map<String, dynamic> donneesEleve) async {
     try {
       final url = Uri.parse('https://alumni.theo-airey.fr/add_alumni.php');
-      
+
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -81,7 +84,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
 }
 
 
-Future<void> modifierEleve(Map<String, dynamic> donnees) async {
+  Future<void> modifierEleve(Map<String, dynamic> donnees) async {
     try {
       final url = Uri.parse('https://alumni.theo-airey.fr/update_alumni.php');
       print("Envoi modification pour ${donnees['nom']}...");
@@ -91,10 +94,10 @@ Future<void> modifierEleve(Map<String, dynamic> donnees) async {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(donnees),
       );
-      
- 
+
+
       print("Code retour: ${response.statusCode}");
-      print("Réponse serveur: ${response.body}"); 
+      print("Réponse serveur: ${response.body}");
 
     } catch (e) {
       print("Erreur modification critique : $e");
