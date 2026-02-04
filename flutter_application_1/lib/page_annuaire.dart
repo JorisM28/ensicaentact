@@ -6,7 +6,6 @@ import 'alumnis.dart';
 import 'database_service.dart';
 import 'filtre_widget.dart';
 import 'alumni_detail_page.dart'; 
-import 'alumni_detail_page_admin.dart';
 import 'AdminValidatePage.dart';
 import 'alumni_preview.dart';
 import 'add_alumni.dart'; 
@@ -435,9 +434,9 @@ void didPopNext() {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => estAdmin
-                ? AlumniDetailPageAdmin(alumni: eleve)
-                : AlumniDetailPage(alumni: eleve, user: widget.user),
+            builder: (context) =>AlumniDetailPage(alumni: eleve, user: widget.user,
+            onSave: () {setState(() {}); 
+            }, ),
           ),
         ).then((resultat) {
             _chargerDonneesInitiales();
@@ -487,12 +486,16 @@ void didPopNext() {
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    Text("${eleve.job} @ ${eleve.entreprise}", style: TextStyle(color: Colors.grey[800])),
+                      if (eleve.job.isNotEmpty || eleve.entreprise.isNotEmpty)...[
+                    Text("${eleve.job} ${eleve.entreprise.isEmpty || eleve.job.isEmpty  ? "" : "⟶"} ${eleve.entreprise}", style: TextStyle(color: Colors.grey[800])),
+                    ],  
                     const SizedBox(height: 5),
                     Wrap(
                       spacing: 5,
                       children: [
+                        if (eleve.filiere.isNotEmpty)
                         Chip(label: Text(eleve.filiere, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
+                        if (eleve.ville.isNotEmpty)
                         Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(eleve.ville, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
                       ],
                     ),
@@ -513,9 +516,9 @@ void didPopNext() {
                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => estAdmin 
-                             ? AlumniDetailPageAdmin(alumni: eleve) 
-                             : AlumniDetailPage(alumni: eleve, user: widget.user),
+                          builder: (context) =>AlumniDetailPage(alumni: eleve, user: widget.user, 
+                          onSave: () {setState(() {}); 
+                          },),
                         ),
                       );
                   }

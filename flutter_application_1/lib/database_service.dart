@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'alumnis.dart';
 
@@ -107,11 +106,9 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   }
 
   Future<Map<String, dynamic>> updatePassword(String email, String oldPassword, String newPassword) async {
-    const String url = 'https://alumni.theo-airey.fr/update_password.php';
-
     try {
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse("$apiUrl/update_password.php"),
         body: {
           "email": email,
           "old_password": oldPassword,
