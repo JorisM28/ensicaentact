@@ -1,19 +1,113 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'login.dart';
+import 'database_service.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> user;
 
   const ProfilePage({super.key, required this.user});
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+
+  void _showChangePasswordDialog(BuildContext context) {
+    final TextEditingController _oldPassController = TextEditingController();
+    final TextEditingController _newPassController = TextEditingController();
+    final TextEditingController _confirmPassController = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+    bool _isLoading = false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Modifier le mot de passe"),
+              content: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: _oldPassController,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: "Ancien mot de passe"),
+                      validator: (val) => val!.isEmpty ? "Requis" : null,
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _newPassController,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: "Nouveau mot de passe"),
+                      validator: (val) => val!.length < 6 ? "Minimum 6 caractères" : null,
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _confirmPassController,
+                      obscureText: true,
+                      decoration: const InputDecoration(labelText: "Confirmer nouveau"),
+                      validator: (val) {
+                        if (val != _newPassController.text) return "Les mots de passe ne correspondent pas";
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Annuler"),
+                ),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : () async {
+                    if (_formKey.currentState!.validate()) {
+                      setState(() => _isLoading = true);
+
+                      final result = await DatabaseService().updatePassword(
+                          widget.user['email'],
+                          _oldPassController.text,
+                          _newPassController.text
+                      );
+
+                      setState(() => _isLoading = false);
+                      Navigator.pop(context);
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(result['message'] ?? "Erreur"),
+                            backgroundColor: result['status'] == 'success' ? Colors.green : Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: _isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text("Valider"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    String prenom = user['name'] ?? "Utilisateur";
-    String nom = user['family_name'] ?? "";
-    String email = user['email'] ?? "";
-    String role = user['role'] ?? "";
-    String phone = user['phone'] ?? "";
+    String prenom = widget.user['prenom'] ?? widget.user['name'] ?? "Utilisateur";
+    String nom = widget.user['nom'] ?? widget.user['family_name'] ?? "";
+    String email = widget.user['email'] ?? "";
+    String role = widget.user['role'] ?? "";
+    String phone = widget.user['phone'] ?? "";
+
 
     return Scaffold(
       appBar: AppBar(
@@ -71,6 +165,15 @@ class ProfilePage extends StatelessWidget {
                   subtitle: Text(phone, style: const TextStyle(fontSize: 16)),
                 ),
               ],
+
+              const Divider(indent: 20, endIndent: 20),
+              ListTile(
+                leading: const Icon(Icons.lock_reset, color: AppColors.ensiCyan),
+                title: const Text("Sécurité"),
+                subtitle: const Text("Modifier mon mot de passe"),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () => _showChangePasswordDialog(context),
+              ),
 
               const Divider(height: 40),
               const SizedBox(height: 20),
