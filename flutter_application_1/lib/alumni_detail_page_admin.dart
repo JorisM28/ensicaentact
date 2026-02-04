@@ -100,31 +100,55 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   }
 
   @override
+  Widget _buildInfoCard(String titre, List<Widget> children) {
+    return Card(
+      elevation: 2,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(titre, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    bool estGrand = screenWidth > 800;
+
+
+
+    List<Widget> proTiles = [
+      _buildListTile(Icons.work, "Poste actuel", _posteCtrl, posteActuel, Colors.blue),
+      const Divider(height: 1),
+      _buildListTile(Icons.school, "Filière", _filiereCtrl, filiereActuelle, Colors.orange),
+      const Divider(height: 1),
+      _buildListTile(Icons.business, "Entreprise", _entrepriseCtrl, entrepriseActuelle, Colors.indigo),
+    ];
+
+    List<Widget> coordonneeTiles = [
+      _buildListTile(Icons.location_on, "Ville", _villeCtrl, villeActuelle, Colors.red),
+      if (widget.alumni.autor == 1 && widget.alumni.decede == 0) ...[
+        const Divider(height: 1),
+        _buildListTile(Icons.email, "Email", _emailCtrl, emailActuel, Colors.green),
+        const Divider(height: 1),
+        _buildListTile(Icons.phone, "Téléphone", _telCtrl, telActuel, Colors.amber),
+      ],
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.alumni.nomComplet),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context, _modifiee);
-          },
-        ),
         actions: [
           IconButton(
             icon: Icon(_enEdition ? Icons.save : Icons.edit),
-            tooltip: _enEdition ? "Enregistrer" : "Modifier",
-            onPressed: () {
-              if (_enEdition) {
-                _sauvegarder();
-              } else {
-                setState(() {
-                  _enEdition = true;
-                });
-              }
-            },
+            onPressed: () => _enEdition ? _sauvegarder() : setState(() => _enEdition = true),
           ),
         ],
       ),
@@ -140,158 +164,42 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                 style: const TextStyle(fontSize: 50, color: Colors.white),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              widget.alumni.nomComplet,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "Promo ${widget.alumni.promo}",
-              style: const TextStyle(fontSize: 20, color: Colors.grey),
-            ),
+            const SizedBox(height: 10),
+            Text(widget.alumni.nomComplet, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            Text("Promo ${widget.alumni.promo}", style: const TextStyle(fontSize: 20, color: Colors.grey)),
             const Divider(height: 40),
 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Card(
-                    elevation: 2,
-                    child: Column(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            "Informations Pro",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.work, color: Colors.blue),
-                          title: const Text("Poste actuel"),
-                          subtitle: _enEdition
-                              ? TextField(
-                            controller: _posteCtrl,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                          )
-                              : Text(posteActuel),
-                        ),
-                        const Divider(height: 1),
-                        ListTile(
-                          leading: const Icon(
-                            Icons.school,
-                            color: Colors.orange,
-                          ),
-                          title: const Text("Filière"),
-                          subtitle: _enEdition
-                              ? TextField(
-                            controller: _filiereCtrl,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                          )
-                              : Text(filiereActuelle),
-                        ),
-                        const Divider(height: 1),
-
-                        ListTile(
-                          leading: const Icon(
-                            Icons.business,
-                            color: Colors.indigo,
-                          ),
-                          title: const Text("Entreprise"),
-                          subtitle: _enEdition
-                              ? TextField(
-                            controller: _entrepriseCtrl,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                          )
-                              : Text(entrepriseActuelle),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: Card(
-                    elevation: 2,
-                    child: Column(
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
-                            "Coordonnées",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-
-                        ListTile(
-                          leading: const Icon(
-                            Icons.location_on,
-                            color: Colors.red,
-                          ),
-                          title: const Text("Ville"),
-                          subtitle: _enEdition
-                              ? TextField(
-                            controller: _villeCtrl,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
-                          )
-                              : Text(villeActuelle),
-                        ),
-
-                        if (widget.alumni.autor == 1 &&
-                            widget.alumni.decede == 0) ...[
-                          const Divider(height: 1),
-                          ListTile(
-                            leading: const Icon(
-                              Icons.email,
-                              color: Colors.green,
-                            ),
-                            title: const Text("Email"),
-                            subtitle: _enEdition
-                                ? TextField(
-                              controller: _emailCtrl,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                              ),
-                            )
-                                : Text(emailActuel),
-                          ),
-                          const Divider(height: 1),
-                          ListTile(
-                            leading: const Icon(
-                              Icons.phone,
-                              color: Colors.amber,
-                            ),
-                            title: const Text("Téléphone"),
-                            subtitle: _enEdition
-                                ? TextField(
-                              controller: _telCtrl,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                              ),
-                            )
-                                : Text(telActuel),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            if (estGrand)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: _buildInfoCard("Informations Pro", proTiles)),
+                  const SizedBox(width: 20),
+                  Expanded(child: _buildInfoCard("Coordonnées", coordonneeTiles)),
+                ],
+              )
+            else
+              Column(
+                children: [
+                  _buildInfoCard("Informations Pro", proTiles),
+                  const SizedBox(height: 20),
+                  _buildInfoCard("Coordonnées", coordonneeTiles),
+                ],
+              ),
           ],
         ),
       ),
+    );
+  }
+
+
+  Widget _buildListTile(IconData icon, String label, TextEditingController ctrl, String valeurActuelle, Color color) {
+    return ListTile(
+      leading: Icon(icon, color: color),
+      title: Text(label),
+      subtitle: _enEdition
+          ? TextField(controller: ctrl, decoration: const InputDecoration(border: OutlineInputBorder()))
+          : Text(valeurActuelle),
     );
   }
 }
