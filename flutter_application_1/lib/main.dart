@@ -3,7 +3,6 @@ import 'package:flutter_application_ensicaentact/navigation.dart';
 import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
-import 'page_annuaire_admin.dart';
 import 'page_emploi.dart';
 
 void main() {
