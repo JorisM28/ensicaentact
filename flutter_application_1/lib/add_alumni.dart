@@ -37,8 +37,10 @@ class StageFormModel {
 class AddAlumniForm extends StatefulWidget {
   final VoidCallback? onSuccess;
   final bool isAdmin;
+  final Map<String, dynamic>? initialData;
+  final int? requestId;
 
-const AddAlumniForm({super.key, this.onSuccess, this.isAdmin=false});
+const AddAlumniForm({super.key, this.onSuccess, this.isAdmin=false, this.initialData, this.requestId});
 
   @override
   State<AddAlumniForm> createState() => _AddAlumniFormState();
@@ -47,7 +49,7 @@ const AddAlumniForm({super.key, this.onSuccess, this.isAdmin=false});
 class _AddAlumniFormState extends State<AddAlumniForm> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  bool? consent = false;
+  bool? _consent = false;
 
   final _nomCtrl = TextEditingController();
   final _prenomCtrl = TextEditingController();
@@ -66,6 +68,45 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   final _paysCtrl = TextEditingController();
 
   final List<StageFormModel> _stages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    
+    if (widget.initialData != null) {
+      var data = widget.initialData!;
+      
+      _nomCtrl.text = data['nom'] ?? '';
+      _prenomCtrl.text = data['prenom'] ?? '';
+      _ageCtrl.text = (data['age'] ?? '').toString();
+      _sexeSelectionne = data['sexe'] ?? 'I';
+      _emailCtrl.text = data['email'] ?? '';
+      _telCtrl.text = data['tel'] ?? '';
+      _consent = data['autor'] == true || data['autor'] == 1; 
+
+      _promoCtrl.text = (data['promo'] ?? '').toString();
+      _formationSelectionnee = data['formation'] ?? 'FISE';
+      _filiereSelectionnee = data['filiere'] ?? 'Informatique';
+      
+      _posteCtrl.text = data['poste'] ?? data['job'] ?? '';
+      _entrepriseCtrl.text = data['entreprise'] ?? '';
+      _villeCtrl.text = data['ville'] ?? '';
+      _paysCtrl.text = data['pays'] ?? '';
+
+      if (data['stages'] != null) {
+        for (var s in data['stages']) {
+          var stageModel = StageFormModel();
+          stageModel.anneeSelectionnee = s['annee'] ?? '2A';
+          stageModel.intituleCtrl.text = s['intitule'] ?? '';
+          stageModel.entrepriseCtrl.text = s['entreprise'] ?? '';
+          stageModel.villeCtrl.text = s['ville'] ?? '';
+          stageModel.paysCtrl.text = s['pays'] ?? '';
+          stageModel.descriptionCtrl.text = s['description'] ?? '';
+          _stages.add(stageModel);
+        }
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -109,11 +150,11 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
         "sexe": _sexeSelectionne,
         "email": _emailCtrl.text.trim(),
         "tel": _telCtrl.text.trim(),
-        "autor":consent,
+        "autor":_consent,
         "promo": int.tryParse(_promoCtrl.text) ?? 2024,
         "filiere": _filiereSelectionnee,
         "formation": _formationSelectionnee,
-        "job": _posteCtrl.text.trim(),
+         "job": _posteCtrl.text.trim(),
         "poste": _posteCtrl.text.trim(),
         "entreprise": _entrepriseCtrl.text.trim(),
         "ville": _villeCtrl.text.trim(),
@@ -124,8 +165,18 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
         data["stages"] = _stages.map((s) => s.toMap()).toList();
       }
 
-      if (widget.isAdmin) {
+      if (widget.isAdmin) {          
+        print("Mode Admin détecté. Ajout direct...");
         await DatabaseService().ajouterEleve(data);
+        print("Vérification suppression demande. RequestId reçu : ${widget.requestId}");
+
+        if (widget.requestId != null) {
+        print("Tentative de suppression de la demande ID: ${widget.requestId}");
+          await DatabaseService().supprimerDemande(widget.requestId!);
+        print("Suppression demandée au service.");
+        }else{
+          print("ATTENTION : RequestId est null, pas de suppression.");
+        }
       } else {
         await DatabaseService().demanderAjoutEleve(data);
       }
@@ -221,10 +272,10 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               ),
               CheckboxListTile(
                 title: Text("Consentir a ce que le téléphone et le mail soit visible"),
-                value: consent,
+                value: _consent,
                 onChanged: (value) {
                   setState(() {
-                    consent = value!;
+                    _consent = value!;
                   });
                 },
                 controlAffinity: ListTileControlAffinity.leading,
@@ -400,6 +451,38 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 }),
 
               const SizedBox(height: 20),
+              
+            if (widget.isAdmin && widget.requestId != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  onPressed: () async {
+                    bool confirm = await showDialog(
+                      context: context, 
+                      builder: (c) => AlertDialog(
+                        title: const Text("Refuser la demande ?"),
+                        content: const Text("Cette action est irréversible."),
+                        actions: [
+                          TextButton(onPressed: ()=>Navigator.pop(c,false), child: const Text("Annuler")),
+                          TextButton(onPressed: ()=>Navigator.pop(c,true), child: const Text("Confirmer le refus")),
+                        ],
+                      )
+                    ) ?? false;
+
+                    if (confirm) {
+                      await DatabaseService().supprimerDemande(widget.requestId!);
+                      if (widget.onSuccess != null) widget.onSuccess!();
+                      if (mounted) Navigator.pop(context);
+                    }
+                  },
+                  icon: const Icon(Icons.delete_forever, color: Colors.white),
+                  label: const Text("REFUSER CETTE DEMANDE", style: TextStyle(color: Colors.white)),
+                ),
+              ),
 
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
@@ -415,6 +498,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   style: const TextStyle(color: Colors.white, fontSize: 16)
                 ),
               ),
+              
             ],
           ),
         ),
