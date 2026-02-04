@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/widget/event_proposition_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'page_emploi.dart';
 import 'page_annuaire.dart'; 
@@ -58,9 +59,18 @@ class PageAccueil extends StatelessWidget {
 
                   const SizedBox(width: 20), 
                   
-                  _buildHeaderButton(Icons.thumb_up_alt_outlined, "Rejoindre"),
-                  const SizedBox(width: 10), 
-                  _buildHeaderButton(Icons.event_available, "Proposer un évènement"),
+                  _buildHeaderButton(Icons.thumb_up_alt_outlined, "Rejoindre", () {}), 
+                    
+                    const SizedBox(width: 10), 
+
+                  _buildHeaderButton(
+                    Icons.event_available, 
+                    "Proposer un évènement",
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (c) => PageProposerEvenement(user: user))
+                    )
+                  )
                 ],
 
                 if (!isDesktop)
@@ -132,9 +142,9 @@ class PageAccueil extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderButton(IconData icon, String label) {
+  Widget _buildHeaderButton(IconData icon, String label, VoidCallback action) {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: action,
       icon: Icon(icon, size: 18, color: headerColor),
       label: Text(label, style: TextStyle(color: headerColor, fontWeight: FontWeight.bold)),
       style: ElevatedButton.styleFrom(

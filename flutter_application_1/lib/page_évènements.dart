@@ -95,7 +95,7 @@ class _PageEvenementsState extends State<PageEvenements> {
                           ),
                           child: Row(
                             children: [
-                              // BLOC DATE (Gris clair comme ton design)
+              
                               Container(
                                 width: 80,
                                 height: 100,

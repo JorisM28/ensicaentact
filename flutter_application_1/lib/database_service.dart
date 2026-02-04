@@ -210,4 +210,37 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     }
     return [];
   }
+
+
+
+  Future<bool> proposerEvenement(Map<String, dynamic> data) async {
+    try {
+      final url = Uri.parse("https://alumni.theo-airey.fr/events/add_evenement.php");
+      
+      
+      final String bodyData = json.encode(data);
+
+      print("📤 ENVOI PROPOSITION : $bodyData");
+
+      final response = await http.post(
+        url, 
+        body: bodyData,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      print("📥 RÉPONSE SERVEUR (Proposer) : ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+
+        return result['success'] == true;
+      } else {
+        print("❌ Erreur Serveur : Code ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("❌ Erreur lors de la proposition : $e");
+      return false;
+    }
+  }
 }
