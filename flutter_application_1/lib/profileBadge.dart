@@ -193,6 +193,10 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                       style: const TextStyle(fontSize: 32, color: Colors.white),
                     ),
                   ),
+                  Text(role.toUpperCase(),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,),
 
                   const SizedBox(height: 12),
 

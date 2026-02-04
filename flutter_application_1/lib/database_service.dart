@@ -103,4 +103,27 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
       print("Erreur modification critique : $e");
     }
   }
+
+  Future<Map<String, dynamic>> updatePassword(String email, String oldPassword, String newPassword) async {
+    const String url = 'https://alumni.theo-airey.fr/update_password.php';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: {
+          "email": email,
+          "old_password": oldPassword,
+          "new_password": newPassword,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        return {"status": "error", "message": "Erreur serveur ${response.statusCode}"};
+      }
+    } catch (e) {
+      return {"status": "error", "message": "Erreur de connexion : $e"};
+    }
+  }
 }
