@@ -3,11 +3,8 @@ import 'package:flutter_application_ensicaentact/navigation.dart';
 import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
-<<<<<<< HEAD
 import 'page_annuaire_admin.dart';
 import 'page_emploi.dart';
-=======
->>>>>>> master
 
 void main() {
   runApp(const MyApp());
@@ -91,7 +88,7 @@ class PageAccueil extends StatelessWidget {
                         'id': '24',
                         'prenom': 'Benoît',
                         'nom': 'Michel',
-                        'role': 'alumni'
+                        'role': 'student'
                       },
                     ), 
                   ),
