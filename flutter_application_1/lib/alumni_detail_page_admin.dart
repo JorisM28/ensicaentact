@@ -18,7 +18,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   bool _enEdition = false;
   bool _modifiee = false;
 
-  // Contrôleurs Texte
   late TextEditingController _nomCtrl;
   late TextEditingController _prenomCtrl;
   late TextEditingController _promoCtrl;
@@ -29,11 +28,9 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   late TextEditingController _telCtrl;
   late TextEditingController _filiereCtrl;
 
-  // Variables d'état pour les Switchs (booléens)
   late bool _autorSwitch;
   late bool _decedeSwitch;
 
-  // Variables pour l'affichage (mise à jour locale)
   late String nomActuel;
   late String prenomActuel;
   late int promoActuelle;
@@ -48,7 +45,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   void initState() {
     super.initState();
 
-    // Initialisation des valeurs d'affichage
     nomActuel = widget.alumni.nom;
     prenomActuel = widget.alumni.prenom;
     promoActuelle = widget.alumni.promo;
@@ -59,7 +55,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
     emailActuel = widget.alumni.email;
     telActuel = widget.alumni.tel;
 
-    // Initialisation des Contrôleurs
     _nomCtrl = TextEditingController(text: nomActuel);
     _prenomCtrl = TextEditingController(text: prenomActuel);
     _promoCtrl = TextEditingController(text: promoActuelle.toString());
@@ -70,7 +65,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
     _telCtrl = TextEditingController(text: telActuel);
     _filiereCtrl = TextEditingController(text: filiereActuelle);
 
-    // Initialisation des booléens (1 = true, 0 = false)
     _autorSwitch = widget.alumni.autor == 1;
     _decedeSwitch = widget.alumni.decede == 1;
   }
@@ -90,17 +84,15 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   }
 
   void _sauvegarder() async {
-    // 1. Conversion des valeurs
     int promoInt = int.tryParse(_promoCtrl.text) ?? promoActuelle;
     int autorInt = _autorSwitch ? 1 : 0;
     int decedeInt = _decedeSwitch ? 1 : 0;
 
-    // 2. Envoi BDD
     await DatabaseService().modifierEleve({
       "id": widget.alumni.id,
       "nom": _nomCtrl.text.trim(),
       "prenom": _prenomCtrl.text.trim(),
-      "promo": promoInt, // CORRECTION: C'était _posteCtrl avant
+      "promo": promoInt,
       "autor": autorInt,
       "decede": decedeInt,
       "poste": _posteCtrl.text.trim(),
@@ -111,19 +103,16 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
       "tel": _telCtrl.text.trim(),
     });
 
-    // 3. Callback parent
     if (widget.onSave != null) {
       widget.onSave!();
     }
     
     if (!mounted) return;
 
-    // 4. Mise à jour UI locale
     setState(() {
       nomActuel = _nomCtrl.text.trim();
       prenomActuel = _prenomCtrl.text.trim();
       promoActuelle = promoInt;
-      // autor et decede sont gérés par les switchs directement
       posteActuel = _posteCtrl.text.trim();
       entrepriseActuelle = _entrepriseCtrl.text.trim();
       villeActuelle = _villeCtrl.text.trim();
@@ -176,7 +165,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // --- SECTION PHOTO & IDENTITÉ ---
             CircleAvatar(
               radius: 60,
               backgroundColor: AppColors.ensiCyan,
@@ -188,7 +176,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
             const SizedBox(height: 20),
 
             if (_enEdition) ...[
-              // MODE ÉDITION : Champs Nom, Prénom, Promo
               Row(
                 children: [
                   Expanded(
@@ -214,7 +201,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                 decoration: const InputDecoration(labelText: "Promo (Année)", border: OutlineInputBorder()),
               ),
             ] else ...[
-              // MODE VISUALISATION : Texte statique
               Text(
                 "$prenomActuel $nomActuel",
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
@@ -227,7 +213,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
 
             const Divider(height: 40),
 
-            // --- SECTION STATUT (NOUVEAU) ---
             if (_enEdition)
               Card(
                 color: Colors.grey[100],
@@ -258,7 +243,6 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                 ),
               ),
 
-            // --- SECTION INFORMATIONS ---
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -322,10 +306,7 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                               : Text(villeActuelle),
                         ),
                         
-                        // Logique d'affichage conditionnel :
-                        // On affiche toujours en mode édition.
-                        // En mode lecture, on cache si pas autorisé ou décédé.
-                        if (_enEdition || (_autorSwitch && !_decedeSwitch)) ...[
+                       if (_enEdition || (_autorSwitch && !_decedeSwitch)) ...[
                           const Divider(height: 1),
                           ListTile(
                             leading: const Icon(Icons.email, color: Colors.green),

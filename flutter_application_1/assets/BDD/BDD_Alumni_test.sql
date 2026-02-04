@@ -54,17 +54,17 @@ CREATE TABLE EDUCATION (
 
 
 CREATE TABLE STAGE (
-                       id_stage INT AUTO_INCREMENT PRIMARY KEY,
-                       intitule VARCHAR(255) NOT NULL,
-                       annee ENUM('1A','2A','3A'),
-                       description TEXT,
-                       entrepriseUniversite ENUM('E','U','I') DEFAULT 'I',
-                       id_date INT,
-                       id_lieu INT,
-                       id_user INT,
-                       FOREIGN KEY (id_user) REFERENCES UTILISATEUR(id_user),
-                       FOREIGN KEY (id_date) REFERENCES DATE_TABLE(id_date),
-                       FOREIGN KEY (id_lieu) REFERENCES LIEU(id_lieu)
+id_stage INT AUTO_INCREMENT PRIMARY KEY,
+intitule VARCHAR(255) NOT NULL,
+annee ENUM('1A','2A','3A'),
+description TEXT,
+entrepriseUniversite ENUM('E','U','I') DEFAULT 'I',
+id_date INT,
+id_lieu INT,
+id_user INT,
+FOREIGN KEY (id_user) REFERENCES UTILISATEUR(id_user),
+FOREIGN KEY (id_date) REFERENCES DATE_TABLE(id_date),
+FOREIGN KEY (id_lieu) REFERENCES LIEU(id_lieu)
 );
 
 CREATE TABLE TRAVAIL (
@@ -198,3 +198,14 @@ INSERT INTO TRAVAIL (poste, description, id_date, id_lieu, id_user) VALUES
 ('Chercheur IA', 'Recherche appliquée sur les modèles génératifs au sein du laboratoire de recherche de Tesla. Mes travaux portent sur la génération de mondes virtuels pour l''entraînement des véhicules autonomes, avec plusieurs publications dans des conférences internationales majeures.', 3, 4, 13),
 ('Ingénieur Bord', 'Développement de logiciels de bord pour les calculateurs de vol critiques. Mon travail est soumis à des contraintes de temps réel strictes et à des standards de qualité aéronautique où aucune erreur n''est permise.', 3, 8, 14),
 ('Lead Dev', 'Référent technique pour l''ensemble du pôle développement Web. Je définis les standards de qualité, je choisis les nouvelles technologies à adopter et j''accompagne les développeurs plus juniors dans leur montée en compétences via du mentorat.', 3, 1, 15);
+
+
+
+
+
+
+
+
+
+
+

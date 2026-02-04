@@ -4,6 +4,7 @@ import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
 import 'formulaire_ajout_alumni.dart';
+import 'page_emploi.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Réseau Alumni',
       navigatorObservers: [routeObserver],
-      home: const PageAccueil(), 
+      home: const PageAccueil(),
     );
   }
 }
@@ -85,6 +86,25 @@ class PageAccueil extends StatelessWidget {
               },
               child: const Text('Formulaire'),
             ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PageEmploi(
+                    
+                      user: {
+                        'id': '24',
+                        'prenom': 'Benoît',
+                        'nom': 'Michel',
+                        'role': 'student'
+                      },
+                    ), 
+                  ),
+                );
+              },
+              child: const Text('Recherche/Dépôt Offres de Stage/Emploi'),
+            )
           ],
         ),
       ),

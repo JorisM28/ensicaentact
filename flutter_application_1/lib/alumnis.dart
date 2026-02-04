@@ -1,19 +1,22 @@
 class Stage {
   final String annee;
   final String intitule;
+  final String description;
+  final String type;
   final String ville;
   final String pays;
   final String entreprise;
-  final String description;
 
 
   Stage({
     required this.annee,
     required this.intitule,
+    required this.type,
+    required this.description,
+
     required this.ville,
     required this.pays,
     required this.entreprise,
-    required this.description,
   });
 
   factory Stage.fromJson(Map<String, dynamic> json) {
@@ -21,9 +24,10 @@ class Stage {
       annee: json['annee']?.toString() ?? '',
       intitule: json['intitule']?.toString() ?? '',
       ville: json['ville']?.toString() ?? '',
+      description: json['descriptionS']?.toString() ?? '',
+      type: json['entrepriseUniversite']?.toString() ?? 'I',
       pays: json['pays']?.toString() ?? '',
       entreprise: json['entreprise']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
     );
   }
 }

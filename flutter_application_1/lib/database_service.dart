@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'alumnis.dart'; 
+import 'alumnis.dart';
 
 class DatabaseService {
 
@@ -11,7 +11,7 @@ class DatabaseService {
     try {
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       final urlString = '$apiUrl?t=$timestamp';
-      
+
       print("Tentative de connexion (No-Cache) : $urlString");
       
       final response = await http.get(Uri.parse("$apiUrl/get_alumni.php?t=$timestamp"));
@@ -25,14 +25,18 @@ class DatabaseService {
       }
     } catch (e) {
       print("Erreur critique : $e");
-      return []; 
+
+      return [];
     }
   }
 Future<bool> supprimerEleve(String nom, String prenom) async {
+
     try {
       final url = Uri.parse("$apiUrl/delete_alumni.php");
       
+    
       final response = await http.post(
+
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"nom": nom, "prenom": prenom}),
@@ -82,7 +86,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
 }
 
 
-Future<void> modifierEleve(Map<String, dynamic> donnees) async {
+  Future<void> modifierEleve(Map<String, dynamic> donnees) async {
     try {
       final url = Uri.parse("$apiUrl/update_alumni.php");
       print("Envoi modification pour ${donnees['nom']}...");
@@ -92,10 +96,10 @@ Future<void> modifierEleve(Map<String, dynamic> donnees) async {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(donnees),
       );
-      
- 
+
+
       print("Code retour: ${response.statusCode}");
-      print("Réponse serveur: ${response.body}"); 
+      print("Réponse serveur: ${response.body}");
 
     } catch (e) {
       print("Erreur modification critique : $e");
@@ -116,6 +120,62 @@ Future<void> modifierEleve(Map<String, dynamic> donnees) async {
       print("Erreur Demande : $e");
       rethrow;
     }
+  }
+
+  Future<List<Map<String, dynamic>>> getOffres() async {
+    try {
+      final response = await http.get(Uri.parse("$apiUrl/offer/get_offers.php"));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("Erreur getOffres: $e");
+    }
+    return [];
+  }
+
+
+  Future<bool> ajouterOffre(Map<String, dynamic> offre) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$apiUrl/offer/add_offer.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(offre),
+      );
+
+      print("Réponse serveur : ${response.body}");
+      
+      if (response.statusCode == 200) {
+        var res = jsonDecode(response.body);
+        return res['status'] == 'success';
+      }
+    } catch (e) {
+      print("Erreur ajouterOffre: $e");
+    }
+    return false;
+  }
+
+  Future<bool> supprimerOffre(String idOffre) async {
+    try {
+      final url = Uri.parse("$apiUrl/offer/delete_offer.php");
+      
+      String payload = jsonEncode({"id_offre": idOffre});
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: payload,
+      );
+
+
+      if (response.statusCode == 200) {
+        var res = jsonDecode(response.body);
+        return res['status'] == 'success';
+      }
+    } catch (e) {
+      print("❌ Erreur supprimerOffre: $e");
+    }
+    return false;
   }
 
   Future<List<Map<String, dynamic>>> getDemandesEnAttente() async {
@@ -146,5 +206,7 @@ Future<void> supprimerDemande(int idDemande) async {
       print("Erreur suppression demande: $e");
     }
   }
+
+
 }
 

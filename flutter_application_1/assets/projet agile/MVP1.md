@@ -52,6 +52,7 @@
 * Avoir des filtres basiques de recherche fonctionnels.
 * Finaliser les **questions liées au RGPD** (quelles données, pourquoi, visibilité).
 * Avoir **défini la base de données** (structure, champs, relations).
+* Page admin
 
 ---
 
@@ -64,3 +65,13 @@
 | **Joris** | Le langage Flutter, gestion de BDD | MySQL, Flutter, phpMyAdmin | Gestion du backend | Mise en lien entre la BDD et l'interface |
 | **Robin** | Les pipelines sur GitLab | DataGrip, MySQL, phpMyAdmin | Déploiement continu | Gestion des BDD entre enjeux RSSI et RGPD |
 
+
+## MVP 2 
+- enrollemetn des alumni 
+- stage universitaire/poerationnel
+- description des stage/emploi
+
+est ec que enroelement des alumni =, comment faire pour daller vers quelque part proposer un stage
+formueelaire modificzaoitn et ajout
+
+carte
