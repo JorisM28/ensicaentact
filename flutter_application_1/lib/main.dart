@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/navigation.dart';
-import 'login.dart';
-import 'login_check.dart';
-import 'page_annuaire.dart';
-import 'page_annuaire_admin.dart';
-import 'page_emploi.dart';
+import 'page_accueil.dart'; 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
 void main() {
   runApp(const MyApp());
@@ -15,90 +12,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
+
+    final Map<String, dynamic> userTest = {
+      'id': '24',
+      'prenom': 'Benoît',
+      'nom': 'Michel',
+      'role': 'student', 
+      'email': 'benoit.michel@ensicaen.fr'
+    };
+
     return MaterialApp(
-      navigatorKey: navigatorKey,
+  
+      navigatorKey: navigatorKey, 
+      navigatorObservers: [routeObserver],
+      
       debugShowCheckedModeBanner: false,
       title: 'Réseau Alumni',
-      navigatorObservers: [routeObserver],
-      home: const PageAccueil(),
-    );
-  }
-}
+      
 
-class PageAccueil extends StatelessWidget {
-  const PageAccueil({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Réseau Alumni')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Bienvenue dans le réseau !', style: TextStyle(fontSize: 20)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PageAnnuaire(user: {
-                      'prenom': 'Visiteur',
-                      'nom': '',
-                      'email': '',
-                      'role': 'guest'
-                    },
-                  )),
-                );
-              },
-              child: const Text('Contacter un ancien élève'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Login()),
-                );
-              },
-              child: const Text('Login'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PageAnnuaire(user: {
-                      'prenom': 'Admin',
-                      'nom': '',
-                      'email': '',
-                      'role': 'admin'
-                    },
-                  )),
-                );
-              },
-              child: const Text('Version Admin'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PageEmploi(
-                    
-                      user: {
-                        'id': '24',
-                        'prenom': 'Benoît',
-                        'nom': 'Michel',
-                        'role': 'student'
-                      },
-                    ), 
-                  ),
-                );
-              },
-              child: const Text('Recherche/Dépôt Offres de Stage/Emploi'),
-            )
-          ],
-        ),
-      ),
+      home: PageAccueil(user: userTest), 
     );
   }
 }

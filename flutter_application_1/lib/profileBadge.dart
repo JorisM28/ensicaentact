@@ -20,9 +20,6 @@ class _ProfileBadgeState extends State<ProfileBadge> {
     final String role = widget.user['role'] ?? 'guest';
     final bool isGuest = role == 'guest';
 
-    // ============================================================
-    // CAS 1 : INVITÉ (CORRIGÉ - PLUS D'ERREUR D'OVERFLOW)
-    // ============================================================
     if (isGuest) {
       return MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
@@ -78,9 +75,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
       );
     }
 
-    // ============================================================
-    // CAS 2 : UTILISATEUR CONNECTÉ (STYLE MICROSOFT UNIFIÉ)
-    // ============================================================
+
 
     final String nom = widget.user['family_name'] ?? "";
     final String prenom = widget.user['name'] ?? "";

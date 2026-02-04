@@ -169,4 +169,45 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   }
 
 
+  Future<List<Map<String, dynamic>>> getActualites() async {
+    try {
+      final url = Uri.parse('https://alumni.theo-airey.fr/actualities/get_actualities.php');
+      
+      final response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      print("📥 RÉPONSE ACTUALITÉS : ${response.body}");
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        return data.map((item) => item as Map<String, dynamic>).toList();
+      }
+    } catch (e) {
+      print("❌ Erreur getActualites: $e");
+    }
+    return [];
+  }
+
+  Future<List<Map<String, dynamic>>> getEvenements() async {
+    try {
+      final url = Uri.parse('https://alumni.theo-airey.fr/events/get_evenements.php');
+      
+      final response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      print("📥 RÉPONSE ÉVÉNEMENTS : ${response.body}");
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        return data.map((item) => item as Map<String, dynamic>).toList();
+      }
+    } catch (e) {
+      print("❌ Erreur getEvenements: $e");
+    }
+    return [];
+  }
 }

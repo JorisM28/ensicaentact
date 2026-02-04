@@ -81,14 +81,11 @@ class _PageEmploiState extends State<PageEmploi> {
     bool isAdmin = (role == 'admin');
     bool peutAjouter = (isAdmin || role == 'alumni');
 
-    // --- 3. FILTRAGE DE LA LISTE (Recherche) ---
     final offresFiltrees = _toutesLesOffres.where((o) {
-      // On met tout en minuscule pour que la recherche ne soit pas sensible à la casse
       final titre = (o['titre'] ?? '').toLowerCase();
       final entreprise = (o['entreprise'] ?? '').toLowerCase();
       final motCle = _recherche.toLowerCase();
       
-      // On garde l'offre si le titre OU l'entreprise contient le mot clé
       return titre.contains(motCle) || entreprise.contains(motCle);
     }).toList();
 
@@ -111,7 +108,6 @@ class _PageEmploiState extends State<PageEmploi> {
       ),
       body: Column(
         children: [
-          // --- BARRE DE RECHERCHE ---
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: TextField(
@@ -141,7 +137,6 @@ class _PageEmploiState extends State<PageEmploi> {
             ),
           ),
 
-          // --- CONTENU DES COLONNES ---
           Expanded(
             child: _isLoading 
             ? const Center(child: CircularProgressIndicator())
@@ -180,7 +175,6 @@ class _PageEmploiState extends State<PageEmploi> {
     );
   }
 
-  // WIDGET POUR CONSTRUIRE UNE COLONNE
   Widget _buildColonne({
     required String titre,
     required Color couleur,
@@ -269,7 +263,6 @@ class _PageEmploiState extends State<PageEmploi> {
                 ),
         ),
 
-        // BOUTON AJOUTER
         if (peutAjouter)
           Padding(
             padding: const EdgeInsets.all(15),
