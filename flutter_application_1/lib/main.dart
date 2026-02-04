@@ -3,7 +3,7 @@ import 'package:flutter_application_ensicaentact/navigation.dart';
 import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
-import 'page_annuaire_admin.dart';
+import 'formulaire_ajout_alumni.dart';
 import 'page_emploi.dart';
 
 void main() {
@@ -76,6 +76,15 @@ class PageAccueil extends StatelessWidget {
                 );
               },
               child: const Text('Version Admin'),
+            ),
+             ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PageAjoutAlumni()),
+                );
+              },
+              child: const Text('Formulaire'),
             ),
             ElevatedButton(
               onPressed: () {
