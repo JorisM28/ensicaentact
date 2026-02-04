@@ -3,6 +3,8 @@ import 'package:flutter_application_ensicaentact/navigation.dart';
 import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
+import 'formulaire_ajout_alumni.dart';
+import 'page_emploi.dart';
 
 void main() {
   runApp(const MyApp());
@@ -75,6 +77,34 @@ class PageAccueil extends StatelessWidget {
               },
               child: const Text('Version Admin'),
             ),
+             ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PageAjoutAlumni()),
+                );
+              },
+              child: const Text('Formulaire'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PageEmploi(
+                    
+                      user: {
+                        'id': '24',
+                        'prenom': 'Benoît',
+                        'nom': 'Michel',
+                        'role': 'student'
+                      },
+                    ), 
+                  ),
+                );
+              },
+              child: const Text('Recherche/Dépôt Offres de Stage/Emploi'),
+            )
           ],
         ),
       ),

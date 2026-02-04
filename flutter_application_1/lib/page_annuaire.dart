@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'profileBadge.dart';
 import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
 import 'filtre_widget.dart';
 import 'alumni_detail_page.dart'; 
 import 'alumni_detail_page_admin.dart';
+import 'AdminValidatePage.dart';
 import 'alumni_preview.dart';
 import 'add_alumni.dart'; 
 import 'navigation.dart';
@@ -53,6 +55,7 @@ class _PageAnnuaireState extends State<PageAnnuaire> with RouteAware{
   List<Alumnis> _tousLesAlumnis = [];
   List<Alumnis> _alumnisAffiches = [];
   bool _filtresOuverts = false;
+  int _nbDemandesEnAttente = 0;
   
   final Set<String> _filtresPromoSelectionnes = {};
   final Set<String> _filtresFiliereSelectionnes = {};
@@ -77,6 +80,9 @@ void dispose() {
   void initState() {
     super.initState();
     _chargerDonneesInitiales();
+    if (widget.user['role'] == 'admin' || estAdmin) { // Adapte selon ta logique admin
+      _chargerCompteurNotifs();
+    }
   }
   @override
 void didPopNext() {
@@ -91,6 +97,19 @@ void didPopNext() {
         .toList();
     promos.sort();
     return promos;
+  }
+
+  Future<void> _chargerCompteurNotifs() async {
+    try {
+      var demandes = await DatabaseService().getDemandesEnAttente();
+      if (mounted) {
+        setState(() {
+          _nbDemandesEnAttente = demandes.length;
+        });
+      }
+    } catch (e) {
+      print("Erreur chargement notifs: $e");
+    }
   }
 
   List<String> get _filieresDisponibles {
@@ -225,11 +244,45 @@ void didPopNext() {
         ],
       ),
       floatingActionButton: estAdmin 
-          ? FloatingActionButton(
-              backgroundColor: AppColors.ensiCyan,
-              child: const Icon(Icons.add, color: Colors.white),
-              onPressed: _ouvrirModalAjout,
-            )
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // --- BOUTON DE VALIDATION AVEC BADGE ---
+                FloatingActionButton(
+                  heroTag: "btn_validation",
+                  backgroundColor: Colors.orange,
+                  tooltip: "Voir les demandes en attente",
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AdminValidationPage()),
+                    ).then((_) {
+                      // IMPORTANT : Quand on revient de la page, on rafraîchit le compteur
+                      _chargerCompteurNotifs();
+                    });
+                  },
+                  // LE WIDGET BADGE EST ICI
+                  child: Badge(
+                    label: Text('$_nbDemandesEnAttente'), // Le chiffre
+                    isLabelVisible: _nbDemandesEnAttente > 0, // Caché si 0
+                    backgroundColor: Colors.red, // Pastille rouge
+                    textColor: Colors.white,
+                    // L'icône originale est l'enfant du Badge
+                    child: const Icon(Icons.playlist_add_check, color: Colors.white),
+                  ),
+                ),
+                
+                const SizedBox(width: 15),
+
+                FloatingActionButton(
+                  heroTag: "btn_ajout_direct",
+                  backgroundColor: AppColors.ensiCyan,
+                  tooltip: "Ajouter un alumni directement",
+                  onPressed: _ouvrirModalAjout,
+                  child: const Icon(Icons.add, color: Colors.white),
+                ),
+              ],
+            ) 
           : null,
 
       body: _chargementEnCours
@@ -393,12 +446,12 @@ void didPopNext() {
     }
 
     return Card(
-      elevation: estSelectionne ? 8 : 2,
-      color: estSelectionne ? AppColors.ensiCyan.withOpacity(0.1) : Colors.white,
+      elevation: estSelectionne ? 5  : 2,
+      color: estSelectionne ? const Color.fromARGB(255, 210, 210, 210).withOpacity(1) : Colors.white,
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: estSelectionne ? const BorderSide(color: AppColors.ensiCyan, width: 2) : BorderSide.none,
+        side: estSelectionne ? const BorderSide(color: Color.fromARGB(255, 118, 118, 118), width: 0.5) : BorderSide.none,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
@@ -506,6 +559,7 @@ void didPopNext() {
         content: SizedBox(
           width: 500,
           child: AddAlumniForm(
+            isAdmin: true,
             onSuccess: () {
               Navigator.pop(context);
               _chargerDonneesInitiales();
