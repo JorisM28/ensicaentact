@@ -1,0 +1,95 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'database_service.dart';
+import 'add_alumni.dart';
+import 'colors.dart';
+
+class AdminValidationPage extends StatefulWidget {
+  const AdminValidationPage({super.key});
+
+  @override
+  State<AdminValidationPage> createState() => _AdminValidationPageState();
+}
+
+class _AdminValidationPageState extends State<AdminValidationPage> {
+  
+  void _refresh() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Demandes en attente"),
+        backgroundColor: AppColors.ensiCyan,
+        foregroundColor: Colors.white,
+      ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: DatabaseService().getDemandesEnAttente(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("Aucune demande en attente."));
+          }
+
+          final demandes = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: demandes.length,
+            itemBuilder: (context, index) {
+              final demande = demandes[index];
+              final date = demande['date_demande'] ?? '?';
+              
+              return Card(
+                margin: const EdgeInsets.all(8),
+                child: ListTile(
+                  leading: const Icon(Icons.person_add, color: Colors.orange),
+                  title: Text("${demande['prenom']} ${demande['nom']}"),
+                  subtitle: Text("Reçu le : $date"),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    try {
+                      Map<String, dynamic> dataDecoded = jsonDecode(demande['contenu_json']);
+                      int idReq = int.parse(demande['id_demande'].toString());
+                      print("ID de la demande envoyé au formulaire : $idReq");
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Scaffold(
+                            appBar: AppBar(title: const Text("Vérification & Validation")),
+                            body: AddAlumniForm(
+                              isAdmin: true,
+                              initialData: dataDecoded,
+                              requestId: idReq,
+                              onSuccess: () {
+                                Navigator.pop(context);
+                                _refresh();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Demande traitée avec succès !"))
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    } catch (e) {
+                      print("Erreur de parsing JSON: $e");
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Erreur de données corrompues"))
+                      );
+                    }
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}

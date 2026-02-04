@@ -1,5 +1,3 @@
----
-
 # Documentation de la Base de Données Alumni
 
 ## 1. Dictionnaire des données
@@ -16,6 +14,8 @@
 | Adresse mail                      | mail                 | VARCHAR(50)   |                        |
 | Autorisation partage du contact   | autor                | BOOLEAN       | Défaut : FALSE (0)     |
 | Décédé                            | decede               | BOOLEAN       | Défaut : FALSE (0)     |
+| Mot de passe                      | password             | VARCHAR(255)  |                        |
+| Rôle                              | role                 | VARCHAR(255)  |                        |
 | **Éducation / Promo**             |                      |               |                        |
 | ID Éducation                      | id_education         | INT (PK)      |                        |
 | Majeure                           | majeure              | VARCHAR(25)   | NOT NULL               |
@@ -34,7 +34,14 @@
 | Ville                             | ville                | VARCHAR(25)   | Table LIEU             |
 | Pays                              | pays                 | VARCHAR(25)   | Table LIEU             |
 | Date Début                        | debut                | DATE          | Table DATE             |
-| Date Fin                          | fin                  | DATE          | Table DATE             |
+| **Demande**                       |                      |               |                        |
+| ID Demande                        | id_Demande           | INT (PK)      |                        |
+| Nom Alumni                        | nom                  | VARCHAR(50)   | NOT NULL               |
+| Prénom Alumni                     | prenom               | VARCHAR(50)   | NOT NULL               |
+| Adresse mail                      | mail                 | VARCHAR(50)   |                        |
+| Contenu Json                      | contenu_json         | TEXT          |                        |
+| Date de la demande                | date_demande         | DATE          |                        |
+| Statut de la demande              | status               | VARCHAR(20)   |                        |                        
 
 ---
 
@@ -61,6 +68,8 @@ erDiagram
         varchar tel
         boolean autor
         boolean decede
+        varchar password
+        varchar role
     }
 
     EDUCATION {
@@ -110,6 +119,16 @@ erDiagram
         int id_date PK
         date debut
         date fin
+    }
+
+    DEMANDE_AJOUT {
+        int id_demande PK
+        varchar nom
+        varchar prenom
+        varchar mail
+        date date_demande
+        text contenu_json
+        varchar statut
     }
 
 ```
