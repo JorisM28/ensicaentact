@@ -5,8 +5,9 @@ import 'database_service.dart';
 
 class AlumniDetailPageAdmin extends StatefulWidget {
   final Alumnis alumni;
+  final VoidCallback? onSave;
 
-  const AlumniDetailPageAdmin({super.key, required this.alumni});
+  const AlumniDetailPageAdmin({super.key, required this.alumni, this.onSave});
 
   @override
   State<AlumniDetailPageAdmin> createState() => _AlumniDetailPageAdminState();
@@ -14,6 +15,7 @@ class AlumniDetailPageAdmin extends StatefulWidget {
 
 class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
   bool _enEdition = false;
+  bool _modifiee = false;
 
   late TextEditingController _posteCtrl;
   late TextEditingController _entrepriseCtrl;
@@ -61,6 +63,7 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
 
   void _sauvegarder() async {
     await DatabaseService().modifierEleve({
+      "id": widget.alumni.id,
       "nom": widget.alumni.nom,
       "prenom": widget.alumni.prenom,
       "poste": _posteCtrl.text,
@@ -71,6 +74,12 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
       "tel": _telCtrl.text,
     });
 
+    if (widget.onSave != null) {
+      print("Appel du callback de rechargement...");
+      widget.onSave!();
+    }
+    if (!mounted) return;
+
     setState(() {
       posteActuel = _posteCtrl.text;
       entrepriseActuelle = _entrepriseCtrl.text;
@@ -79,6 +88,7 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
       emailActuel = _emailCtrl.text;
       telActuel = _telCtrl.text;
       _enEdition = false;
+      _modifiee = true;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +106,12 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
         title: Text(widget.alumni.nomComplet),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, _modifiee);
+          },
+        ),
         actions: [
           IconButton(
             icon: Icon(_enEdition ? Icons.save : Icons.edit),
@@ -155,11 +171,11 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                           title: const Text("Poste actuel"),
                           subtitle: _enEdition
                               ? TextField(
-                                  controller: _posteCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                            controller: _posteCtrl,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          )
                               : Text(posteActuel),
                         ),
                         const Divider(height: 1),
@@ -171,11 +187,11 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                           title: const Text("Filière"),
                           subtitle: _enEdition
                               ? TextField(
-                                  controller: _filiereCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                            controller: _filiereCtrl,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          )
                               : Text(filiereActuelle),
                         ),
                         const Divider(height: 1),
@@ -188,11 +204,11 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                           title: const Text("Entreprise"),
                           subtitle: _enEdition
                               ? TextField(
-                                  controller: _entrepriseCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                            controller: _entrepriseCtrl,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          )
                               : Text(entrepriseActuelle),
                         ),
                       ],
@@ -224,11 +240,11 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                           title: const Text("Ville"),
                           subtitle: _enEdition
                               ? TextField(
-                                  controller: _villeCtrl,
-                                  decoration: const InputDecoration(
-                                    border: OutlineInputBorder(),
-                                  ),
-                                )
+                            controller: _villeCtrl,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                          )
                               : Text(villeActuelle),
                         ),
 
@@ -243,11 +259,11 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                             title: const Text("Email"),
                             subtitle: _enEdition
                                 ? TextField(
-                                    controller: _emailCtrl,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  )
+                              controller: _emailCtrl,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                              ),
+                            )
                                 : Text(emailActuel),
                           ),
                           const Divider(height: 1),
@@ -259,11 +275,11 @@ class _AlumniDetailPageAdminState extends State<AlumniDetailPageAdmin> {
                             title: const Text("Téléphone"),
                             subtitle: _enEdition
                                 ? TextField(
-                                    controller: _telCtrl,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  )
+                              controller: _telCtrl,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                              ),
+                            )
                                 : Text(telActuel),
                           ),
                         ],
