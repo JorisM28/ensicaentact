@@ -57,6 +57,25 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   final _emailCtrl = TextEditingController();
   final _telCtrl = TextEditingController();
   String _sexeSelectionne = 'I';
+  String? _majeureSelectionnee;
+  String? _optionSelectionnee;
+
+  final Map<String, Map<String, List<String>>> _hierarchieFormation = {
+    'Informatique': {
+      'ISIA': ['Intelligence Artificielle', 'Scala'],
+      'CYIA': ['Intelligence Artificielle', 'Scala'],
+      'EPCS': ['Intelligence Artificielle', 'Scala'],
+    },
+    'Systèmes Embarqués': {
+      'Systèmes embarqués et automatique': [],
+      'Ingénierie physique et capteurs': [],
+      'Génie nucléaire et énergie' :[],
+    },
+    'Matériaux Chimie': {
+      'Chimie organique et catalyse': ['Rearrangements et processus pericycliques et Synthese multi-etapes',"Biomasse lignocellulosique en energie et Catalyse et procedes pour l'energie et la chimie"],
+      'Matériaux pour l’énergie et matériaux de structure': [],
+    },
+  };
 
   final _promoCtrl = TextEditingController();
   String _formationSelectionnee = 'FISE';
@@ -68,6 +87,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   final _paysCtrl = TextEditingController();
 
   final List<StageFormModel> _stages = [];
+
+  
 
   @override
   void initState() {
@@ -88,6 +109,9 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       _formationSelectionnee = data['formation'] ?? 'FISE';
       _filiereSelectionnee = data['filiere'] ?? 'Informatique';
       
+      if (data['majeure'] != null) _majeureSelectionnee = data['majeure'];
+      if (data['option'] != null) _optionSelectionnee = data['option'];
+
       _posteCtrl.text = data['poste'] ?? data['job'] ?? '';
       _entrepriseCtrl.text = data['entreprise'] ?? '';
       _villeCtrl.text = data['ville'] ?? '';
@@ -154,7 +178,9 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
         "promo": int.tryParse(_promoCtrl.text) ?? 2024,
         "filiere": _filiereSelectionnee,
         "formation": _formationSelectionnee,
-         "job": _posteCtrl.text.trim(),
+        "majeure": _majeureSelectionnee ?? "",
+        "option": _optionSelectionnee ?? "",
+        "job": _posteCtrl.text.trim(),
         "poste": _posteCtrl.text.trim(),
         "entreprise": _entrepriseCtrl.text.trim(),
         "ville": _villeCtrl.text.trim(),
@@ -166,16 +192,9 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       }
 
       if (widget.isAdmin) {          
-        print("Mode Admin détecté. Ajout direct...");
         await DatabaseService().ajouterEleve(data);
-        print("Vérification suppression demande. RequestId reçu : ${widget.requestId}");
-
         if (widget.requestId != null) {
-        print("Tentative de suppression de la demande ID: ${widget.requestId}");
           await DatabaseService().supprimerDemande(widget.requestId!);
-        print("Suppression demandée au service.");
-        }else{
-          print("ATTENTION : RequestId est null, pas de suppression.");
         }
       } else {
         await DatabaseService().demanderAjoutEleve(data);
@@ -203,6 +222,15 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
   @override
   Widget build(BuildContext context) {
+   List<String>? optionsDisponibles;
+
+    if (_filiereSelectionnee != null && _majeureSelectionnee != null) {
+      var mapFiliere = _hierarchieFormation[_filiereSelectionnee];
+      
+      if (mapFiliere != null) {
+        optionsDisponibles = mapFiliere[_majeureSelectionnee];
+      }
+    }
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -311,22 +339,66 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 ],
               ),
               SizedBox(height: 10),
-              Row (children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: _filiereSelectionnee,
-                  decoration: const InputDecoration(labelText: "Filière", border: OutlineInputBorder()),
-                  items: const [
-                    DropdownMenuItem(value: 'Informatique', child: Text("Informatique")),
-                    DropdownMenuItem(value: 'Matériaux Chimie', child: Text("Matériaux Chimie")),
-                    DropdownMenuItem(value: 'Systèmes Embarqués', child: Text("Systèmes Embarqués")),
-                  ],
-                  onChanged: (v) => setState(() => _filiereSelectionnee = v!),
-                  validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _filiereSelectionnee,
+                      decoration: const InputDecoration(labelText: "Filière", border: OutlineInputBorder()),
+                      items: _hierarchieFormation.keys.map((String filiere) {
+                        return DropdownMenuItem(value: filiere, child: Text(filiere, overflow: TextOverflow.ellipsis));
+                      }).toList(),
+                      onChanged: (v) {
+                        setState(() {
+                          _filiereSelectionnee = v!;
+                          _majeureSelectionnee = null;
+                          _optionSelectionnee = null;
+                        });
+                      },
+                    ),
+                  ),
+                  
+                  const SizedBox(width: 10),
+
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _majeureSelectionnee,
+                      decoration: const InputDecoration(labelText: "Majeure", border: OutlineInputBorder()),
+                      isExpanded: true,
+                      items: _filiereSelectionnee == null || _hierarchieFormation[_filiereSelectionnee] == null
+                          ? []
+                          : _hierarchieFormation[_filiereSelectionnee]!.keys.map((String majeure) {
+                              return DropdownMenuItem(
+                                value: majeure, 
+                                child: Text(majeure, overflow: TextOverflow.ellipsis)
+                              );
+                            }).toList(),
+                      onChanged: (v) {
+                        setState(() {
+                          _majeureSelectionnee = v;
+                          _optionSelectionnee = null;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
+
+              if ( optionsDisponibles != null && optionsDisponibles.isNotEmpty)...[
+              const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                      value: _optionSelectionnee,
+                      decoration: const InputDecoration(labelText: "Option", border: OutlineInputBorder()),
+                      isExpanded: true,
+                      items: optionsDisponibles.map((String option) {
+                        return DropdownMenuItem(
+                          value: option, 
+                          child: Text(option, overflow: TextOverflow.ellipsis)
+                        );
+                      }).toList(),
+                      onChanged: (v) => setState(() => _optionSelectionnee = v),
+                    ),
               ],
-              ),
 
               const Divider(height: 30),
 
