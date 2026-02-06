@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'page_emploi.dart';
 import 'page_annuaire.dart'; 
-import 'page_actualités.dart'; // Import de ta nouvelle page
+import 'page_actualités.dart';
 import 'colors.dart'; 
 import 'widget/actuality_widget.dart';
 import 'widget/event_widget.dart';
 import 'widget/joboffert_widget.dart';
+import 'profileBadge.dart';
+import 'widget/key_figures_widget.dart';
 
 class PageAccueil extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -48,19 +50,19 @@ class PageAccueil extends StatelessWidget {
                 
                 _buildBrandIdentity(),
 
-                const Spacer(), 
-
                 if (isDesktop) ...[
+                  const Spacer(),
                   _buildLienMenu(context, "Actualités", () => _naviguer(context, PageActualites(user: user))),
                   _buildLienMenu(context, "Annuaire", () => _naviguer(context, PageAnnuaire(user: user))),
                   _buildLienMenu(context, "Offres", () => _naviguer(context, PageEmploi(user: user))),
                   _buildLienMenu(context, "ENSICAEN", _ouvrirSiteEcole),
+                  const Spacer(),
 
-                  const SizedBox(width: 20), 
-                  
                   _buildHeaderButton(Icons.thumb_up_alt_outlined, "Rejoindre"),
                   const SizedBox(width: 10), 
                   _buildHeaderButton(Icons.event_available, "Proposer un évènement"),
+                  const SizedBox(width: 20),
+                  ProfileBadge(user: user)
                 ],
 
                 if (!isDesktop)
@@ -79,7 +81,8 @@ class PageAccueil extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-       
+            const SizedBox(height: 20,),
+            KeyFiguresWidget(),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), 
