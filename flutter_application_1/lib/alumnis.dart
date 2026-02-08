@@ -24,7 +24,7 @@ class Stage {
       annee: json['annee']?.toString() ?? '',
       intitule: json['intitule']?.toString() ?? '',
       ville: json['ville']?.toString() ?? '',
-      description: json['descriptionS']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
       type: json['entrepriseUniversite']?.toString() ?? 'I',
       pays: json['pays']?.toString() ?? '',
       entreprise: json['entreprise']?.toString() ?? '',

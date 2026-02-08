@@ -11,7 +11,9 @@ class StageFormModel {
   final TextEditingController villeCtrl = TextEditingController();
   final TextEditingController paysCtrl = TextEditingController();
   final TextEditingController descriptionCtrl = TextEditingController();
-
+  final TextEditingController dateDebutCtrl = TextEditingController();
+  final TextEditingController dateFinCtrl = TextEditingController();
+  String typeStage ='I';
   String anneeSelectionnee = '2A';
 
   void dispose() {
@@ -20,16 +22,21 @@ class StageFormModel {
     villeCtrl.dispose();
     paysCtrl.dispose();
     descriptionCtrl.dispose();
+    dateDebutCtrl.dispose();
+    dateFinCtrl.dispose();
   }
 
   Map<String, dynamic> toMap() {
     return {
       "intitule": intituleCtrl.text.trim(),
       "annee": anneeSelectionnee,
+      "type" : typeStage,
       "entreprise": entrepriseCtrl.text.trim(),
       "ville": villeCtrl.text.trim(),
       "pays": paysCtrl.text.trim(),
       "description": descriptionCtrl.text.trim(),
+      "debut": dateDebutCtrl.text.trim(),
+      "fin": dateFinCtrl.text.trim(),
     };
   }
 }
@@ -77,6 +84,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     },
   };
 
+  String type ='E';
+
   final _promoCtrl = TextEditingController();
   String _formationSelectionnee = 'FISE';
   String _filiereSelectionnee = 'Informatique';
@@ -88,7 +97,21 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
   final List<StageFormModel> _stages = [];
 
-  
+  Future<void> _selectionnerDate(BuildContext context, TextEditingController controller) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      locale: const Locale("fr", "FR"),
+    );
+
+    if (picked != null) {
+      setState(() {
+        controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -121,6 +144,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
         for (var s in data['stages']) {
           var stageModel = StageFormModel();
           stageModel.anneeSelectionnee = s['annee'] ?? '2A';
+          stageModel.typeStage = s['type'] ?? 'I';
           stageModel.intituleCtrl.text = s['intitule'] ?? '';
           stageModel.entrepriseCtrl.text = s['entreprise'] ?? '';
           stageModel.villeCtrl.text = s['ville'] ?? '';
@@ -385,7 +409,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               ),
 
               if ( optionsDisponibles != null && optionsDisponibles.isNotEmpty)...[
-              const SizedBox(height: 10),
+              const SizedBox(height : 10),
                 DropdownButtonFormField<String>(
                       value: _optionSelectionnee,
                       decoration: const InputDecoration(labelText: "Option", border: OutlineInputBorder()),
@@ -486,6 +510,36 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                             ],
                             onChanged: (v) => stage.anneeSelectionnee = v!,
                           ),
+                            const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: stage.dateDebutCtrl,
+                                  decoration: const InputDecoration(
+                                    labelText: "Date de début", 
+                                    border: OutlineInputBorder(),
+                                    prefixIcon: Icon(Icons.calendar_today),
+                                  ),
+                                  readOnly: true,
+                                  onTap: () => _selectionnerDate(context, stage.dateDebutCtrl),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: stage.dateFinCtrl,
+                                  decoration: const InputDecoration(
+                                    labelText: "Date de fin", 
+                                    border: OutlineInputBorder(),
+                                    prefixIcon: Icon(Icons.event),
+                                  ),
+                                  readOnly: true,
+                                  onTap: () => _selectionnerDate(context, stage.dateFinCtrl),
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 10),
                           TextFormField(
                             controller: stage.intituleCtrl,
@@ -493,9 +547,45 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                             validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
                           ),
                           const SizedBox(height: 10),
-                          TextFormField(
+                         Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: RadioListTile<String>(
+                                      title: const Text('Entreprise'),
+                                      value: 'E',
+                                      groupValue: stage.typeStage,
+                                      activeColor: AppColors.ensiCyan,
+                                      contentPadding: EdgeInsets.zero,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          stage.typeStage = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: RadioListTile<String>(
+                                      title: const Text('Université'),
+                                      value: 'U',
+                                      groupValue: stage.typeStage,
+                                      activeColor: AppColors.ensiCyan,
+                                      contentPadding: EdgeInsets.zero,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          stage.typeStage = value!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),TextFormField(
                             controller: stage.entrepriseCtrl,
-                            decoration: const InputDecoration(labelText: "Entreprise / Labo", border: OutlineInputBorder()),
+                            decoration: const InputDecoration(labelText: "Nom de l'Entreprise / du Labo", border: OutlineInputBorder()),
                           ),
                           const SizedBox(height: 10),
                           Row(
