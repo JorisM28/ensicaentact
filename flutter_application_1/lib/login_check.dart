@@ -76,7 +76,6 @@ class EnsiCaenConnection {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // DEBUG : Affiche ce que le serveur renvoie vraiment
         print("Réponse du serveur : $data");
 
         if (data['status'] == 'success') {

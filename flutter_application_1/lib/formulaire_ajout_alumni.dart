@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'colors.dart'; // Assure-toi d'importer tes couleurs si besoin
-import 'add_alumni.dart'; // Assure-toi que le fichier de ton formulaire est bien importé
+import 'colors.dart';
+import 'add_alumni.dart';
 
 void main() {
   runApp(const MonApplicationAlumni());
@@ -15,7 +15,7 @@ class MonApplicationAlumni extends StatelessWidget {
       title: 'Ajout Alumni',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.cyan, // Ou ta couleur personnalisée
+        primarySwatch: Colors.cyan,
         useMaterial3: true,
       ),
       home: const PageAjoutAlumni(),

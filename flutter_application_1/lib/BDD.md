@@ -1,6 +1,3 @@
-Voici la mise à jour complète de votre document Markdown. J'ai synchronisé la liste des informations et le diagramme Mermaid pour qu'ils correspondent exactement à la structure et aux contraintes de votre fichier SQL (noms de colonnes, types de données et relations).
-
-
 # Documentation de la Base de Données Alumni
 
 ## 1. Dictionnaire des données
