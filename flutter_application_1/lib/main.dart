@@ -5,6 +5,7 @@ import 'login_check.dart';
 import 'page_annuaire.dart';
 import 'formulaire_ajout_alumni.dart';
 import 'page_emploi.dart';
+import 'entreprise_annuaire_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -77,7 +78,7 @@ class PageAccueil extends StatelessWidget {
               },
               child: const Text('Version Admin'),
             ),
-             ElevatedButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -85,6 +86,15 @@ class PageAccueil extends StatelessWidget {
                 );
               },
               child: const Text('Formulaire'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PageAnnuaireEntreprise()),
+                );
+              },
+              child: const Text('Page Annuaire Entreprise'),
             ),
             ElevatedButton(
               onPressed: () {
