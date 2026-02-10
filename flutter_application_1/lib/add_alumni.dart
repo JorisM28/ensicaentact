@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'database_service.dart';
 import 'colors.dart';
 
@@ -60,9 +62,11 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
   final _nomCtrl = TextEditingController();
   final _prenomCtrl = TextEditingController();
-  final _ageCtrl = TextEditingController();
+  final _dateNaissanceCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _telCtrl = TextEditingController();
+  final _descriptionPosteCtrl = TextEditingController();
+  final _dateDebutCtrl = TextEditingController();
   String _sexeSelectionne = 'I';
   String? _majeureSelectionnee;
   String? _optionSelectionnee;
@@ -113,6 +117,32 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     }
   }
 
+  Future<Map<String, double>?> _obtenirCoordonnees(String ville, String pays) async {
+    if (ville.isEmpty) return null;
+
+    String query = "$ville, $pays";
+    var url = Uri.parse("https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=1");
+
+    try {
+      var response = await http.get(url, headers: {
+        'User-Agent': 'AlumniEnsiApp/1.0 (votre_email@exemple.com)' 
+      });
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        if (data is List && data.isNotEmpty) {
+          return {
+            "lat": double.parse(data[0]['lat']),
+            "lon": double.parse(data[0]['lon']),
+          };
+        }
+      }
+    } catch (e) {
+      print("Erreur de géocodage : $e");
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -122,7 +152,6 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       
       _nomCtrl.text = data['nom'] ?? '';
       _prenomCtrl.text = data['prenom'] ?? '';
-      _ageCtrl.text = (data['age'] ?? '').toString();
       _sexeSelectionne = data['sexe'] ?? 'I';
       _emailCtrl.text = data['email'] ?? '';
       _telCtrl.text = data['tel'] ?? '';
@@ -137,6 +166,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
       _posteCtrl.text = data['poste'] ?? data['job'] ?? '';
       _entrepriseCtrl.text = data['entreprise'] ?? '';
+      _descriptionPosteCtrl.text = data['description'] ?? '';
       _villeCtrl.text = data['ville'] ?? '';
       _paysCtrl.text = data['pays'] ?? '';
 
@@ -158,11 +188,18 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
   @override
   void dispose() {
-    _nomCtrl.dispose(); _prenomCtrl.dispose(); _ageCtrl.dispose();
-    _emailCtrl.dispose(); _telCtrl.dispose();
+    _nomCtrl.dispose(); 
+    _prenomCtrl.dispose(); 
+    _dateNaissanceCtrl.dispose();
+    _emailCtrl.dispose(); 
+    _telCtrl.dispose();
     _promoCtrl.dispose();
-    _posteCtrl.dispose(); _entrepriseCtrl.dispose(); 
-    _villeCtrl.dispose(); _paysCtrl.dispose();
+    _posteCtrl.dispose(); 
+    _entrepriseCtrl.dispose(); 
+    _descriptionPosteCtrl.dispose();
+    _dateDebutCtrl.dispose();
+    _villeCtrl.dispose(); 
+    _paysCtrl.dispose();
     
     for (var stage in _stages) {
       stage.dispose();
@@ -191,10 +228,16 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     setState(() => _isLoading = true);
 
     try {
+      double? latPoste, lonPoste;
+      var coordsPoste = await _obtenirCoordonnees(_villeCtrl.text, _paysCtrl.text);
+      if (coordsPoste != null) {
+        latPoste = coordsPoste['lat'];
+        lonPoste = coordsPoste['lon'];
+      }
       Map<String, dynamic> data = {
         "nom": _nomCtrl.text.trim(),
         "prenom": _prenomCtrl.text.trim(),
-        "age": int.tryParse(_ageCtrl.text) ?? 0,
+        "dateNaissance": _dateNaissanceCtrl.text.trim(),
         "sexe": _sexeSelectionne,
         "email": _emailCtrl.text.trim(),
         "tel": _telCtrl.text.trim(),
@@ -207,9 +250,29 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
         "job": _posteCtrl.text.trim(),
         "poste": _posteCtrl.text.trim(),
         "entreprise": _entrepriseCtrl.text.trim(),
+        "description": _descriptionPosteCtrl.text.trim(),
+        "debut": _dateDebutCtrl.text.trim(),
         "ville": _villeCtrl.text.trim(),
         "pays": _paysCtrl.text.trim(),
+        "latitude": latPoste,
+        "longitude": lonPoste,
       };
+
+      List<Map<String, dynamic>> stagesList = [];
+      for (var s in _stages) {
+        var stageMap = s.toMap();
+        
+        var coordsStage = await _obtenirCoordonnees(s.villeCtrl.text, s.paysCtrl.text);
+        if (coordsStage != null) {
+          stageMap['latitude'] = coordsStage['lat'];
+          stageMap['longitude'] = coordsStage['lon'];
+        }
+        stagesList.add(stageMap);
+      }
+
+      if (stagesList.isNotEmpty) {
+        data["stages"] = stagesList;
+      }
 
       if (_stages.isNotEmpty) {
         data["stages"] = _stages.map((s) => s.toMap()).toList();
@@ -248,7 +311,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   Widget build(BuildContext context) {
    List<String>? optionsDisponibles;
 
-    if (_filiereSelectionnee != null && _majeureSelectionnee != null) {
+    if (_filiereSelectionnee.isNotEmpty && _majeureSelectionnee != null) {
       var mapFiliere = _hierarchieFormation[_filiereSelectionnee];
       
       if (mapFiliere != null) {
@@ -288,10 +351,14 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _ageCtrl,
-                      decoration: const InputDecoration(labelText: "Âge", border: OutlineInputBorder()),
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      controller: _dateNaissanceCtrl,
+                      decoration: const InputDecoration(
+                        labelText: "Date de naissance", 
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.cake),
+                      ),
+                      readOnly: true,
+                      onTap: () => _selectionnerDate(context, _dateNaissanceCtrl),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -389,7 +456,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                       value: _majeureSelectionnee,
                       decoration: const InputDecoration(labelText: "Majeure", border: OutlineInputBorder()),
                       isExpanded: true,
-                      items: _filiereSelectionnee == null || _hierarchieFormation[_filiereSelectionnee] == null
+                      items: _filiereSelectionnee.isEmpty || _hierarchieFormation[_filiereSelectionnee] == null
                           ? []
                           : _hierarchieFormation[_filiereSelectionnee]!.keys.map((String majeure) {
                               return DropdownMenuItem(
@@ -453,6 +520,33 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _descriptionPosteCtrl,
+                decoration: const InputDecoration(
+                  labelText: "Description du poste",
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,),
+                  maxLines: 4,
+                  keyboardType: TextInputType.multiline,
+                ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _dateDebutCtrl,
+                      decoration: const InputDecoration(
+                        labelText: "Date de début", 
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.calendar_today),
+                      ),
+                      readOnly: true,
+                      onTap: () => _selectionnerDate(context, _dateDebutCtrl),
+                    ),
+                  ),
+                  ],
               ),
 
               const Divider(height: 30),
@@ -547,43 +641,67 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                             validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
                           ),
                           const SizedBox(height: 10),
-                         Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                         FormField<String>(
+                            validator: (value) {
+                              if (stage.typeStage == 'I') {
+                                return 'Type de structure requis';
+                              }
+                              return null;
+                            },
+                            builder: (FormFieldState<String> state) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: RadioListTile<String>(
-                                      title: const Text('Entreprise'),
-                                      value: 'E',
-                                      groupValue: stage.typeStage,
-                                      activeColor: AppColors.ensiCyan,
-                                      contentPadding: EdgeInsets.zero,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          stage.typeStage = value!;
-                                        });
-                                      },
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: RadioListTile<String>(
+                                          title: const Text('Entreprise'),
+                                          value: 'E',
+                                          groupValue: stage.typeStage,
+                                          activeColor: AppColors.ensiCyan,
+                                          contentPadding: EdgeInsets.zero,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              stage.typeStage = value!;
+                                              state.didChange(value);
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: RadioListTile<String>(
+                                          title: const Text('Université'),
+                                          value: 'U',
+                                          groupValue: stage.typeStage,
+                                          activeColor: AppColors.ensiCyan,
+                                          contentPadding: EdgeInsets.zero,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              stage.typeStage = value!;
+                                              state.didChange(value);
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Expanded(
-                                    child: RadioListTile<String>(
-                                      title: const Text('Université'),
-                                      value: 'U',
-                                      groupValue: stage.typeStage,
-                                      activeColor: AppColors.ensiCyan,
-                                      contentPadding: EdgeInsets.zero,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          stage.typeStage = value!;
-                                        });
-                                      },
+                                  if (state.hasError)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 12.0, bottom: 5),
+                                      child: Text(
+                                        state.errorText!,
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.error,
+                                          fontSize: 12,
+                                        ),
+                                      ),
                                     ),
-                                  ),
                                 ],
-                              ),
-                            ],
-                          ),TextFormField(
+                              );
+                            },
+                          ),
+                          TextFormField(
                             controller: stage.entrepriseCtrl,
                             decoration: const InputDecoration(labelText: "Nom de l'Entreprise / du Labo", border: OutlineInputBorder()),
                           ),

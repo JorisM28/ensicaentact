@@ -10,8 +10,6 @@ import 'AdminValidatePage.dart';
 import 'alumni_preview.dart';
 import 'add_alumni.dart'; 
 import 'navigation.dart';
-import 'profileBadge.dart';
-
 void main() {
   runApp(const MonReseauAlumni());
 }
