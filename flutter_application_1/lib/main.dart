@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/navigation.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';  
 import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
@@ -16,9 +17,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('fr', 'FR'),
+        Locale('en', 'US'),
+      ],
       title: 'Réseau Alumni',
       navigatorObservers: [routeObserver],
       home: const PageAccueil(),
