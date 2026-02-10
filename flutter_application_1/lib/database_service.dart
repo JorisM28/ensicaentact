@@ -73,16 +73,30 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   }
 
   Future<List<Map<String, dynamic>>> getHistorique() async {
-  try {
-    final response = await http.get(Uri.parse("$apiUrl/get_history.php"));
-    if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    try {
+      final response = await http.get(Uri.parse("$apiUrl/get_history.php"));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("Erreur historique: $e");
     }
-  } catch (e) {
-    print("Erreur historique: $e");
+    return [];
+
   }
-  return [];
-}
+
+  Future<List<Map<String, dynamic>>> getEntreprise() async {
+    try {
+      final response = await http.get(Uri.parse("$apiUrl/get_entreprise.php"));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("Erreur entreprise: $e");
+    }
+    return [];
+
+  }
 
 
   Future<void> modifierEleve(Map<String, dynamic> donnees) async {
