@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/navigation.dart';
+import 'login.dart';
+import 'login_check.dart';
+import 'page_annuaire.dart';
+import 'formulaire_ajout_alumni.dart';
+import 'page_emploi.dart';
+import 'entreprise_annuaire_page.dart';
 import 'page_accueil.dart'; 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
@@ -18,7 +25,7 @@ class MyApp extends StatelessWidget {
       'id': '24',
       'prenom': 'Benoît',
       'nom': 'Michel',
-      'role': 'student', 
+      'role': 'admin', 
       'email': 'benoit.michel@ensicaen.fr'
     };
 
