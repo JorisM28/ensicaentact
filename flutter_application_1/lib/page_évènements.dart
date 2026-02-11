@@ -33,7 +33,6 @@ class _PageEvenementsState extends State<PageEvenements> {
     }
   }
 
-  // Helper pour extraire jour, mois et heure du format SQL
   Map<String, String> _formatDateTime(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return {"day": "??", "month": "???", "time": ""};
     try {

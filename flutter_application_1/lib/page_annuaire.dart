@@ -11,6 +11,7 @@ import 'alumni_preview.dart';
 import 'add_alumni.dart'; 
 import 'navigation.dart';
 import 'profileBadge.dart';
+import 'page_moderation.dart';
 
 void main() {
   runApp(const MonReseauAlumni());
@@ -254,10 +255,11 @@ void didPopNext() {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AdminValidationPage()),
+                      MaterialPageRoute(builder: (context) => PageModeration(user: widget.user)),
                     ).then((_) {
                       // IMPORTANT : Quand on revient de la page, on rafraîchit le compteur
                       _chargerCompteurNotifs();
+                      _chargerDonneesInitiales();
                     });
                   },
                   // LE WIDGET BADGE EST ICI

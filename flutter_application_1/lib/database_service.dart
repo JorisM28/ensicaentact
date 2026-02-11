@@ -310,6 +310,102 @@ Future<List<Map<String, dynamic>>> getActualites() async {
     }
     return [];
   }
+
+  Future<List<Map<String, dynamic>>> getDemandesEvenements() async {
+    try {
+      final response = await http.get(
+        Uri.parse("$apiUrl/events/get_request_events.php"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        String responseBody = utf8.decode(response.bodyBytes);
+        return List<Map<String, dynamic>>.from(jsonDecode(responseBody));
+      }
+    } catch (e) {
+      print("❌ Erreur getDemandesEvenements: $e");
+    }
+    return [];
+  }
+
+  Future<bool> validerEvenement(int idDemande) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$apiUrl/events/validate_event.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"id_demande": idDemande}),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['success'] == true;
+      }
+    } catch (e) {
+      print("❌ Erreur validerEvenement: $e");
+    }
+    return false;
+  }
   
+
+
+  Future<bool> supprimerEvenement(int idEvent) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$apiUrl/events/delete_evenements.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"id_event": idEvent}),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['status'] == 'success';
+      }
+    } catch (e) {
+      print("❌ Erreur supprimerEvenement: $e");
+    }
+    return false;
+  }
+
+
+  Future<bool> supprimerActualite(int idActu) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$apiUrl/actualities/delete_actualities.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"id_actu": idActu}),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['status'] == 'success';
+      }
+    } catch (e) {
+      print("❌ Erreur supprimerActualite: $e");
+    }
+    return false;
+  }
+
+  Future<bool> ajouterActualite(Map<String, dynamic> actu) async {
+      try {
+        print("📤 ENVOI AJOUT : ${jsonEncode(actu)}"); // On vérifie ce qu'on envoie
+
+        final response = await http.post(
+          Uri.parse("$apiUrl/actualities/add_actualities.php"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode(actu),
+        );
+
+        print("📥 CODE RETOUR : ${response.statusCode}");
+        print("📥 RÉPONSE SERVEUR : ${response.body}"); 
+
+        if (response.statusCode == 200) {
+          final res = jsonDecode(response.body);
+          return res['status'] == 'success';
+        }
+      } catch (e) {
+        print("❌ Erreur ajouterActualite: $e");
+      }
+      return false;
+    }
 }
 

@@ -45,11 +45,58 @@ class _PageActualitesState extends State<PageActualites> {
     }
   }
 
+
+  void _confirmerSuppression(BuildContext context, Map<String, dynamic> item) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Supprimer l'actualité ?"),
+          content: Text("Voulez-vous vraiment supprimer définitivement : \n\n\"${item['titre']}\" ?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx), 
+              child: const Text("Annuler")
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(ctx); // Ferme la pop-up
+                
+        
+                int idToDelete = int.parse(item['id_actu'].toString()); 
+                // ---------------------
+
+                // Appel BDD
+                bool success = await DatabaseService().supprimerActualite(idToDelete);
+
+                if (success) {
+                  // Rafraîchir la liste locale
+                  _chargerDonnees();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Actualité supprimée avec succès."))
+                    );
+                  }
+                } else {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Erreur lors de la suppression."))
+                    );
+                  }
+                }
+              },
+              child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      );
+    }
   @override
   Widget build(BuildContext context) {
-    // Filtrage dynamique selon la recherche
     final actusFiltrees = _actus.where((a) => 
       (a['titre'] ?? '').toLowerCase().contains(_recherche.toLowerCase())).toList();
+
+   
+    bool estAdmin = widget.user['role'] == 'admin';
 
     return Scaffold(
       appBar: AppBar(
@@ -63,13 +110,23 @@ class _PageActualitesState extends State<PageActualites> {
           )
         ],
       ),
+
+      floatingActionButton: estAdmin 
+        ? FloatingActionButton(
+            backgroundColor: AppColors.ensiCyan,
+            tooltip: "Ajouter une actualité",
+            child: const Icon(Icons.add, color: Colors.white),
+            onPressed: () => _afficherDialogAjout(context),
+          )
+        : null,
+      
       body: Column(
         children: [
           _buildSearchBar(),
           Expanded(
             child: _isLoading 
                 ? const Center(child: CircularProgressIndicator())
-                : _buildSectionActus(actusFiltrees), 
+                : _buildSectionActus(actusFiltrees, estAdmin), 
           ),
         ],
       ),
@@ -89,7 +146,7 @@ class _PageActualitesState extends State<PageActualites> {
     ),
   );
 
-  Widget _buildSectionActus(List<Map<String, dynamic>> liste) {
+  Widget _buildSectionActus(List<Map<String, dynamic>> liste, bool estAdmin) {
     return Column(
       children: [
         Container(
@@ -116,7 +173,6 @@ class _PageActualitesState extends State<PageActualites> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 child: InkWell(
                   onTap: () { 
-                    // Navigation vers la page de détail simple
                     Navigator.push(
                       context, 
                       MaterialPageRoute(
@@ -124,13 +180,12 @@ class _PageActualitesState extends State<PageActualites> {
                       ),
                     );
                   },
-                  hoverColor: Colors.transparent,
-                  splashColor: Colors.black12,
                   borderRadius: BorderRadius.circular(10),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       children: [
+                        // Barre de couleur (Tag)
                         Container(
                           width: 6,
                           height: 80, 
@@ -140,6 +195,8 @@ class _PageActualitesState extends State<PageActualites> {
                           ),
                         ),
                         const SizedBox(width: 15),
+                        
+                        // Image
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Container(
@@ -152,6 +209,8 @@ class _PageActualitesState extends State<PageActualites> {
                           ),
                         ),
                         const SizedBox(width: 15),
+                        
+                        // Textes
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,6 +228,15 @@ class _PageActualitesState extends State<PageActualites> {
                             ],
                           ),
                         ),
+
+                   
+                        if (estAdmin)
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.red),
+                            tooltip: "Supprimer",
+                            onPressed: () => _confirmerSuppression(context, item),
+                          ),
+                        // -----------------------------------
                       ],
                     ),
                   ),
@@ -178,6 +246,50 @@ class _PageActualitesState extends State<PageActualites> {
           ),
         ),
       ],
+    );
+  }
+
+
+  void _afficherDialogAjout(BuildContext context) {
+    final titleCtrl = TextEditingController();
+    final descCtrl = TextEditingController();
+    final imgCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Nouvelle Actualité"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: "Titre")),
+            TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Description"), maxLines: 3),
+            TextField(controller: imgCtrl, decoration: const InputDecoration(labelText: "URL Image (optionnel)")),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          ElevatedButton(
+            onPressed: () async {
+              if (titleCtrl.text.isEmpty) return;
+
+              await DatabaseService().ajouterActualite({
+                "titre": titleCtrl.text,
+                "description": descCtrl.text,
+                "image": imgCtrl.text,
+                "auteur_id": widget.user['id_user'] ?? "0",
+              });
+
+              Navigator.pop(ctx);
+              _chargerDonnees();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Actualité publiée !")));
+              }
+            },
+            child: const Text("Publier"),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -228,7 +340,6 @@ class DetailsPageSimple extends StatelessWidget {
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-
                   Text(
                     "Par $author",
                     style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blueGrey),
@@ -237,9 +348,7 @@ class DetailsPageSimple extends StatelessWidget {
                     "Publié le $date",
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  
                   const Divider(height: 40),
-
                   Text(
                     content,
                     style: const TextStyle(fontSize: 16, height: 1.6),
