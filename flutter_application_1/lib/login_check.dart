@@ -1,16 +1,19 @@
 import 'package:aad_oauth/aad_oauth.dart';
 import 'package:aad_oauth/model/config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
+// TODO : Le transformer avec un patron de conception "Décorateur" Ou "Proxy" ?
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final Config config = Config(
-  tenant: "ID EnsiCaen",
-  clientId: "ID Azure",
+  tenant: dotenv.env['AZURE_TENANT_ID'] ?? "",
+  clientId: dotenv.env['AZURE_CLIENT_ID'] ?? "",
   scope: "openid profile User.Read",
-  redirectUri: "http://localhost:39019/redirect.html",
+  redirectUri: dotenv.env['AZURE_REDIRECT_URI'] ?? "http://localhost:39019/redirect.html",
   navigatorKey: navigatorKey,
 );
 
@@ -77,7 +80,7 @@ class EnsiCaenConnection {
         final data = jsonDecode(response.body);
 
         // DEBUG : Affiche ce que le serveur renvoie vraiment
-        print("Réponse du serveur : $data");
+        // print("Réponse du serveur : $data");
 
         if (data['status'] == 'success') {
           return {
@@ -95,7 +98,7 @@ class EnsiCaenConnection {
       } else {
         return {
           "status": "error",
-          "message": "Erreur serveur ${response.statusCode}"
+          "message": "Erreur serveur : ${response.statusCode}"
         };
       }
     } catch (e) {

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/navigation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
 import 'formulaire_ajout_alumni.dart';
 import 'page_emploi.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
