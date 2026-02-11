@@ -16,7 +16,6 @@ class _PageEmploiState extends State<PageEmploi> {
   List<Map<String, dynamic>> _toutesLesOffres = [];
   bool _isLoading = true;
 
-  // --- 1. VARIABLES POUR LA RECHERCHE ---
   String _recherche = "";
   final TextEditingController _searchCtrl = TextEditingController();
 
@@ -27,7 +26,6 @@ class _PageEmploiState extends State<PageEmploi> {
   }
 
   void _chargerLesVraiesOffres() async {
-    // On met isLoading à true pour montrer que ça charge si on rafraichit
     setState(() => _isLoading = true);
     
     var data = await DatabaseService().getOffres();
@@ -40,7 +38,6 @@ class _PageEmploiState extends State<PageEmploi> {
     }
   }
 
-  // --- 2. FONCTION POUR SUPPRIMER UNE OFFRE ---
   void _confirmerSuppression(String idOffre) {
     showDialog(
       context: context,
@@ -51,13 +48,12 @@ class _PageEmploiState extends State<PageEmploi> {
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
           TextButton(
             onPressed: () async {
-              Navigator.pop(ctx); // Ferme la fenêtre de confirmation
+              Navigator.pop(ctx);
               
-              // Appel au service de suppression
               bool success = await DatabaseService().supprimerOffre(idOffre);
               
               if (success) {
-                _chargerLesVraiesOffres(); // On recharge la liste pour voir qu'elle a disparu
+                _chargerLesVraiesOffres();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Offre supprimée avec succès."))
                 );
@@ -77,7 +73,7 @@ class _PageEmploiState extends State<PageEmploi> {
   @override
   Widget build(BuildContext context) {
     String role = widget.user['role'] ?? 'guest';
-    String monId = widget.user['id'].toString(); // Ton ID à toi
+    String monId = widget.user['id'].toString();
     bool isAdmin = (role == 'admin');
     bool peutAjouter = (isAdmin || role == 'alumni');
 
@@ -89,7 +85,6 @@ class _PageEmploiState extends State<PageEmploi> {
       return titre.contains(motCle) || entreprise.contains(motCle);
     }).toList();
 
-    // Ensuite on sépare Stages et Emplois (sur la liste déjà filtrée)
     final listeStages = offresFiltrees.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
     final listeEmplois = offresFiltrees.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
 
@@ -99,7 +94,6 @@ class _PageEmploiState extends State<PageEmploi> {
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
-          // Petit bouton refresh manuel dans la barre
           IconButton(
             icon: const Icon(Icons.refresh), 
             onPressed: _chargerLesVraiesOffres
@@ -116,7 +110,6 @@ class _PageEmploiState extends State<PageEmploi> {
                 labelText: "Rechercher (Poste, Entreprise...)",
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                // Bouton croix pour effacer la recherche
                 suffixIcon: _recherche.isNotEmpty 
                   ? IconButton(
                       icon: const Icon(Icons.clear), 
@@ -149,8 +142,8 @@ class _PageEmploiState extends State<PageEmploi> {
                       liste: listeEmplois,
                       isStage: false,
                       peutAjouter: peutAjouter,
-                      monId: monId,   // On passe ton ID pour savoir si c'est ton offre
-                      isAdmin: isAdmin // On passe si tu es admin
+                      monId: monId,
+                      isAdmin: isAdmin
                     ),
                   ),
 
@@ -186,7 +179,6 @@ class _PageEmploiState extends State<PageEmploi> {
   }) {
     return Column(
       children: [
-        // En-tête coloré
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(15),
@@ -198,7 +190,6 @@ class _PageEmploiState extends State<PageEmploi> {
           ),
         ),
 
-        // Liste des offres
         Expanded(
           child: liste.isEmpty
               ? const Center(child: Text("Aucune offre trouvée", style: TextStyle(color: Colors.grey)))
@@ -209,12 +200,9 @@ class _PageEmploiState extends State<PageEmploi> {
                     final offre = liste[index];
                     print("DÉBUG OFFRE : $offre");
                     
-                    // --- LOGIQUE DE DROIT DE SUPPRESSION ---
-                    // C'est mon offre SI l'id_auteur de l'offre == mon ID
                     String idAuteurOffre = (offre['id_auteur'] ?? '').toString();
                     bool estMonOffre = (idAuteurOffre == monId);
                     
-                    // J'ai le droit de supprimer si c'est la mienne OU si je suis admin
                     bool droitSupprimer = estMonOffre || isAdmin;
 
                     return Card(
@@ -226,7 +214,6 @@ class _PageEmploiState extends State<PageEmploi> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text("${offre['entreprise']} - ${offre['ville']}"),
-                            // Affichage de l'auteur si dispo
                             if (offre['nom_auteur'] != null)
                               Text(
                                 "Par: ${offre['prenom_auteur']} ${offre['nom_auteur']}",
@@ -234,20 +221,17 @@ class _PageEmploiState extends State<PageEmploi> {
                               ),
                           ],
                         ),
-                        // --- ZONE DE DROITE (Badge + Poubelle) ---
                         trailing: Row(
-                          mainAxisSize: MainAxisSize.min, // Prend le moins de place possible
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            // 1. Le Badge (Stage/CDI)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(color: couleur.withOpacity(0.1), borderRadius: BorderRadius.circular(5)),
                               child: Text(offre['type'] ?? '', style: TextStyle(fontSize: 12, color: couleur, fontWeight: FontWeight.bold)),
                             ),
                             
-                            // 2. Le Bouton Poubelle (Visible seulement si droitSupprimer est vrai)
                             if (droitSupprimer) ...[
-                              const SizedBox(width: 10), // Espace entre le badge et la poubelle
+                              const SizedBox(width: 10),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red, size: 20),
                                 onPressed: () => _confirmerSuppression(offre['id_offre'].toString()),
@@ -293,7 +277,6 @@ class _PageEmploiState extends State<PageEmploi> {
     );
   }
 
-  // --- POPUP DÉTAIL ---
   void _voirDetail(Map<String, dynamic> offre) {
     showDialog(
       context: context,
@@ -319,7 +302,6 @@ class _PageEmploiState extends State<PageEmploi> {
     );
   }
 
-  // --- POPUP AJOUT ---
   void _popupAjouter(bool isStage, Color couleur) {
     final titreCtrl = TextEditingController();
     final entCtrl = TextEditingController();
@@ -378,7 +360,7 @@ class _PageEmploiState extends State<PageEmploi> {
 
                     if (success && mounted) {
                       Navigator.pop(context); 
-                      _chargerLesVraiesOffres(); // Rechargement après ajout
+                      _chargerLesVraiesOffres();
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Offre enregistrée !")));
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
