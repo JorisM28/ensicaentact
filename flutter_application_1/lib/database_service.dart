@@ -265,7 +265,7 @@ Future<void> supprimerDemande(int idDemande) async {
 
   Future<bool> proposerEvenement(Map<String, dynamic> data) async {
     try {
-      final url = Uri.parse("$apiUrl/events/add_evenement.php");
+      final url = Uri.parse("$apiUrl/events/proposer_evenements.php");
       
       print("📤 ENVOI PROPOSITION : ${jsonEncode(data)}");
 
@@ -279,7 +279,8 @@ Future<void> supprimerDemande(int idDemande) async {
 
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        return result['success'] == true;
+        // Gestion souple du retour (success ou status)
+        return result['success'] == true || result['status'] == 'success';
       }
     } catch (e) {
       print("❌ Erreur proposerEvenement: $e");
@@ -288,11 +289,10 @@ Future<void> supprimerDemande(int idDemande) async {
   }
 
 
-
   Future<List<Map<String, dynamic>>> getDemandesEvenements() async {
     try {
       final response = await http.get(
-        Uri.parse("$apiUrl/events/get_request_evenementsts.php"),
+        Uri.parse("$apiUrl/events/get_request_evenements.php"),
         headers: {"Content-Type": "application/json"},
       );
 
@@ -309,7 +309,7 @@ Future<void> supprimerDemande(int idDemande) async {
   Future<bool> validerEvenement(int idDemande) async {
     try {
       final response = await http.post(
-        Uri.parse("$apiUrl/events/validate_event.php"),
+        Uri.parse("$apiUrl/events/validate_evenements.php"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"id_demande": idDemande}),
       );
@@ -361,6 +361,32 @@ Future<void> supprimerDemande(int idDemande) async {
     }
     return false;
   }
+
+
+  Future<bool> ajouterEvenementDirect(Map<String, dynamic> data) async {
+    try {
+      final url = Uri.parse("$apiUrl/events/add_evenements.php");
+      
+      print("📤 ENVOI AJOUT DIRECT : ${jsonEncode(data)}");
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(data),
+      );
+
+      print("📥 RÉPONSE SERVEUR : ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['success'] == true;
+      }
+    } catch (e) {
+      print("❌ Erreur ajouterEvenementDirect: $e");
+    }
+    return false;
+  }
+
 
 
   Future<List<Map<String, dynamic>>> getActualites() async {
@@ -430,6 +456,8 @@ Future<void> supprimerDemande(int idDemande) async {
       }
       return false;
     }
+
+
 
   
 
