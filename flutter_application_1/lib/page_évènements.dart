@@ -21,6 +21,7 @@ class _PageEvenementsState extends State<PageEvenements> {
     _chargerDonnees();
   }
 
+  // Chargement des données
   void _chargerDonnees() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
@@ -33,6 +34,7 @@ class _PageEvenementsState extends State<PageEvenements> {
     }
   }
 
+  // Formatage de la date pour l'affichage
   Map<String, String> _formatDateTime(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return {"day": "??", "month": "???", "time": ""};
     try {
@@ -48,8 +50,91 @@ class _PageEvenementsState extends State<PageEvenements> {
     }
   }
 
+  // --- FONCTION SUPPRIMER (ADMIN) ---
+  void _confirmerSuppression(Map<String, dynamic> ev) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Supprimer l'évènement ?"),
+        content: Text("Voulez-vous supprimer : \"${ev['titre']}\" ?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              int id = int.parse(ev['id_event'].toString());
+              bool success = await DatabaseService().supprimerEvenement(id);
+              if (success) {
+                _chargerDonnees();
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Évènement supprimé")));
+              }
+            },
+            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _ouvrirFormulaireEvent([Map<String, dynamic>? ev]) {
+    final bool isEdit = ev != null;
+    final titleCtrl = TextEditingController(text: isEdit ? ev['titre'] : "");
+    final lieuCtrl = TextEditingController(text: isEdit ? ev['lieu'] : "");
+    final descCtrl = TextEditingController(text: isEdit ? ev['description'] : "");
+    final dateCtrl = TextEditingController(text: isEdit ? ev['date_event'] : "2026-06-15 18:00:00");
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(isEdit ? "Modifier l'évènement" : "Ajouter un évènement"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: "Titre")),
+              TextField(controller: dateCtrl, decoration: const InputDecoration(labelText: "Date (AAAA-MM-JJ HH:MM:SS)")),
+              TextField(controller: lieuCtrl, decoration: const InputDecoration(labelText: "Lieu")),
+              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Description"), maxLines: 3),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          ElevatedButton(
+            onPressed: () async {
+              if (titleCtrl.text.isEmpty) return;
+              
+              final data = {
+                "titre": titleCtrl.text,
+                "lieu": lieuCtrl.text,
+                "description": descCtrl.text,
+                "date_event": dateCtrl.text,
+                "id_auteur": widget.user['id_user'] ?? "0",
+              };
+
+              bool success;
+              if (isEdit) {
+                data["id_event"] = ev['id_event'].toString();
+                success = await DatabaseService().modifierEvenement(data);
+              } else {
+                success = await DatabaseService().proposerEvenement(data);
+              }
+
+              if (success) {
+                Navigator.pop(ctx);
+                _chargerDonnees();
+              }
+            },
+            child: const Text("Enregistrer"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool estAdmin = widget.user['role'] == 'admin';
     final evFiltres = _evenements.where((e) => 
       (e['titre'] ?? '').toLowerCase().contains(_recherche.toLowerCase()) ||
       (e['lieu'] ?? '').toLowerCase().contains(_recherche.toLowerCase())
@@ -60,9 +145,18 @@ class _PageEvenementsState extends State<PageEvenements> {
         title: const Text("Agenda ENSICAEN"),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _chargerDonnees),
+          if (estAdmin)
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline), 
+              onPressed: () => _ouvrirFormulaireEvent()
+            ),
+        ],
       ),
       body: Column(
         children: [
+          // Barre de recherche
           Padding(
             padding: const EdgeInsets.all(10),
             child: TextField(
@@ -94,10 +188,9 @@ class _PageEvenementsState extends State<PageEvenements> {
                           ),
                           child: Row(
                             children: [
-              
+                              // Bloc Date
                               Container(
-                                width: 80,
-                                height: 100,
+                                width: 80, height: 100,
                                 decoration: BoxDecoration(
                                   color: Colors.grey[100],
                                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4)),
@@ -110,7 +203,7 @@ class _PageEvenementsState extends State<PageEvenements> {
                                   ],
                                 ),
                               ),
-                              // CONTENU
+                              // Contenu textuel
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -119,14 +212,27 @@ class _PageEvenementsState extends State<PageEvenements> {
                                     children: [
                                       Text(ev['titre'] ?? "", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
                                       const SizedBox(height: 5),
-                                      Text("📍 ${ev['lieu'] ?? ''}", style: TextStyle(color: Colors.grey[600], fontSize: 13)), // Colonne lieu
+                                      Text("📍 ${ev['lieu'] ?? ''}", style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                                       Text("🕒 ${dt['time']}", style: const TextStyle(color: Colors.black54, fontSize: 12)),
                                     ],
                                   ),
                                 ),
                               ),
-                              const Icon(Icons.chevron_right, color: Colors.grey),
-                              const SizedBox(width: 10),
+                              
+                              // ACTIONS ADMIN : EDITER & SUPPRIMER
+                              if (estAdmin) ...[
+                                IconButton(
+                                  icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                                  onPressed: () => _ouvrirFormulaireEvent(ev),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                                  onPressed: () => _confirmerSuppression(ev),
+                                ),
+                              ] else 
+                                const Icon(Icons.chevron_right, color: Colors.grey),
+                              
+                              const SizedBox(width: 5),
                             ],
                           ),
                         ),
@@ -140,6 +246,7 @@ class _PageEvenementsState extends State<PageEvenements> {
   }
 }
 
+// Page de détails
 class DetailsEvenementPage extends StatelessWidget {
   final Map<String, dynamic> item;
   const DetailsEvenementPage({super.key, required this.item});
@@ -151,8 +258,9 @@ class DetailsEvenementPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            if (item['image_url'] != null)
-              Image.network(item['image_url'], width: double.infinity, height: 250, fit: BoxFit.cover),
+            if (item['image_url'] != null && item['image_url'].toString().isNotEmpty)
+              Image.network(item['image_url'], width: double.infinity, height: 250, fit: BoxFit.cover,
+                errorBuilder: (c, e, s) => Container(height: 100, color: Colors.grey[200], child: const Icon(Icons.image_not_supported))),
             
             Padding(
               padding: const EdgeInsets.all(20),
