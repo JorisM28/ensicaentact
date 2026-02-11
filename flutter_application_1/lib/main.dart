@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       'id': '24',
       'prenom': 'Benoît',
       'nom': 'Michel',
-      'role': 'student', 
+      'role': 'alumni', 
       'email': 'benoit.michel@ensicaen.fr'
     };
 

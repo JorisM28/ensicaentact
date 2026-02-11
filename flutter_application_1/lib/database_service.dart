@@ -265,7 +265,7 @@ Future<void> supprimerDemande(int idDemande) async {
 
   Future<bool> proposerEvenement(Map<String, dynamic> data) async {
     try {
-      final url = Uri.parse("$apiUrl/events/add_evenements.php");
+      final url = Uri.parse("$apiUrl/events/add_evenement.php");
       
       print("📤 ENVOI PROPOSITION : ${jsonEncode(data)}");
 

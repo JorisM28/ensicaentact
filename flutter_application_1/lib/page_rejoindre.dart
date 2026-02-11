@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+import 'add_alumni.dart'; 
+import 'colors.dart';
+
+class PageRejoindre extends StatelessWidget {
+  final Map<String, dynamic> user;
+
+  const PageRejoindre({super.key, required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Rejoindre le réseau"),
+        backgroundColor: AppColors.ensiCyan,
+        foregroundColor: Colors.white,
+      ),
+      body: AddAlumniForm(
+        isAdmin: false, 
+        onSuccess: () {
+
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+}

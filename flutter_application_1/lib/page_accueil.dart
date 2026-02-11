@@ -10,6 +10,8 @@ import 'widget/event_widget.dart';
 import 'widget/joboffert_widget.dart';
 import 'profileBadge.dart';
 import 'widget/key_figures_widget.dart';
+import 'add_alumni.dart';
+import'page_rejoindre.dart';
 
 class PageAccueil extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -59,19 +61,29 @@ class PageAccueil extends StatelessWidget {
                   _buildLienMenu(context, "ENSICAEN", _ouvrirSiteEcole),
 
                   const SizedBox(width: 20), 
-                  
-                  _buildHeaderButton(Icons.thumb_up_alt_outlined, "Rejoindre", () {}), 
-                    
-                    const SizedBox(width: 10), 
 
-                  _buildHeaderButton(
-                    Icons.event_available, 
-                    "Proposer un évènement",
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (c) => PageProposerEvenement(user: user))
-                    )
-                  )
+
+                  if (user['role'] == 'admin') ...[
+                    _buildHeaderButton(Icons.admin_panel_settings, "Modération", 
+                        () => _naviguer(context, PageModeration(user: user))),
+                  ],
+
+
+                  if (user['role'] == 'alumni') ...[
+                    _buildHeaderButton(
+                      Icons.thumb_up_alt_outlined, 
+                      "Rejoindre", 
+                      () => _naviguer(context, PageRejoindre(user: user))
+                    ), 
+                    const SizedBox(width: 10), 
+                    _buildHeaderButton(
+                      Icons.event_available, 
+                      "Proposer évènement",
+                      () => _naviguer(context, PageProposerEvenement(user: user))
+                    ),
+                  ],
+
+
                 ],
 
                 if (!isDesktop)
@@ -177,16 +189,13 @@ class PageAccueil extends StatelessWidget {
             decoration: BoxDecoration(color: headerColor),
             child: const Center(child: Text("Menu Alumni", style: TextStyle(color: Colors.white, fontSize: 24))),
           ),
-          ListTile(leading: const Icon(Icons.newspaper), title: const Text("Actualités"), 
-              onTap: () => _naviguer(context, PageActualites(user: user))),
-          ListTile(leading: const Icon(Icons.people), title: const Text("Annuaire"), 
-              onTap: () => _naviguer(context, PageAnnuaire(user: user))),
-          ListTile(leading: const Icon(Icons.work), title: const Text("Offres"), 
-              onTap: () => _naviguer(context, PageEmploi(user: user))),
+          ListTile(leading: const Icon(Icons.newspaper), title: const Text("Actualités"), onTap: () => _naviguer(context, PageActualites(user: user))),
+          ListTile(leading: const Icon(Icons.people), title: const Text("Annuaire"), onTap: () => _naviguer(context, PageAnnuaire(user: user))),
+          ListTile(leading: const Icon(Icons.work), title: const Text("Offres"), onTap: () => _naviguer(context, PageEmploi(user: user))),
           ListTile(leading: const Icon(Icons.school), title: const Text("Site École"), onTap: _ouvrirSiteEcole),
           const Divider(),
-          ListTile(leading: const Icon(Icons.thumb_up), title: const Text("Rejoindre"), onTap: (){}),
-          ListTile(leading: const Icon(Icons.event), title: const Text("Proposer un évènement"), onTap: (){}),
+          ListTile(leading: const Icon(Icons.thumb_up), title: const Text("Rejoindre"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => Scaffold(appBar: AppBar(title: const Text("Rejoindre"), backgroundColor: headerColor), body: AddAlumniForm(onSuccess: () => Navigator.pop(c)))))),
+          ListTile(leading: const Icon(Icons.event), title: const Text("Proposer un évènement"), onTap: () => _naviguer(context, PageProposerEvenement(user: user))),
         ],
       ),
     );
