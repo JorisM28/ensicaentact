@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/View/navigation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';  
 import 'View/screens/auth/login.dart';
+import 'View/screens/employment/companies_directory_page.dart';
 import 'ViewModel/admin/login_check.dart';
 import 'View/screens/alumni/directory_page.dart';
 import 'View/screens/alumni/add_alumni_form.dart';
 import 'View/screens/employment/employement_page.dart';
-import 'View/screens/employment/companies_directory_page.dart';
+import 'ViewModel/employment_viewmodel.dart';
 
 void main() {
   runApp(const MyApp());
@@ -102,7 +103,7 @@ class PageAccueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CompaniesDirectoryPage()),
+                  MaterialPageRoute(builder: (context) => CompaniesDirectoryPage(user: {},)),
                 );
               },
               child: const Text('Page Annuaire Entreprise'),

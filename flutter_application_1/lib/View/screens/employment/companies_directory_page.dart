@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
-import '../../../Model/data/services/database_service.dart';
 import '../../common/carte_entreprise_widget.dart';
+import '../../../ViewModel/employment_viewmodel.dart';
 
 class CompaniesDirectoryPage extends StatefulWidget {
-  const CompaniesDirectoryPage({super.key});
+  final Map<String, dynamic> user;
+  const CompaniesDirectoryPage({super.key, required this.user});
 
   @override
-  State<CompaniesDirectoryPage> createState() =>
-      _CompaniesDirectoryPageState();
+  State<CompaniesDirectoryPage> createState() => _CompaniesDirectoryPageState();
 }
 
 class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
-  final DatabaseService _dbService = DatabaseService();
+  late CareerViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel = CareerViewModel(user: widget.user);
+    viewModel.loadCompanies();
+    viewModel.addListener(() => setState(() {}));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,141 +28,46 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Annuaire des Entreprises",
-          style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text("Annuaire des Entreprises", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.ensiCyan,
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _dbService.getCompanies(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-                child: Text(
-                    "Erreur de chargement : ${snapshot.error}"));
-          }
-
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Aucune entreprise trouvée"));
-          }
-
-          final companies = snapshot.data!;
-
-          final listWidget = ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: companies.length,
-            separatorBuilder: (_, __) =>
-            const Divider(height: 30),
-            itemBuilder: (context, index) {
-              final item = companies[index];
-
-              final nom =
-                  item['nom_entreprise'] ?? "Inconnu";
-              final nb =
-                  item['nombre_alumni']?.toString() ?? "0";
-              final ville = item['ville'] ?? "";
-              final pays = item['pays'] ?? "";
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.business,
-                          color: AppColors.ensiCyan),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          nom,
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.ensiCyan),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.ensiCyan.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          "$nb alumni",
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                  _buildInfoRow(
-                    Icons.location_on,
-                    "Localisation",
-                    pays.isNotEmpty ? "$ville, $pays" : ville,
-                  ),
-                ],
-              );
-            },
-          );
-
-          final mapWidget =
-          CarteEntrepriseWidget(companies: companies);
-
-          return isWideScreen
-              ? Row(
-            children: [
-              Expanded(flex: 2, child: listWidget),
-              const VerticalDivider(width: 1),
-              Expanded(flex: 3, child: mapWidget),
-            ],
-          )
-              : Column(
-            children: [
-              Expanded(flex: 2, child: listWidget),
-              const Divider(height: 1),
-              Expanded(flex: 3, child: mapWidget),
-            ],
-          );
-        },
-      ),
+      body: viewModel.isLoadingCompanies
+          ? const Center(child: CircularProgressIndicator())
+          : isWideScreen
+          ? Row(children: [Expanded(flex: 2, child: _buildList()), const VerticalDivider(width: 1), Expanded(flex: 3, child: CarteEntrepriseWidget(companies: viewModel.allCompanies))])
+          : Column(children: [Expanded(flex: 2, child: _buildList()), const Divider(height: 1), Expanded(flex: 3, child: CarteEntrepriseWidget(companies: viewModel.allCompanies))]),
     );
   }
 
-  Widget _buildInfoRow(
-      IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, left: 34),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: Colors.grey),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 14),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
+  Widget _buildList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: viewModel.allCompanies.length,
+      separatorBuilder: (_, __) => const Divider(height: 30),
+      itemBuilder: (context, index) {
+        final item = viewModel.allCompanies[index];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.business, color: AppColors.ensiCyan),
+                const SizedBox(width: 10),
+                Expanded(child: Text(item['nom_entreprise'] ?? "Inconnu", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.ensiCyan))),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: AppColors.ensiCyan.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                  child: Text("${item['nombre_alumni'] ?? 0} alumni", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 34),
+              child: Text("${item['ville'] ?? ''}, ${item['pays'] ?? ''}"),
+            ),
+          ],
+        );
+      },
     );
   }
 }
