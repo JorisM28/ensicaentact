@@ -10,8 +10,10 @@
 .history
 .svn/
 .swiftpm/
-.env
 migrate_working_dir/
+
+#Configuration
+.env
 
 # IntelliJ related
 *.iml
