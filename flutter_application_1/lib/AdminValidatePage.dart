@@ -122,36 +122,81 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
           itemCount: events.length,
           itemBuilder: (context, index) {
             final req = events[index];
-            Map<String, dynamic> eventData = {};
-            try {
-              eventData = jsonDecode(req['contenu_json']);
-            } catch (e) {
-              eventData = {"titre": "Erreur données"};
-            }
+
+            // CORRECTION : On utilise directement les champs envoyés par le PHP
+            // Plus besoin de jsonDecode ici !
+            final String titre = req['titre'] ?? "Sans titre";
+            final String date = req['date_event'] ?? "Date inconnue";
+            final String lieu = req['lieu'] ?? "Lieu non précisé";
+            final String auteur = "${req['prenom_auteur'] ?? ''} ${req['nom_auteur'] ?? ''}".trim();
+            final String desc = req['description'] ?? "Pas de description";
 
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              elevation: 2,
               child: ListTile(
-                leading: const CircleAvatar(backgroundColor: Colors.purple, child: Icon(Icons.event, color: Colors.white)),
-                title: Text(eventData['titre'] ?? "Sans titre"),
-                subtitle: Text("Proposé par : ${req['prenom_auteur'] ?? req['prenom']} ${req['nom_auteur'] ?? req['nom']}"),
+                leading: CircleAvatar(
+                  backgroundColor: AppColors.ensiCyan, 
+                  child: const Icon(Icons.event, color: Colors.white)
+                ),
+                title: Text(titre, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("📅 $date  📍 $lieu"),
+                    Text("Proposé par : $auteur", style: const TextStyle(fontStyle: FontStyle.italic)),
+                  ],
+                ),
+                isThreeLine: true, // Permet d'avoir plus d'espace pour le sous-titre
+                
+                // Au clic, on affiche les détails complets pour vérification
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(titre),
+                      content: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("Date : $date", style: const TextStyle(fontWeight: FontWeight.bold)),
+                            Text("Lieu : $lieu"),
+                            const Divider(),
+                            const Text("Description :", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(desc),
+                            const SizedBox(height: 10),
+                            Text("Auteur : $auteur", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Fermer")),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                          onPressed: () async {
+                            Navigator.pop(ctx);
+                            await _valider(req);
+                          }, 
+                          child: const Text("Valider")
+                        )
+                      ],
+                    ),
+                  );
+                },
+
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.red),
-                      onPressed: () async {
-                        await _db.supprimerDemande(int.parse(req['id_demande'].toString()));
-                        _refresh();
-                      },
+                      tooltip: "Refuser",
+                      onPressed: () => _refuser(req),
                     ),
                     IconButton(
                       icon: const Icon(Icons.check, color: Colors.green),
-                      onPressed: () async {
-                        await _db.validerEvenement(int.parse(req['id_demande'].toString()));
-                        _refresh();
-                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Évènement publié !")));
-                      },
+                      tooltip: "Valider",
+                      onPressed: () => _valider(req),
                     ),
                   ],
                 ),
@@ -161,5 +206,19 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
         );
       },
     );
+  }
+
+  // Petites fonctions helper pour alléger le code
+  Future<void> _valider(Map<String, dynamic> req) async {
+     await _db.validerEvenement(int.parse(req['id_demande'].toString()));
+     _refresh();
+     if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Évènement publié !")));
+  }
+
+  Future<void> _refuser(Map<String, dynamic> req) async {
+     // Utilise supprimerDemande (qui supprime de la table DEMANDE_AJOUT sans publier)
+     await _db.supprimerDemande(int.parse(req['id_demande'].toString()));
+     _refresh();
+     if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Proposition refusée.")));
   }
 }

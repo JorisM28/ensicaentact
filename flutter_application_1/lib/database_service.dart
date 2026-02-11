@@ -212,6 +212,28 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     return false;
   }
 
+ 
+  Future<bool> modifierOffre(Map<String, dynamic> data) async {
+    try {
+      final url = Uri.parse("$apiUrl/offer/update_offer.php");
+      print("Envoi modification offre...");
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['status'] == 'success';
+      }
+    } catch (e) {
+      print("Erreur modification offre : $e");
+    }
+    return false;
+  }
+
   Future<List<Map<String, dynamic>>> getDemandesEnAttente() async {
     try {
       final response = await http.get(Uri.parse("$apiUrl/get_request.php"));
