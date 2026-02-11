@@ -1,26 +1,62 @@
+import 'dart:convert';
+import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-// ==========================================
-// 1. LE MODÈLE DE DONNÉES & CONFIGURATION
-// ==========================================
-
+// --- MODELE DE DONNEES ---
 class KeyFigure {
+  int id;
   String label;
   int value;
   String suffix;
   String iconKey;
   Color color;
+  String colorHex;
 
   KeyFigure({
+    required this.id,
     required this.label,
     required this.value,
     this.suffix = "",
     required this.iconKey,
     required this.color,
+    required this.colorHex,
   });
+
+  factory KeyFigure.fromJson(Map<String, dynamic> json) {
+    String rawColor = json['color_hex'] ?? '#000000';
+    String hexColor = rawColor.replaceAll('#', '');
+    Color colorParsed;
+    try {
+      colorParsed = Color(int.parse('0xFF$hexColor'));
+    } catch (e) {
+      colorParsed = Colors.black;
+    }
+
+    return KeyFigure(
+      id: int.parse(json['id'].toString()),
+      label: json['label'],
+      value: int.parse(json['stat_value'].toString()),
+      suffix: json['suffix'] ?? "",
+      iconKey: json['icon_key'],
+      colorHex: rawColor,
+      color: colorParsed,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'label': label,
+      'stat_value': value,
+      'suffix': suffix,
+      'icon_key': iconKey,
+      'color_hex': colorHex,
+    };
+  }
 }
 
-// Liste des icônes disponibles dans le menu déroulant
 final Map<String, IconData> availableIcons = {
   'school': Icons.school,
   'public': Icons.public,
@@ -31,91 +67,164 @@ final Map<String, IconData> availableIcons = {
   'computer': Icons.computer,
   'groups': Icons.groups,
   'rocket': Icons.rocket_launch,
+  'event': Icons.event,
+  'work': Icons.work,
 };
 
-// ==========================================
-// 2. LE WIDGET PRINCIPAL
-// ==========================================
-
+// --- WIDGET PRINCIPAL ---
 class KeyFiguresWidget extends StatefulWidget {
   final bool isAdmin;
-
-  const KeyFiguresWidget({super.key, this.isAdmin = false});
+  const KeyFiguresWidget({super.key, required this.isAdmin});
 
   @override
   State<KeyFiguresWidget> createState() => _KeyFiguresWidgetState();
 }
 
 class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
-  // État local : est-on en train de modifier ?
   bool _isEditing = false;
+  bool _isLoading = true; // Chargement initial (GET)
+  bool _isSaving = false; // Chargement sauvegarde (POST)
+  List<KeyFigure> stats = [];
 
-  // Données initiales (Simule ta Base de Données)
-  List<KeyFigure> stats = [
-    KeyFigure(label: "DIPLÔMÉS", value: 8000, suffix: "+", iconKey: "school", color: const Color(0xFFE30613)),
-    KeyFigure(label: "PAYS", value: 45, suffix: "", iconKey: "public", color: Colors.blue[700]!),
-    KeyFigure(label: "ÉVÉNEMENTS", value: 150, suffix: "", iconKey: "calendar", color: Colors.green[700]!),
-    KeyFigure(label: "ENTREPRISES", value: 300, suffix: "+", iconKey: "business", color: Colors.teal[700]!),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchStats();
+  }
+
+  Future<void> _fetchStats() async {
+    try {
+      final response = await http.get(Uri.parse('https://alumni.theo-airey.fr/get_key_figures.php'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'success') {
+          if (mounted) {
+            setState(() {
+              stats = (data['data'] as List).map((i) => KeyFigure.fromJson(i)).toList();
+              _isLoading = false;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      print("Erreur de connexion : $e");
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // --- LOGIQUE DE SAUVEGARDE CORRIGÉE ---
+  Future<void> _saveData() async {
+    // 1. On active l'état "Sauvegarde en cours" pour afficher le loader
+    setState(() => _isSaving = true);
+
+    try {
+      String jsonBody = json.encode(stats.map((e) => e.toJson()).toList());
+
+      final response = await http.post(
+        Uri.parse('https://alumni.theo-airey.fr/set_key_figures.php'),
+        body: jsonBody,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      final result = json.decode(response.body);
+
+      // 2. Si succès UNIQUEMENT, on ferme le mode édition
+      if (result['status'] == 'success') {
+        if (mounted) {
+          setState(() {
+            _isEditing = false;
+            _isSaving = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Mise à jour réussie !"), backgroundColor: Colors.green),
+          );
+        }
+      } else {
+        throw Exception(result['message']);
+      }
+    } catch (e) {
+      // 3. Si erreur, on reste en mode édition pour laisser l'utilisateur réessayer
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erreur sauvegarde : $e"), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Container(
+          height: 200,
+          color: Colors.white,
+          child: const Center(child: CircularProgressIndicator())
+      );
+    }
+
     return Container(
-      // Changement de fond subtil en mode édition pour bien différencier
       color: _isEditing ? Colors.grey[50] : Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       child: Stack(
+        clipBehavior: Clip.none, // Permet aux ombres de ne pas être coupées
         alignment: Alignment.topRight,
         children: [
-
-          // A. LE CONTENU (Basculer entre Vue Admin et Vue Publique)
+          // CONTENU PRINCIPAL (Admin ou Public)
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
             child: _isEditing
-                ? _buildAdminInterface()  // Si on édite
-                : _buildPublicInterface(), // Vue normale
+                ? _buildAdminInterface()
+                : _buildPublicInterface(),
           ),
 
-          // B. LE BOUTON MAGIQUE (Visible SEULEMENT si isAdmin = true)
+          // BOUTON FLOTTANT SIMPLIFIÉ
           if (widget.isAdmin)
-            FloatingActionButton.extended(
-              onPressed: () {
-                if (_isEditing) {
-                  // Action : Sauvegarder
-                  _saveData();
-                } else {
-                  // Action : Entrer en mode édition
-                  setState(() => _isEditing = true);
-                }
-              },
-              // Le bouton change d'aspect selon l'état
-              backgroundColor: _isEditing ? Colors.green : Colors.redAccent,
-              icon: Icon(_isEditing ? Icons.check : Icons.edit, color: Colors.white),
-              label: Text(
-                  _isEditing ? "Valider" : "Modifier",
-                  style: const TextStyle(color: Colors.white)
-              ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: _buildSimpleEditButton(),
             ),
         ],
       ),
     );
   }
 
-  // --- LOGIQUE DE SAUVEGARDE ---
-  void _saveData() {
-    // ICI : Tu ferais ton appel API vers ta base de données
-    // ex: await api.updateStats(stats);
-
-    setState(() => _isEditing = false); // On quitte le mode édition
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Modifications enregistrées !"), backgroundColor: Colors.green),
+  // --- NOUVEAU DESIGN DU BOUTON ---
+  Widget _buildSimpleEditButton() {
+    return Material(
+      color: Colors.white,
+      elevation: 4, // L'ombre demandée
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: _isSaving
+            ? null // Désactivé pendant la sauvegarde
+            : () {
+          if (_isEditing) {
+            _saveData();
+          } else {
+            setState(() => _isEditing = true);
+          }
+        },
+        child: Container(
+          width: 50,
+          height: 50,
+          alignment: Alignment.center,
+          // Si sauvegarde : Loader, Si Edition : Check vert, Sinon : Crayon gris/rouge
+          child: _isSaving
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+              : Icon(
+            _isEditing ? Icons.check : Icons.edit,
+            color: _isEditing ? Colors.green : const Color(0xFFE30613),
+            size: 24,
+          ),
+        ),
+      ),
     );
   }
 
-  // ==========================================
-  // 3. VUE PUBLIQUE (Lecture Seule + Animation)
-  // ==========================================
   Widget _buildPublicInterface() {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isMobile = screenWidth < 800;
@@ -133,11 +242,10 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
   }
 
   Widget _buildStatCard(KeyFigure stat) {
-    // Petite protection si l'icône n'existe pas
     IconData icon = availableIcons[stat.iconKey] ?? Icons.help;
 
     return TweenAnimationBuilder<double>(
-      key: ValueKey(stat.value), // Relance l'anim si la valeur change
+      key: ValueKey(stat.value),
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 800),
       builder: (context, val, child) {
@@ -163,11 +271,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
     );
   }
 
-  // ==========================================
-  // 4. VUE ADMIN (Formulaire + Aperçu Live)
-  // ==========================================
   Widget _buildAdminInterface() {
-    // On affiche une grille responsive : Formulaire à gauche (ou haut), Aperçu à droite (ou bas)
     double width = MediaQuery.of(context).size.width;
     bool isMobile = width < 900;
 
@@ -177,8 +281,9 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
         KeyFigure stat = entry.value;
         return Card(
           margin: const EdgeInsets.only(bottom: 15),
+          elevation: 2,
           child: ExpansionTile(
-            initiallyExpanded: idx == 0, // Le premier ouvert par défaut
+            initiallyExpanded: idx == 0,
             leading: Icon(availableIcons[stat.iconKey], color: stat.color),
             title: Text("Bloc ${idx + 1} : ${stat.label}", style: const TextStyle(fontWeight: FontWeight.bold)),
             children: [
@@ -186,7 +291,6 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
                 padding: const EdgeInsets.all(15),
                 child: Column(
                   children: [
-                    // Ligne 1 : Valeur + Suffixe
                     Row(
                       children: [
                         Expanded(
@@ -209,14 +313,12 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    // Ligne 2 : Titre
                     TextFormField(
                       initialValue: stat.label,
                       decoration: const InputDecoration(labelText: "Titre (Label)", border: OutlineInputBorder()),
                       onChanged: (val) => setState(() => stat.label = val),
                     ),
                     const SizedBox(height: 10),
-                    // Ligne 3 : Menu déroulant Icône
                     DropdownButtonFormField<String>(
                       value: availableIcons.containsKey(stat.iconKey) ? stat.iconKey : 'school',
                       decoration: const InputDecoration(labelText: "Icône", border: OutlineInputBorder()),
@@ -235,20 +337,23 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
       }).toList(),
     );
 
-    // On retourne la mise en page selon l'écran
+    // On ajoute un padding en bas pour éviter que le dernier élément soit caché par le clavier ou le scroll
     if (isMobile) {
-      return ListView(children: [formSection, const SizedBox(height: 80)]); // 80px pour le bouton flottant
+      return ListView(
+          shrinkWrap: true, // Important si dans une Column parente
+          physics: const NeverScrollableScrollPhysics(), // Scroll géré par la page principale
+          children: [formSection, const SizedBox(height: 20)]
+      );
     } else {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 4, child: SingleChildScrollView(child: formSection)),
+          Expanded(flex: 4, child: formSection),
           const VerticalDivider(width: 50),
           Expanded(flex: 6, child: Column(
             children: [
               const Chip(label: Text("APERÇU EN DIRECT")),
               const SizedBox(height: 50),
-              // On réutilise _buildStatCard mais sans l'animation d'entrée pour éviter les clignotements
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: stats.map((s) => _buildSimplePreview(s)).toList(),
@@ -260,7 +365,6 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
     }
   }
 
-  // Version simplifiée pour l'aperçu (sans animation lourde)
   Widget _buildSimplePreview(KeyFigure stat) {
     return Column(
       children: [

@@ -82,8 +82,7 @@ class PageAccueil extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20,),
-            KeyFiguresWidget(),
-
+            KeyFiguresWidget(isAdmin: user['role'] == "admin",),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), 
               child: isDesktop ? _buildDesktopLayout() : _buildMobileLayout(),
