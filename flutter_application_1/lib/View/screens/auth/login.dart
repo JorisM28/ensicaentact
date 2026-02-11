@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'colors.dart';
-import 'login_check.dart';
-import 'directory_page.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../../../ViewModel/admin/login_check.dart';
+import '../alumni/directory_page.dart';
 
 
 class Login extends StatefulWidget {

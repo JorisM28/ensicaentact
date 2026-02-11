@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'colors.dart';
-import 'login.dart';
-import 'profile.dart';
+import '../../Model/core/theme/colors.dart';
+import '../screens/auth/login.dart';
+import '../screens/alumni/profile.dart';
 
 class ProfileBadge extends StatefulWidget {
   final Map<String, dynamic> user;

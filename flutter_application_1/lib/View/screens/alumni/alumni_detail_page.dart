@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/profile_badge.dart';
-import 'colors.dart';
-import 'alumnis.dart';
-import 'database_service.dart';
+import 'package:flutter_application_ensicaentact/View/common/profile_badge.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../../../Model/data/alumnis.dart';
+import '../../../Model/data/services/database_service.dart';
 import 'package:flutter/services.dart';
 
 class AlumniDetailPage extends StatefulWidget {

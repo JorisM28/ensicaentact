@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../colors.dart';
-import 'database_service.dart';
-import 'widget/carte_entreprise_widget.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../../../Model/data/services/database_service.dart';
+import '../../common/carte_entreprise_widget.dart';
 
 class CompaniesDirectoryPage extends StatefulWidget {
   const CompaniesDirectoryPage({super.key});

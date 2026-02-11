@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'colors.dart';
-import 'login.dart';
-import 'database_service.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../auth/login.dart';
+import '../../../Model/data/services/database_service.dart';
 
 class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> user;

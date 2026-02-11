@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'profile_badge.dart';
-import 'colors.dart';
-import 'alumnis.dart';
-import 'database_service.dart';
-import 'widget/filtre_widget.dart';
-import 'alumni_detail_page.dart'; 
-import 'admin_validate_page.dart';
+import '../../common/profile_badge.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../../../Model/data/alumnis.dart';
+import '../../../Model/data/services/database_service.dart';
+import '../../common/filtre_widget.dart';
+import 'alumni_detail_page.dart';
+import '../admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
-import 'add_alumni.dart'; 
-import 'navigation.dart';
+import 'add_alumni.dart';
+import '../../navigation.dart';
 
 void main() {
   runApp(const MyAlumniNetwork());

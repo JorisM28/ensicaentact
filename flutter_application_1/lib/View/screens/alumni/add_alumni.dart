@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'database_service.dart';
-import 'colors.dart';
+import '../../../Model/data/services/database_service.dart';
+import '../../../Model/core/theme/colors.dart';
 
 class StageFormModel {
   final Key key = UniqueKey();

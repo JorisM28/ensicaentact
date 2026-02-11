@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'colors.dart';
-import 'database_service.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../../../Model/data/services/database_service.dart';
 
 class EmploymentPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -22,10 +22,10 @@ class _EmploymentPageState extends State<EmploymentPage> {
   @override
   void initState() {
     super.initState();
-    _chargerLesVraiesOffres();
+    _loadTrueOffers();
   }
 
-  void _chargerLesVraiesOffres() async {
+  void _loadTrueOffers() async {
     setState(() => _isLoading = true);
     
     var data = await DatabaseService().getOffers();
@@ -38,7 +38,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
     }
   }
 
-  void _confirmerSuppression(String idOffre) {
+  void _deleteComfirm(String idOffre) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -53,7 +53,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
               bool success = await DatabaseService().deleteOffers(idOffre);
               
               if (success) {
-                _chargerLesVraiesOffres();
+                _loadTrueOffers();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Offre supprimée avec succès."))
                 );
@@ -95,7 +95,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh), 
-            onPressed: _chargerLesVraiesOffres
+            onPressed: _loadTrueOffers
           )
         ],
       ),
@@ -233,7 +233,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
                               const SizedBox(width: 10),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                                onPressed: () => _confirmerSuppression(offre['id_offre'].toString()),
+                                onPressed: () => _deleteComfirm(offre['id_offre'].toString()),
                                 tooltip: "Supprimer",
                               ),
                             ]
@@ -359,7 +359,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
 
                     if (success && mounted) {
                       Navigator.pop(context); 
-                      _chargerLesVraiesOffres();
+                      _loadTrueOffers();
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Offre enregistrée !")));
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(

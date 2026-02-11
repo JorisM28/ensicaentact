@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/navigation.dart';
+import 'package:flutter_application_ensicaentact/View/navigation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';  
-import 'login.dart';
-import 'login_check.dart';
-import 'directory_page.dart';
-import 'add_alumni_form.dart';
-import 'employement_page.dart';
-import 'companies_directory_page.dart';
+import 'View/screens/auth/login.dart';
+import 'ViewModel/admin/login_check.dart';
+import 'View/screens/alumni/directory_page.dart';
+import 'View/screens/alumni/add_alumni_form.dart';
+import 'View/screens/employment/employement_page.dart';
+import 'View/screens/employment/companies_directory_page.dart';
 
 void main() {
   runApp(const MyApp());

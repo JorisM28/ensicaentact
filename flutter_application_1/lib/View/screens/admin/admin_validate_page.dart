@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'database_service.dart';
-import 'add_alumni.dart';
-import 'colors.dart';
+import '../../../Model/data/services/database_service.dart';
+import '../alumni/add_alumni.dart';
+import '../../../Model/core/theme/colors.dart';
 
 class AdminValidationPage extends StatefulWidget {
   const AdminValidationPage({super.key});

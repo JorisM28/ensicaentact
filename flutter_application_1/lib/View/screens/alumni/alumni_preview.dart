@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'colors.dart';
-import 'alumnis.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../../../Model/data/alumnis.dart';
 import 'alumni_detail_page.dart';
 
 class AlumniPreview extends StatelessWidget {
