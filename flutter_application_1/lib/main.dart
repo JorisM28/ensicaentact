@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/navigation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';  
 import 'login.dart';
 import 'login_check.dart';
 import 'page_annuaire.dart';
 import 'formulaire_ajout_alumni.dart';
 import 'page_emploi.dart';
+import 'entreprise_annuaire_page.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -17,9 +19,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('fr', 'FR'),
+        Locale('en', 'US'),
+      ],
       title: 'Réseau Alumni',
       navigatorObservers: [routeObserver],
       home: const PageAccueil(),
@@ -79,7 +91,7 @@ class PageAccueil extends StatelessWidget {
               },
               child: const Text('Version Admin'),
             ),
-             ElevatedButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -87,6 +99,15 @@ class PageAccueil extends StatelessWidget {
                 );
               },
               child: const Text('Formulaire'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PageAnnuaireEntreprise()),
+                );
+              },
+              child: const Text('Page Annuaire Entreprise'),
             ),
             ElevatedButton(
               onPressed: () {

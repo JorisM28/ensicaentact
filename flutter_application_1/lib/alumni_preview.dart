@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'alumnis.dart';
 import 'alumni_detail_page.dart';
-import 'alumni_detail_page_admin.dart';
 
 class AlumniPreview extends StatelessWidget {
   final Alumnis alumni;
@@ -11,22 +10,21 @@ class AlumniPreview extends StatelessWidget {
   bool get estAdmin => user['role'] == 'admin';
 
 
-  // Fonction pour aller vers la page complète
   void _ouvrirPageComplete(BuildContext context) {
     if (estAdmin) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => AlumniDetailPageAdmin(alumni: alumni),
-        ),
+            builder: (context) =>AlumniDetailPage(alumni: alumni, user: user),
+          ),
       );
     }else{
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AlumniDetailPage(alumni: alumni, user: user),
-      ),
-    );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AlumniDetailPage(alumni: alumni, user: user),
+        ),
+      );
     }
   }
 
@@ -60,8 +58,9 @@ class AlumniPreview extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
+            if (alumni.job.isNotEmpty || alumni.entreprise.isNotEmpty)
             Text(
-              "${alumni.job} chez ${alumni.entreprise}",
+              "${alumni.job} ${alumni.entreprise.isEmpty || alumni.job.isEmpty ? "" : "chez"} ${alumni.entreprise}",
               style: TextStyle(fontSize: 18, color: Colors.grey[700]),
               textAlign: TextAlign.center,
             ),
@@ -70,10 +69,67 @@ class AlumniPreview extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _infoBulle(Icons.school, alumni.promo.toString(), Colors.orangeAccent),
-                _infoBulle(Icons.location_on, alumni.ville, Colors.red),
+                if (alumni.tel.isNotEmpty) 
+                  _infoBulle(Icons.calendar_month_outlined, alumni.promo.toString(), Colors.orangeAccent),
+                if (alumni.email.isNotEmpty) 
+                  _infoBulle(Icons.location_on, alumni.ville, Colors.red),
+                if  (alumni.filiere.isNotEmpty) 
+                  _infoBulle(Icons.school, alumni.filiere.toString(), Colors.green),
+                if (alumni.majeure.isNotEmpty) 
+                  _infoBulle(Icons.auto_awesome, alumni.majeure, Colors.cyan),
               ],
             ),
+            const SizedBox(height: 40),
+
+            const Divider(height: 1),
+
+            const SizedBox(height: 40),
+
+            if (alumni.stages.isNotEmpty)...[
+              Text(
+                "Stages :",
+                style: TextStyle(fontSize: 18,   fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Column(
+                children: [
+                  for (var stage in alumni.stages)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 15.0),
+                      padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 5.0),
+                      
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 211, 211, 211),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3), 
+                          ),
+                        ],
+                      ),
+                      
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (stage.entreprise.isNotEmpty) 
+                            Expanded(child: _infoBulle(Icons.calendar_today, stage.annee, Colors.purple)),
+                          if (stage.entreprise.isNotEmpty) 
+                            Expanded(child: _infoBulle(Icons.public, stage.pays, Colors.lightBlue)),
+                          if (stage.entreprise.isNotEmpty) 
+                            Expanded(child: _infoBulle(Icons.location_city, stage.ville, Colors.teal)),
+                          if (stage.entreprise.isNotEmpty) 
+                            Expanded(child: _infoBulle(Icons.subject, stage.intitule, Colors.pink)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ],
 
             const Spacer(),
 

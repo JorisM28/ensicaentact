@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'alumnis.dart';
 
@@ -74,16 +73,30 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   }
 
   Future<List<Map<String, dynamic>>> getHistorique() async {
-  try {
-    final response = await http.get(Uri.parse("$apiUrl/get_history.php"));
-    if (response.statusCode == 200) {
-      return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    try {
+      final response = await http.get(Uri.parse("$apiUrl/get_history.php"));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("Erreur historique: $e");
     }
-  } catch (e) {
-    print("Erreur historique: $e");
+    return [];
+
   }
-  return [];
-}
+
+  Future<List<Map<String, dynamic>>> getEntreprise() async {
+    try {
+      final response = await http.get(Uri.parse("$apiUrl/get_entreprise.php"));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(jsonDecode(response.body));
+      }
+    } catch (e) {
+      print("Erreur entreprise: $e");
+    }
+    return [];
+
+  }
 
 
   Future<void> modifierEleve(Map<String, dynamic> donnees) async {
@@ -107,11 +120,9 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   }
 
   Future<Map<String, dynamic>> updatePassword(String email, String oldPassword, String newPassword) async {
-    const String url = 'https://alumni.theo-airey.fr/update_password.php';
-
     try {
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse("$apiUrl/update_password.php"),
         body: {
           "email": email,
           "old_password": oldPassword,
