@@ -6,7 +6,7 @@ class DatabaseService {
 
   static const String apiUrl = 'https://alumni.theo-airey.fr';
 
-  Future<List<Alumnis>> getTousLesEleves() async {
+  Future<List<Alumnis>> getAllStudent() async {
     try {
       String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
       final urlString = '$apiUrl?t=$timestamp';
@@ -28,7 +28,7 @@ class DatabaseService {
       return [];
     }
   }
-Future<bool> supprimerEleve(String nom, String prenom) async {
+Future<bool> deleteStudents(String nom, String prenom) async {
 
     try {
       final url = Uri.parse("$apiUrl/delete_alumni.php");
@@ -56,7 +56,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     }
   }
 
-  Future<void> ajouterEleve(Map<String, dynamic> donneesEleve) async {
+  Future<void> addStudent(Map<String, dynamic> donneesEleve) async {
     try {
       final url = Uri.parse("$apiUrl/add_alumni.php");
       
@@ -72,7 +72,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getHistorique() async {
+  Future<List<Map<String, dynamic>>> getHistory() async {
     try {
       final response = await http.get(Uri.parse("$apiUrl/get_history.php"));
       if (response.statusCode == 200) {
@@ -85,7 +85,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
 
   }
 
-  Future<List<Map<String, dynamic>>> getEntreprise() async {
+  Future<List<Map<String, dynamic>>> getCompanies() async {
     try {
       final response = await http.get(Uri.parse("$apiUrl/get_entreprise.php"));
       if (response.statusCode == 200) {
@@ -99,7 +99,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   }
 
 
-  Future<void> modifierEleve(Map<String, dynamic> donnees) async {
+  Future<void> modifyStudent(Map<String, dynamic> donnees) async {
     try {
       final url = Uri.parse("$apiUrl/update_alumni.php");
       print("Envoi modification pour ${donnees['nom']}...");
@@ -140,7 +140,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     }
   }
 
-  Future<void> demanderAjoutEleve(Map<String, dynamic> donneesEleve) async {
+  Future<void> askAddStudent(Map<String, dynamic> donneesEleve) async {
     try {
       final url = Uri.parse("$apiUrl/request_alumni.php");
       final response = await http.post(
@@ -156,7 +156,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getOffres() async {
+  Future<List<Map<String, dynamic>>> getOffers() async {
     try {
       final response = await http.get(Uri.parse("$apiUrl/offer/get_offers.php"));
       if (response.statusCode == 200) {
@@ -169,7 +169,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
   }
 
 
-  Future<bool> ajouterOffre(Map<String, dynamic> offre) async {
+  Future<bool> addOffers(Map<String, dynamic> offre) async {
     try {
       final response = await http.post(
         Uri.parse("$apiUrl/offer/add_offer.php"),
@@ -189,7 +189,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     return false;
   }
 
-  Future<bool> supprimerOffre(String idOffre) async {
+  Future<bool> deleteOffers(String idOffre) async {
     try {
       final url = Uri.parse("$apiUrl/offer/delete_offer.php");
       
@@ -212,7 +212,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     return false;
   }
 
-  Future<List<Map<String, dynamic>>> getDemandesEnAttente() async {
+  Future<List<Map<String, dynamic>>> getWaitingRequests() async {
     try {
       final response = await http.get(Uri.parse("$apiUrl/get_request.php"));
       if (response.statusCode == 200) {
@@ -224,7 +224,7 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     return [];
   }
 
-Future<void> supprimerDemande(int idDemande) async {
+Future<void> deleteStudent(int idDemande) async {
     try {
       final url = Uri.parse("$apiUrl/delete_request.php");
       print("Appel Suppression pour ID : $idDemande");

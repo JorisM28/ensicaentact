@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'database_service.dart';
 
-class PageEmploi extends StatefulWidget {
+class EmploymentPage extends StatefulWidget {
   final Map<String, dynamic> user;
 
-  const PageEmploi({super.key, required this.user});
+  const EmploymentPage({super.key, required this.user});
 
   @override
-  State<PageEmploi> createState() => _PageEmploiState();
+  State<EmploymentPage> createState() => _EmploymentPageState();
 }
 
-class _PageEmploiState extends State<PageEmploi> {
+class _EmploymentPageState extends State<EmploymentPage> {
   
-  List<Map<String, dynamic>> _toutesLesOffres = [];
+  List<Map<String, dynamic>> _allOffers = [];
   bool _isLoading = true;
 
-  String _recherche = "";
+  String _search = "";
   final TextEditingController _searchCtrl = TextEditingController();
 
   @override
@@ -28,11 +28,11 @@ class _PageEmploiState extends State<PageEmploi> {
   void _chargerLesVraiesOffres() async {
     setState(() => _isLoading = true);
     
-    var data = await DatabaseService().getOffres();
+    var data = await DatabaseService().getOffers();
     
     if (mounted) {
       setState(() {
-        _toutesLesOffres = data;
+        _allOffers = data;
         _isLoading = false;
       });
     }
@@ -50,7 +50,7 @@ class _PageEmploiState extends State<PageEmploi> {
             onPressed: () async {
               Navigator.pop(ctx);
               
-              bool success = await DatabaseService().supprimerOffre(idOffre);
+              bool success = await DatabaseService().deleteOffers(idOffre);
               
               if (success) {
                 _chargerLesVraiesOffres();
@@ -73,19 +73,19 @@ class _PageEmploiState extends State<PageEmploi> {
   @override
   Widget build(BuildContext context) {
     String role = widget.user['role'] ?? 'guest';
-    String monId = widget.user['id'].toString();
+    String myId = widget.user['id'].toString();
     bool isAdmin = (role == 'admin');
-    bool peutAjouter = (isAdmin || role == 'alumni');
+    bool canAdd = (isAdmin || role == 'alumni');
 
-    final offresFiltrees = _toutesLesOffres.where((o) {
-      final titre = (o['titre'] ?? '').toLowerCase();
-      final entreprise = (o['entreprise'] ?? '').toLowerCase();
-      final motCle = _recherche.toLowerCase();
-            return titre.contains(motCle) || entreprise.contains(motCle);
+    final filteredOffers = _allOffers.where((o) {
+      final title = (o['titre'] ?? '').toLowerCase();
+      final company = (o['entreprise'] ?? '').toLowerCase();
+      final keyWord = _search.toLowerCase();
+            return title.contains(keyWord) || company.contains(keyWord);
     }).toList();
 
-    final listeStages = offresFiltrees.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
-    final listeEmplois = offresFiltrees.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
+    final internshipList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
+    final employmentOffers = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -109,13 +109,13 @@ class _PageEmploiState extends State<PageEmploi> {
                 labelText: "Rechercher (Poste, Entreprise...)",
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                suffixIcon: _recherche.isNotEmpty 
+                suffixIcon: _search.isNotEmpty 
                   ? IconButton(
                       icon: const Icon(Icons.clear), 
                       onPressed: () {
                         setState(() {
                           _searchCtrl.clear();
-                          _recherche = "";
+                          _search = "";
                         });
                       },
                     ) 
@@ -123,7 +123,7 @@ class _PageEmploiState extends State<PageEmploi> {
               ),
               onChanged: (val) {
                 setState(() {
-                  _recherche = val;
+                  _search = val;
                 });
               },
             ),
@@ -135,13 +135,13 @@ class _PageEmploiState extends State<PageEmploi> {
             : Row(
                 children: [
                   Expanded(
-                    child: _buildColonne(
-                      titre: "Offres d'Emploi",
-                      couleur: Colors.blue[800]!,
-                      liste: listeEmplois,
-                      isStage: false,
-                      peutAjouter: peutAjouter,
-                      monId: monId,
+                    child: _buildColumn(
+                      title: "Offres d'Emploi",
+                      color: Colors.blue[800]!,
+                      list: employmentOffers,
+                      isInternship: false,
+                      canAdd: canAdd,
+                      myId: myId,
                       isAdmin: isAdmin
                     ),
                   ),
@@ -149,13 +149,13 @@ class _PageEmploiState extends State<PageEmploi> {
                   Container(width: 1, color: Colors.grey[300]),
 
                   Expanded(
-                    child: _buildColonne(
-                      titre: "Offres de Stage",
-                      couleur: Colors.orange[800]!,
-                      liste: listeStages,
-                      isStage: true,
-                      peutAjouter: peutAjouter,
-                      monId: monId,
+                    child: _buildColumn(
+                      title: "Offres de Stage",
+                      color: Colors.orange[800]!,
+                      list: internshipList,
+                      isInternship: true,
+                      canAdd: canAdd,
+                      myId: myId,
                       isAdmin: isAdmin
                     ),
                   ),
@@ -167,13 +167,13 @@ class _PageEmploiState extends State<PageEmploi> {
     );
   }
 
-  Widget _buildColonne({
-    required String titre,
-    required Color couleur,
-    required List<Map<String, dynamic>> liste,
-    required bool isStage,
-    required bool peutAjouter,
-    required String monId,
+  Widget _buildColumn({
+    required String title,
+    required Color color,
+    required List<Map<String, dynamic>> list,
+    required bool isInternship,
+    required bool canAdd,
+    required String myId,
     required bool isAdmin,
   }) {
     return Column(
@@ -181,28 +181,28 @@ class _PageEmploiState extends State<PageEmploi> {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(15),
-          color: couleur.withOpacity(0.1),
+          color: color.withOpacity(0.1),
           child: Text(
-            titre,
+            title,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: couleur),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
           ),
         ),
 
         Expanded(
-          child: liste.isEmpty
+          child: list.isEmpty
               ? const Center(child: Text("Aucune offre trouvée", style: TextStyle(color: Colors.grey)))
               : ListView.builder(
                   padding: const EdgeInsets.all(10),
-                  itemCount: liste.length,
+                  itemCount: list.length,
                   itemBuilder: (context, index) {
-                    final offre = liste[index];
+                    final offre = list[index];
                     print("DÉBUG OFFRE : $offre");
                     
-                    String idAuteurOffre = (offre['id_auteur'] ?? '').toString();
-                    bool estMonOffre = (idAuteurOffre == monId);
+                    String idAutorOffers = (offre['id_auteur'] ?? '').toString();
+                    bool isMyOffers = (idAutorOffers == myId);
                     
-                    bool droitSupprimer = estMonOffre || isAdmin;
+                    bool canDelete = isMyOffers || isAdmin;
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 10),
@@ -225,11 +225,11 @@ class _PageEmploiState extends State<PageEmploi> {
                           children: [
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(color: couleur.withOpacity(0.1), borderRadius: BorderRadius.circular(5)),
-                              child: Text(offre['type'] ?? '', style: TextStyle(fontSize: 12, color: couleur, fontWeight: FontWeight.bold)),
+                              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(5)),
+                              child: Text(offre['type'] ?? '', style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.bold)),
                             ),
                             
-                            if (droitSupprimer) ...[
+                            if (canDelete) ...[
                               const SizedBox(width: 10),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red, size: 20),
@@ -239,32 +239,32 @@ class _PageEmploiState extends State<PageEmploi> {
                             ]
                           ],
                         ),
-                        onTap: () => _voirDetail(offre),
+                        onTap: () => _seeDetail(offre),
                       ),
                     );
                   },
                 ),
         ),
 
-        if (peutAjouter)
+        if (canAdd)
           Padding(
             padding: const EdgeInsets.all(15),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: couleur, 
+                  backgroundColor: color, 
                   foregroundColor: Colors.white, 
                   padding: const EdgeInsets.all(15)
                 ),
                 icon: const Icon(Icons.add),
-                label: Text(isStage ? "Ajouter un Stage" : "Ajouter un Emploi"),
-                onPressed: () => _popupAjouter(isStage, couleur),
+                label: Text(isInternship ? "Ajouter un Stage" : "Ajouter un Emploi"),
+                onPressed: () => _addPopUp(isInternship, color),
               ),
             ),
           ),
 
-        if (!peutAjouter)
+        if (!canAdd)
           Padding(
             padding: const EdgeInsets.all(10),
             child: Text(
@@ -276,7 +276,7 @@ class _PageEmploiState extends State<PageEmploi> {
     );
   }
 
-  void _voirDetail(Map<String, dynamic> offre) {
+  void _seeDetail(Map<String, dynamic> offre) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -301,12 +301,12 @@ class _PageEmploiState extends State<PageEmploi> {
     );
   }
 
-  void _popupAjouter(bool isStage, Color couleur) {
-    final titreCtrl = TextEditingController();
-    final entCtrl = TextEditingController();
-    final villeCtrl = TextEditingController();
-    final emailCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
+  void _addPopUp(bool isStage, Color couleur) {
+    final controllerTitle = TextEditingController();
+    final controllerCompany = TextEditingController();
+    final controllerCity = TextEditingController();
+    final controllerEmail = TextEditingController();
+    final controllerDescription = TextEditingController();
     String typeSelect = isStage ? 'Stage' : 'CDI';
 
     showDialog(
@@ -321,9 +321,9 @@ class _PageEmploiState extends State<PageEmploi> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(controller: titreCtrl, decoration: const InputDecoration(labelText: "Intitulé du poste")),
-                    TextField(controller: entCtrl, decoration: const InputDecoration(labelText: "Entreprise")),
-                    TextField(controller: villeCtrl, decoration: const InputDecoration(labelText: "Ville")),
+                    TextField(controller: controllerTitle, decoration: const InputDecoration(labelText: "Intitulé du poste")),
+                    TextField(controller: controllerCompany, decoration: const InputDecoration(labelText: "Entreprise")),
+                    TextField(controller: controllerCity, decoration: const InputDecoration(labelText: "Ville")),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: typeSelect,
@@ -332,8 +332,8 @@ class _PageEmploiState extends State<PageEmploi> {
                       onChanged: (v) => setStateDialog(() => typeSelect = v!),
                       decoration: const InputDecoration(labelText: "Type"),
                     ),
-                    TextField(controller: emailCtrl, decoration: const InputDecoration(labelText: "Email contact")),
-                    TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Description"), maxLines: 3),
+                    TextField(controller: controllerEmail, decoration: const InputDecoration(labelText: "Email contact")),
+                    TextField(controller: controllerDescription, decoration: const InputDecoration(labelText: "Description"), maxLines: 3),
                   ],
                 ),
               ),
@@ -343,18 +343,18 @@ class _PageEmploiState extends State<PageEmploi> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: couleur, foregroundColor: Colors.white),
                 onPressed: () async { 
-                  if (titreCtrl.text.isNotEmpty && entCtrl.text.isNotEmpty) {
+                  if (controllerTitle.text.isNotEmpty && controllerCompany.text.isNotEmpty) {
                     
-                    String monId = widget.user['id'].toString();
+                    String myId = widget.user['id'].toString();
 
-                    bool success = await DatabaseService().ajouterOffre({
-                      "titre": titreCtrl.text,
-                      "entreprise": entCtrl.text,
-                      "ville": villeCtrl.text,
+                    bool success = await DatabaseService().addOffers({
+                      "titre": controllerTitle.text,
+                      "entreprise": controllerCompany.text,
+                      "ville": controllerCity.text,
                       "type": typeSelect,
-                      "contact_email": emailCtrl.text,
-                      "description": descCtrl.text,
-                      "id_auteur": monId
+                      "contact_email": controllerEmail.text,
+                      "description": controllerDescription.text,
+                      "id_auteur": myId
                     });
 
                     if (success && mounted) {

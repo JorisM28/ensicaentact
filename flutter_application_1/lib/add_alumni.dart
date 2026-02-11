@@ -8,37 +8,37 @@ import 'colors.dart';
 class StageFormModel {
   final Key key = UniqueKey();
   
-  final TextEditingController intituleCtrl = TextEditingController();
-  final TextEditingController entrepriseCtrl = TextEditingController();
-  final TextEditingController villeCtrl = TextEditingController();
-  final TextEditingController paysCtrl = TextEditingController();
-  final TextEditingController descriptionCtrl = TextEditingController();
-  final TextEditingController dateDebutCtrl = TextEditingController();
-  final TextEditingController dateFinCtrl = TextEditingController();
-  String typeStage ='I';
-  String anneeSelectionnee = '2A';
+  final TextEditingController controllerEntitled = TextEditingController();
+  final TextEditingController controllerCompany = TextEditingController();
+  final TextEditingController controllerCity = TextEditingController();
+  final TextEditingController controllercountry = TextEditingController();
+  final TextEditingController controllerDescription = TextEditingController();
+  final TextEditingController controllerStartDate = TextEditingController();
+  final TextEditingController controllerEndDate = TextEditingController();
+  String internshipType ='I';
+  String selectedYear = '2A';
 
   void dispose() {
-    intituleCtrl.dispose();
-    entrepriseCtrl.dispose();
-    villeCtrl.dispose();
-    paysCtrl.dispose();
-    descriptionCtrl.dispose();
-    dateDebutCtrl.dispose();
-    dateFinCtrl.dispose();
+    controllerEntitled.dispose();
+    controllerCompany.dispose();
+    controllerCity.dispose();
+    controllercountry.dispose();
+    controllerDescription.dispose();
+    controllerStartDate.dispose();
+    controllerEndDate.dispose();
   }
 
   Map<String, dynamic> toMap() {
     return {
-      "intitule": intituleCtrl.text.trim(),
-      "annee": anneeSelectionnee,
-      "type" : typeStage,
-      "entreprise": entrepriseCtrl.text.trim(),
-      "ville": villeCtrl.text.trim(),
-      "pays": paysCtrl.text.trim(),
-      "description": descriptionCtrl.text.trim(),
-      "debut": dateDebutCtrl.text.trim(),
-      "fin": dateFinCtrl.text.trim(),
+      "intitule": controllerEntitled.text.trim(),
+      "annee": selectedYear,
+      "type" : internshipType,
+      "entreprise": controllerCompany.text.trim(),
+      "ville": controllerCity.text.trim(),
+      "pays": controllercountry.text.trim(),
+      "description": controllerDescription.text.trim(),
+      "debut": controllerStartDate.text.trim(),
+      "fin": controllerEndDate.text.trim(),
     };
   }
 }
@@ -60,16 +60,25 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   bool _isLoading = false;
   bool? _consent = false;
 
-  final _nomCtrl = TextEditingController();
-  final _prenomCtrl = TextEditingController();
-  final _dateNaissanceCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _telCtrl = TextEditingController();
-  final _descriptionPosteCtrl = TextEditingController();
-  final _dateDebutCtrl = TextEditingController();
-  String _sexeSelectionne = 'I';
-  String? _majeureSelectionnee;
-  String? _optionSelectionnee;
+  final _controllerLastName = TextEditingController();
+  final _controllerFirstName = TextEditingController();
+  final _controllerDateOfBirth = TextEditingController();
+  final _controllereMail = TextEditingController();
+  final _controllerPhone = TextEditingController();
+  final _controllerPositionDescription = TextEditingController();
+  final _controllerStartDate = TextEditingController();
+  String _selectedGender = 'I';
+  String? _selectedSpecialisation;
+  String? _selectedOption;
+
+  final _controllerPromotion = TextEditingController();
+  String _selectedFormation = 'FISE';
+  String _selectedSector = 'Informatique';
+
+  final _controllerPosition = TextEditingController();
+  final _controllerCompany = TextEditingController();
+  final _controllerCity = TextEditingController();
+  final _paysCtrl = TextEditingController();
 
   final Map<String, Map<String, List<String>>> _hierarchieFormation = {
     'Informatique': {
@@ -90,16 +99,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
   String type ='E';
 
-  final _promoCtrl = TextEditingController();
-  String _formationSelectionnee = 'FISE';
-  String _filiereSelectionnee = 'Informatique';
-
-  final _posteCtrl = TextEditingController();
-  final _entrepriseCtrl = TextEditingController();
-  final _villeCtrl = TextEditingController();
-  final _paysCtrl = TextEditingController();
-
-  final List<StageFormModel> _stages = [];
+  final List<StageFormModel> _internships = [];
 
   Future<void> _selectionnerDate(BuildContext context, TextEditingController controller) async {
     DateTime? picked = await showDatePicker(
@@ -150,37 +150,37 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     if (widget.initialData != null) {
       var data = widget.initialData!;
       
-      _nomCtrl.text = data['nom'] ?? '';
-      _prenomCtrl.text = data['prenom'] ?? '';
-      _sexeSelectionne = data['sexe'] ?? 'I';
-      _emailCtrl.text = data['email'] ?? '';
-      _telCtrl.text = data['tel'] ?? '';
+      _controllerLastName.text = data['nom'] ?? '';
+      _controllerFirstName.text = data['prenom'] ?? '';
+      _selectedGender = data['sexe'] ?? 'I';
+      _controllereMail.text = data['email'] ?? '';
+      _controllerPhone.text = data['tel'] ?? '';
       _consent = data['autor'] == true || data['autor'] == 1; 
 
-      _promoCtrl.text = (data['promo'] ?? '').toString();
-      _formationSelectionnee = data['formation'] ?? 'FISE';
-      _filiereSelectionnee = data['filiere'] ?? 'Informatique';
+      _controllerPromotion.text = (data['promo'] ?? '').toString();
+      _selectedFormation = data['formation'] ?? 'FISE';
+      _selectedSector = data['filiere'] ?? 'Informatique';
       
-      if (data['majeure'] != null) _majeureSelectionnee = data['majeure'];
-      if (data['option'] != null) _optionSelectionnee = data['option'];
+      if (data['majeure'] != null) _selectedSpecialisation = data['majeure'];
+      if (data['option'] != null) _selectedOption = data['option'];
 
-      _posteCtrl.text = data['poste'] ?? data['job'] ?? '';
-      _entrepriseCtrl.text = data['entreprise'] ?? '';
-      _descriptionPosteCtrl.text = data['description'] ?? '';
-      _villeCtrl.text = data['ville'] ?? '';
+      _controllerPosition.text = data['poste'] ?? data['job'] ?? '';
+      _controllerCompany.text = data['entreprise'] ?? '';
+      _controllerPositionDescription.text = data['description'] ?? '';
+      _controllerCity.text = data['ville'] ?? '';
       _paysCtrl.text = data['pays'] ?? '';
 
       if (data['stages'] != null) {
         for (var s in data['stages']) {
           var stageModel = StageFormModel();
-          stageModel.anneeSelectionnee = s['annee'] ?? '2A';
-          stageModel.typeStage = s['type'] ?? 'I';
-          stageModel.intituleCtrl.text = s['intitule'] ?? '';
-          stageModel.entrepriseCtrl.text = s['entreprise'] ?? '';
-          stageModel.villeCtrl.text = s['ville'] ?? '';
-          stageModel.paysCtrl.text = s['pays'] ?? '';
-          stageModel.descriptionCtrl.text = s['description'] ?? '';
-          _stages.add(stageModel);
+          stageModel.selectedYear = s['annee'] ?? '2A';
+          stageModel.internshipType = s['type'] ?? 'I';
+          stageModel.controllerEntitled.text = s['intitule'] ?? '';
+          stageModel.controllerCompany.text = s['entreprise'] ?? '';
+          stageModel.controllerCity.text = s['ville'] ?? '';
+          stageModel.controllercountry.text = s['pays'] ?? '';
+          stageModel.controllerDescription.text = s['description'] ?? '';
+          _internships.add(stageModel);
         }
       }
     }
@@ -188,39 +188,39 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
   @override
   void dispose() {
-    _nomCtrl.dispose(); 
-    _prenomCtrl.dispose(); 
-    _dateNaissanceCtrl.dispose();
-    _emailCtrl.dispose(); 
-    _telCtrl.dispose();
-    _promoCtrl.dispose();
-    _posteCtrl.dispose(); 
-    _entrepriseCtrl.dispose(); 
-    _descriptionPosteCtrl.dispose();
-    _dateDebutCtrl.dispose();
-    _villeCtrl.dispose(); 
+    _controllerLastName.dispose(); 
+    _controllerFirstName.dispose(); 
+    _controllerDateOfBirth.dispose();
+    _controllereMail.dispose(); 
+    _controllerPhone.dispose();
+    _controllerPromotion.dispose();
+    _controllerPosition.dispose(); 
+    _controllerCompany.dispose(); 
+    _controllerPositionDescription.dispose();
+    _controllerStartDate.dispose();
+    _controllerCity.dispose(); 
     _paysCtrl.dispose();
     
-    for (var stage in _stages) {
-      stage.dispose();
+    for (var internship in _internships) {
+      internship.dispose();
     }
     super.dispose();
   }
 
-  void _ajouterStage() {
+  void _addInternship() {
     setState(() {
-      _stages.add(StageFormModel());
+      _internships.add(StageFormModel());
     });
   }
 
   void _supprimerStage(int index) {
     setState(() {
-      _stages[index].dispose();
-      _stages.removeAt(index);
+      _internships[index].dispose();
+      _internships.removeAt(index);
     });
   }
 
-  Future<void> _soumettreFormulaire() async {
+  Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -228,63 +228,64 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     setState(() => _isLoading = true);
 
     try {
-      double? latPoste, lonPoste;
-      var coordsPoste = await _obtenirCoordonnees(_villeCtrl.text, _paysCtrl.text);
+      double? positionLat;
+      double? positionLon;
+      var coordsPoste = await _obtenirCoordonnees(_controllerCity.text, _paysCtrl.text);
       if (coordsPoste != null) {
-        latPoste = coordsPoste['lat'];
-        lonPoste = coordsPoste['lon'];
+        positionLat = coordsPoste['lat'];
+        positionLon = coordsPoste['lon'];
       }
       Map<String, dynamic> data = {
-        "nom": _nomCtrl.text.trim(),
-        "prenom": _prenomCtrl.text.trim(),
-        "dateNaissance": _dateNaissanceCtrl.text.trim(),
-        "sexe": _sexeSelectionne,
-        "email": _emailCtrl.text.trim(),
-        "tel": _telCtrl.text.trim(),
+        "nom": _controllerLastName.text.trim(),
+        "prenom": _controllerFirstName.text.trim(),
+        "dateNaissance": _controllerDateOfBirth.text.trim(),
+        "sexe": _selectedGender,
+        "email": _controllereMail.text.trim(),
+        "tel": _controllerPhone.text.trim(),
         "autor":_consent,
-        "promo": int.tryParse(_promoCtrl.text) ?? 2024,
-        "filiere": _filiereSelectionnee,
-        "formation": _formationSelectionnee,
-        "majeure": _majeureSelectionnee ?? "",
-        "option": _optionSelectionnee ?? "",
-        "job": _posteCtrl.text.trim(),
-        "poste": _posteCtrl.text.trim(),
-        "entreprise": _entrepriseCtrl.text.trim(),
-        "description": _descriptionPosteCtrl.text.trim(),
-        "debut": _dateDebutCtrl.text.trim(),
-        "ville": _villeCtrl.text.trim(),
+        "promo": int.tryParse(_controllerPromotion.text) ?? 2024,
+        "filiere": _selectedSector,
+        "formation": _selectedFormation,
+        "majeure": _selectedSpecialisation ?? "",
+        "option": _selectedOption ?? "",
+        "job": _controllerPosition.text.trim(),
+        "poste": _controllerPosition.text.trim(),
+        "entreprise": _controllerCompany.text.trim(),
+        "description": _controllerPositionDescription.text.trim(),
+        "debut": _controllerStartDate.text.trim(),
+        "ville": _controllerCity.text.trim(),
         "pays": _paysCtrl.text.trim(),
-        "latitude": latPoste,
-        "longitude": lonPoste,
+        "latitude": positionLat,
+        "longitude": positionLon,
       };
 
-      List<Map<String, dynamic>> stagesList = [];
-      for (var s in _stages) {
+      List<Map<String, dynamic>> internshipList = [];
+      for (var s in _internships) {
         var stageMap = s.toMap();
         
-        var coordsStage = await _obtenirCoordonnees(s.villeCtrl.text, s.paysCtrl.text);
+        var coordsStage = await _obtenirCoordonnees(s.controllerCity.text, s.controllercountry.text);
         if (coordsStage != null) {
           stageMap['latitude'] = coordsStage['lat'];
           stageMap['longitude'] = coordsStage['lon'];
         }
-        stagesList.add(stageMap);
+        internshipList.add(stageMap);
       }
 
-      if (stagesList.isNotEmpty) {
-        data["stages"] = stagesList;
+      if (internshipList.isNotEmpty) {
+        data["stages"] = internshipList;
       }
 
-      if (_stages.isNotEmpty) {
-        data["stages"] = _stages.map((s) => s.toMap()).toList();
+      if (_internships.isNotEmpty) {
+        data["stages"] = _internships.map((s) => s.toMap()).toList();
       }
 
       if (widget.isAdmin) {          
-        await DatabaseService().ajouterEleve(data);
+        await DatabaseService().addStudent(data);
         if (widget.requestId != null) {
-          await DatabaseService().supprimerDemande(widget.requestId!);
+          await DatabaseService().deleteStudent(widget.requestId!);
         }
       } else {
-        await DatabaseService().demanderAjoutEleve(data);
+        await DatabaseService().askAddStudent(data);
       }
 
       if (widget.onSuccess != null) {
@@ -309,13 +310,13 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
   @override
   Widget build(BuildContext context) {
-   List<String>? optionsDisponibles;
+   List<String>? availableOption;
 
-    if (_filiereSelectionnee.isNotEmpty && _majeureSelectionnee != null) {
-      var mapFiliere = _hierarchieFormation[_filiereSelectionnee];
+    if (_selectedSector.isNotEmpty && _selectedSpecialisation != null) {
+      var sectorMap = _hierarchieFormation[_selectedSector];
       
-      if (mapFiliere != null) {
-        optionsDisponibles = mapFiliere[_majeureSelectionnee];
+      if (sectorMap != null) {
+        availableOption = sectorMap[_selectedSpecialisation];
       }
     }
     return SingleChildScrollView(
@@ -326,12 +327,12 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _titreSection("Identité", Icons.person, Colors.purple),
+              _sectionTitle("Identité", Icons.person, Colors.purple),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _nomCtrl,
+                      controller: _controllerLastName,
                       decoration: const InputDecoration(labelText: "Nom *", border: OutlineInputBorder()),
                       validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
                     ),
@@ -339,7 +340,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextFormField(
-                      controller: _prenomCtrl,
+                      controller: _controllerFirstName,
                       decoration: const InputDecoration(labelText: "Prénom *", border: OutlineInputBorder()),
                       validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
                     ),
@@ -351,41 +352,41 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _dateNaissanceCtrl,
+                      controller: _controllerDateOfBirth,
                       decoration: const InputDecoration(
                         labelText: "Date de naissance", 
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.cake),
                       ),
                       readOnly: true,
-                      onTap: () => _selectionnerDate(context, _dateNaissanceCtrl),
+                      onTap: () => _selectionnerDate(context, _controllerDateOfBirth),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _sexeSelectionne,
+                      value: _selectedGender,
                       decoration: const InputDecoration(labelText: "Sexe", border: OutlineInputBorder()),
                       items: const [
                         DropdownMenuItem(value: 'I', child: Text("Inconnu")),
                         DropdownMenuItem(value: 'M', child: Text("Homme")),
                         DropdownMenuItem(value: 'F', child: Text("Femme")),
                       ],
-                      onChanged: (v) => setState(() => _sexeSelectionne = v!),
+                      onChanged: (v) => setState(() => _selectedGender = v!),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
               TextFormField(
-                controller: _emailCtrl,
+                controller: _controllereMail,
                 decoration: const InputDecoration(labelText: "Email", border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.email)),
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 10),
               TextFormField(
-                controller: _telCtrl,
+                controller: _controllerPhone,
                 decoration: const InputDecoration(labelText: "Téléphone", border: OutlineInputBorder(), prefixIcon: Icon(Icons.phone)),
                 keyboardType: TextInputType.phone,
               ),
@@ -402,12 +403,12 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
               const Divider(height: 30),
 
-              _titreSection("Formation ENSI", Icons.school, Colors.orange),
+              _sectionTitle("Formation ENSI", Icons.school, Colors.orange),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _promoCtrl,
+                      controller: _controllerPromotion,
                       decoration: const InputDecoration(labelText: "Promo (ex: 2024) *", border: OutlineInputBorder()),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -417,14 +418,14 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _formationSelectionnee,
+                      value: _selectedFormation,
                       decoration: const InputDecoration(labelText: "Formation", border: OutlineInputBorder()),
                       items: const [
                         DropdownMenuItem(value: 'FISE', child: Text("FISE (Etudiant)")),
                         DropdownMenuItem(value: 'FISA', child: Text("FISA (Alternance)")),
                         DropdownMenuItem(value: 'MTS', child: Text("MTS (Mastère)")),
                       ],
-                      onChanged: (v) => setState(() => _formationSelectionnee = v!),
+                      onChanged: (v) => setState(() => _selectedFormation = v!),
                     ),
                   ),
                 ],
@@ -434,16 +435,16 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _filiereSelectionnee,
+                      value: _selectedSector,
                       decoration: const InputDecoration(labelText: "Filière", border: OutlineInputBorder()),
                       items: _hierarchieFormation.keys.map((String filiere) {
                         return DropdownMenuItem(value: filiere, child: Text(filiere, overflow: TextOverflow.ellipsis));
                       }).toList(),
                       onChanged: (v) {
                         setState(() {
-                          _filiereSelectionnee = v!;
-                          _majeureSelectionnee = null;
-                          _optionSelectionnee = null;
+                          _selectedSector = v!;
+                          _selectedSpecialisation = null;
+                          _selectedOption = null;
                         });
                       },
                     ),
@@ -453,12 +454,12 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _majeureSelectionnee,
+                      value: _selectedSpecialisation,
                       decoration: const InputDecoration(labelText: "Majeure", border: OutlineInputBorder()),
                       isExpanded: true,
-                      items: _filiereSelectionnee.isEmpty || _hierarchieFormation[_filiereSelectionnee] == null
+                      items: _selectedSector.isEmpty || _hierarchieFormation[_selectedSector] == null
                           ? []
-                          : _hierarchieFormation[_filiereSelectionnee]!.keys.map((String majeure) {
+                          : _hierarchieFormation[_selectedSector]!.keys.map((String majeure) {
                               return DropdownMenuItem(
                                 value: majeure, 
                                 child: Text(majeure, overflow: TextOverflow.ellipsis)
@@ -466,8 +467,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                             }).toList(),
                       onChanged: (v) {
                         setState(() {
-                          _majeureSelectionnee = v;
-                          _optionSelectionnee = null;
+                          _selectedSpecialisation = v;
+                          _selectedOption = null;
                         });
                       },
                     ),
@@ -475,32 +476,32 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 ],
               ),
 
-              if ( optionsDisponibles != null && optionsDisponibles.isNotEmpty)...[
+              if ( availableOption != null && availableOption.isNotEmpty)...[
               const SizedBox(height : 10),
                 DropdownButtonFormField<String>(
-                      value: _optionSelectionnee,
+                      value: _selectedOption,
                       decoration: const InputDecoration(labelText: "Option", border: OutlineInputBorder()),
                       isExpanded: true,
-                      items: optionsDisponibles.map((String option) {
+                      items: availableOption.map((String option) {
                         return DropdownMenuItem(
                           value: option, 
                           child: Text(option, overflow: TextOverflow.ellipsis)
                         );
                       }).toList(),
-                      onChanged: (v) => setState(() => _optionSelectionnee = v),
+                      onChanged: (v) => setState(() => _selectedOption = v),
                     ),
               ],
 
               const Divider(height: 30),
 
-              _titreSection("Poste Actuel", Icons.work, Colors.indigo),
+              _sectionTitle("Poste Actuel", Icons.work, Colors.indigo),
               TextFormField(
-                controller: _posteCtrl,
+                controller: _controllerPosition,
                 decoration: const InputDecoration(labelText: "Intitulé du poste", border: OutlineInputBorder()),
               ),
               const SizedBox(height: 10),
               TextFormField(
-                controller: _entrepriseCtrl,
+                controller: _controllerCompany,
                 decoration: const InputDecoration(labelText: "Entreprise", border: OutlineInputBorder()),
               ),
               const SizedBox(height: 10),
@@ -508,7 +509,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _villeCtrl,
+                      controller: _controllerCity,
                       decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()),
                     ),
                   ),
@@ -523,7 +524,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               ),
               const SizedBox(height: 10),
               TextFormField(
-                controller: _descriptionPosteCtrl,
+                controller: _controllerPositionDescription,
                 decoration: const InputDecoration(
                   labelText: "Description du poste",
                   border: OutlineInputBorder(),
@@ -536,14 +537,14 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _dateDebutCtrl,
+                      controller: _controllerStartDate,
                       decoration: const InputDecoration(
                         labelText: "Date de début", 
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.calendar_today),
                       ),
                       readOnly: true,
-                      onTap: () => _selectionnerDate(context, _dateDebutCtrl),
+                      onTap: () => _selectionnerDate(context, _controllerStartDate),
                     ),
                   ),
                   ],
@@ -554,27 +555,27 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _titreSection("Stages", Icons.work_history, Colors.green),
+                  _sectionTitle("Stages", Icons.work_history, Colors.green),
                   TextButton.icon(
-                    onPressed: _ajouterStage,
+                    onPressed: _addInternship,
                     icon: const Icon(Icons.add_circle, color: AppColors.ensiCyan),
                     label: const Text("Ajouter un stage", style: TextStyle(color: AppColors.ensiCyan)),
                   ),
                 ],
               ),
 
-              if (_stages.isEmpty)
+              if (_internships.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 10),
                   child: Text("Aucun stage ajouté (facultatif)", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
                 )
               else
-                ..._stages.asMap().entries.map((entry) {
+                ..._internships.asMap().entries.map((entry) {
                   int index = entry.key;
-                  StageFormModel stage = entry.value;
+                  StageFormModel intership = entry.value;
 
                   return Card(
-                    key: stage.key,
+                    key: intership.key,
                     margin: const EdgeInsets.only(bottom: 15),
                     elevation: 2,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -595,55 +596,55 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                             ],
                           ),
                           DropdownButtonFormField<String>(
-                            value: stage.anneeSelectionnee,
+                            value: intership.selectedYear,
                             decoration: const InputDecoration(labelText: "Année du stage", border: OutlineInputBorder()),
                             items: const [
                               DropdownMenuItem(value: '1A', child: Text("1ère Année (1A)")),
                               DropdownMenuItem(value: '2A', child: Text("2ème Année (2A)")),
                               DropdownMenuItem(value: '3A', child: Text("PFE (3A)")),
                             ],
-                            onChanged: (v) => stage.anneeSelectionnee = v!,
+                            onChanged: (v) => intership.selectedYear = v!,
                           ),
                             const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
                                 child: TextFormField(
-                                  controller: stage.dateDebutCtrl,
+                                  controller: intership.controllerStartDate,
                                   decoration: const InputDecoration(
                                     labelText: "Date de début", 
                                     border: OutlineInputBorder(),
                                     prefixIcon: Icon(Icons.calendar_today),
                                   ),
                                   readOnly: true,
-                                  onTap: () => _selectionnerDate(context, stage.dateDebutCtrl),
+                                  onTap: () => _selectionnerDate(context, intership.controllerStartDate),
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: TextFormField(
-                                  controller: stage.dateFinCtrl,
+                                  controller: intership.controllerEndDate,
                                   decoration: const InputDecoration(
                                     labelText: "Date de fin", 
                                     border: OutlineInputBorder(),
                                     prefixIcon: Icon(Icons.event),
                                   ),
                                   readOnly: true,
-                                  onTap: () => _selectionnerDate(context, stage.dateFinCtrl),
+                                  onTap: () => _selectionnerDate(context, intership.controllerEndDate),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
-                            controller: stage.intituleCtrl,
+                            controller: intership.controllerEntitled,
                             decoration: const InputDecoration(labelText: "Sujet / Intitulé *", border: OutlineInputBorder()),
                             validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
                           ),
                           const SizedBox(height: 10),
                          FormField<String>(
                             validator: (value) {
-                              if (stage.typeStage == 'I') {
+                              if (intership.internshipType == 'I') {
                                 return 'Type de structure requis';
                               }
                               return null;
@@ -658,12 +659,12 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                                         child: RadioListTile<String>(
                                           title: const Text('Entreprise'),
                                           value: 'E',
-                                          groupValue: stage.typeStage,
+                                          groupValue: intership.internshipType,
                                           activeColor: AppColors.ensiCyan,
                                           contentPadding: EdgeInsets.zero,
                                           onChanged: (value) {
                                             setState(() {
-                                              stage.typeStage = value!;
+                                              intership.internshipType = value!;
                                               state.didChange(value);
                                             });
                                           },
@@ -673,12 +674,12 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                                         child: RadioListTile<String>(
                                           title: const Text('Université'),
                                           value: 'U',
-                                          groupValue: stage.typeStage,
+                                          groupValue: intership.internshipType,
                                           activeColor: AppColors.ensiCyan,
                                           contentPadding: EdgeInsets.zero,
                                           onChanged: (value) {
                                             setState(() {
-                                              stage.typeStage = value!;
+                                              intership.internshipType = value!;
                                               state.didChange(value);
                                             });
                                           },
@@ -702,20 +703,20 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                             },
                           ),
                           TextFormField(
-                            controller: stage.entrepriseCtrl,
+                            controller: intership.controllerCompany,
                             decoration: const InputDecoration(labelText: "Nom de l'Entreprise / du Labo", border: OutlineInputBorder()),
                           ),
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              Expanded(child: TextFormField(controller: stage.villeCtrl, decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()))),
+                              Expanded(child: TextFormField(controller: intership.controllerCity, decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()))),
                               const SizedBox(width: 10),
-                              Expanded(child: TextFormField(controller: stage.paysCtrl, decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()))),
+                              Expanded(child: TextFormField(controller: intership.controllercountry, decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()))),
                             ],
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
-                            controller: stage.descriptionCtrl,
+                            controller: intership.controllerDescription,
                             decoration: const InputDecoration(
                             labelText: "Description du stage", 
                             border: OutlineInputBorder(),
@@ -754,7 +755,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                     ) ?? false;
 
                     if (confirm) {
-                      await DatabaseService().supprimerDemande(widget.requestId!);
+                      await DatabaseService().deleteStudent(widget.requestId!);
                       if (widget.onSuccess != null) widget.onSuccess!();
                       if (mounted) Navigator.pop(context);
                     }
@@ -769,7 +770,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   backgroundColor: AppColors.ensiCyan,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                onPressed: _isLoading ? null : _soumettreFormulaire,
+                onPressed: _isLoading ? null : _submitForm,
                 icon: _isLoading 
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Icon(Icons.save, color: Colors.white),
@@ -786,7 +787,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     );
   }
 
- Widget _titreSection(String titre, IconData icon, Color color) {
+ Widget _sectionTitle(String titre, IconData icon, Color color) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 15),
     child: Row(

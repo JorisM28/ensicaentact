@@ -1,129 +1,129 @@
-  class Stage {
-    final String annee;
-    final String intitule;
+  class Internship {
+    final String year;
+    final String entitled;
     final String description;
     final String type;
-    final String ville;
-    final String pays;
-    final String entreprise;
-    final String dateDebut;
-    final String dateFin;
+    final String city;
+    final String country;
+    final String company;
+    final String startDate;
+    final String endDate;
 
 
-    Stage({
-      required this.annee,
-      required this.intitule,
+    Internship({
+      required this.year,
+      required this.entitled,
       required this.type,
       required this.description,
 
-      required this.ville,
-      required this.pays,
-      required this.entreprise,
-      required this.dateDebut,
-      required this.dateFin,
+      required this.city,
+      required this.country,
+      required this.company,
+      required this.startDate,
+      required this.endDate,
     });
 
-    factory Stage.fromJson(Map<String, dynamic> json) {
-      return Stage(
-        annee: json['annee']?.toString() ?? '',
-        intitule: json['intitule']?.toString() ?? '',
-        ville: json['ville']?.toString() ?? '',
+    factory Internship.fromJson(Map<String, dynamic> json) {
+      return Internship(
+        year: json['annee']?.toString() ?? '',
+        entitled: json['intitule']?.toString() ?? '',
+        city: json['ville']?.toString() ?? '',
         description: json['description']?.toString() ?? '',
         type: json['entrepriseUniversite']?.toString() ?? 'I',
-        pays: json['pays']?.toString() ?? '',
-        entreprise: json['entreprise']?.toString() ?? '',
-        dateDebut: json['debut']?.toString() ?? '',
-        dateFin: json['fin']?.toString() ?? '',
+        country: json['pays']?.toString() ?? '',
+        company: json['entreprise']?.toString() ?? '',
+        startDate: json['debut']?.toString() ?? '',
+        endDate: json['fin']?.toString() ?? '',
       );
     }
   }
 
   class Alumnis {
     final int id;
-    final String nom;
-    final String prenom;
+    final String lastName;
+    final String firstname;
     final String email;
-    final String tel;
-    final int autor;
-    final int decede;
-    final String sexe;
-    final String dateNaissance;
-    final int promo;
-    final String filiere;
+    final String phone;
+    final int permission;
+    final int deceased;
+    final String gender;
+    final String dateOfBirth;
+    final int promotion;
+    final String sector;
     final String formation;
-    final String majeure;
+    final String specialisation;
     final String option;
-    final String ddiplome;
+    final String doubleDiploma;
 
     final String job;
     final String jobDescription;
-    final String jobDebut;
-    final String jobFin;
-    final String entreprise;
-    final String ville;
-    final String pays;
+    final String jobStart;
+    final String jobEnd;
+    final String company;
+    final String city;
+    final String country;
 
-    final List<Stage> stages;
+    final List<Internship> internships;
 
     Alumnis({
       required this.id,
-      required this.nom,
-      required this.prenom,
+      required this.lastName,
+      required this.firstname,
       required this.email,
-      required this.tel,
-      required this.autor,
-      required this.decede,
-      required this.sexe,
-      required this.dateNaissance,
-      required this.promo,
-      required this.filiere,
+      required this.phone,
+      required this.permission,
+      required this.deceased,
+      required this.gender,
+      required this.dateOfBirth,
+      required this.promotion,
+      required this.sector,
       required this.formation,
-      required this.majeure,
+      required this.specialisation,
       required this.option,
-      required this.ddiplome,
+      required this.doubleDiploma,
       required this.job,
       required this.jobDescription,
-      required this.jobDebut,
-      required this.jobFin,
-      required this.entreprise,
-      required this.ville,
-      required this.pays,
-      required this.stages,
+      required this.jobStart,
+      required this.jobEnd,
+      required this.company,
+      required this.city,
+      required this.country,
+      required this.internships,
     });
 
-    String get nomComplet => "${decede == 1 ? "† " : ""}$prenom $nom";
+    String get wholeName => "${deceased == 1 ? "† " : ""}$firstname $lastName";
 
     factory Alumnis.fromMap(Map<String, dynamic> map) {
       var listStages = map['stages'] as List<dynamic>?;
-      List<Stage> stagesList = listStages != null 
-          ? listStages.map((i) => Stage.fromJson(i)).toList() 
+      List<Internship> stagesList = listStages != null 
+          ? listStages.map((i) => Internship.fromJson(i)).toList() 
           : [];
 
       return Alumnis(
         id: int.tryParse(map['id'].toString()) ?? 0,
-        nom: map['nom']?.toString() ?? '',
-        prenom: map['prenom']?.toString() ?? '',  
+        lastName: map['nom']?.toString() ?? '',
+        firstname: map['prenom']?.toString() ?? '',  
         email: map['email']?.toString() ?? '',
-        tel: map['tel']?.toString() ?? '',
-        autor: int.tryParse(map['autor'].toString()) ?? 0,
-        decede: int.tryParse(map['decede'].toString()) ?? 0,
-        sexe: map['sexe']?.toString() ?? 'I',
-        dateNaissance: map['dateNaissance']?.toString() ?? "",
-        promo: int.tryParse(map['promo'].toString()) ?? 0,
-        filiere: map['filiere']?.toString() ?? '',
+        phone: map['tel']?.toString() ?? '',
+        permission: int.tryParse(map['autor'].toString()) ?? 0,
+        deceased: int.tryParse(map['decede'].toString()) ?? 0,
+        gender: map['sexe']?.toString() ?? 'I',
+        dateOfBirth: map['dateNaissance']?.toString() ?? "",
+        promotion: int.tryParse(map['promo'].toString()) ?? 0,
+        sector: map['filiere']?.toString() ?? '',
         formation: map['formation']?.toString() ?? '',
-        majeure: map['majeure']?.toString() ?? '',
+        specialisation: map['majeure']?.toString() ?? '',
         option: map['option']?.toString() ?? '',
-        ddiplome: map['diplome']?.toString() ?? '',
+        doubleDiploma: map['diplome']?.toString() ?? '',
 
         job: map['job']?.toString() ?? 'En recherche',
         jobDescription: map['job_desc']?.toString() ?? '',
-        jobDebut: map['job_debut']?.toString() ?? '', 
-        jobFin: map['job_fin']?.toString() ?? '',
-        entreprise: map['entreprise']?.toString() ?? 'Non renseigné',
-        ville: map['ville']?.toString() ?? '',
-        pays: map['pays']?.toString() ?? '',
-        stages: stagesList,
+        jobStart: map['job_debut']?.toString() ?? '', 
+        jobEnd: map['job_fin']?.toString() ?? '',
+        company: map['entreprise']?.toString() ?? 'Non renseigné',
+        city: map['ville']?.toString() ?? '',
+        country: map['pays']?.toString() ?? '',
+        internships: stagesList,
       );
     }
 

@@ -7,11 +7,11 @@ class AlumniPreview extends StatelessWidget {
   final Alumnis alumni;
   final Map<String, dynamic> user;
   const AlumniPreview({super.key, required this.alumni, required this.user});
-  bool get estAdmin => user['role'] == 'admin';
+  bool get isAdmin => user['role'] == 'admin';
 
 
   void _ouvrirPageComplete(BuildContext context) {
-    if (estAdmin) {
+    if (isAdmin) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -45,7 +45,7 @@ class AlumniPreview extends StatelessWidget {
                 radius: 70,
                 backgroundColor: AppColors.ensiCyan,
                 child: Text(
-                  alumni.prenom.isNotEmpty ? alumni.prenom[0] : "?",
+                  alumni.firstname.isNotEmpty ? alumni.firstname[0] : "?",
                   style: const TextStyle(fontSize: 60, color: Colors.white),
                 ),
               ),
@@ -53,14 +53,14 @@ class AlumniPreview extends StatelessWidget {
             const SizedBox(height: 30),
 
             Text(
-              alumni.nomComplet,
+              alumni.wholeName,
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
-            if (alumni.job.isNotEmpty || alumni.entreprise.isNotEmpty)
+            if (alumni.job.isNotEmpty || alumni.company.isNotEmpty)
             Text(
-              "${alumni.job} ${alumni.entreprise.isEmpty || alumni.job.isEmpty ? "" : "chez"} ${alumni.entreprise}",
+              "${alumni.job} ${alumni.company.isEmpty || alumni.job.isEmpty ? "" : "chez"} ${alumni.company}",
               style: TextStyle(fontSize: 18, color: Colors.grey[700]),
               textAlign: TextAlign.center,
             ),
@@ -69,14 +69,14 @@ class AlumniPreview extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                if (alumni.tel.isNotEmpty) 
-                  _infoBulle(Icons.calendar_month_outlined, alumni.promo.toString(), Colors.orangeAccent),
+                if (alumni.phone.isNotEmpty) 
+                  _infoBulle(Icons.calendar_month_outlined, alumni.promotion.toString(), Colors.orangeAccent),
                 if (alumni.email.isNotEmpty) 
-                  _infoBulle(Icons.location_on, alumni.ville, Colors.red),
-                if  (alumni.filiere.isNotEmpty) 
-                  _infoBulle(Icons.school, alumni.filiere.toString(), Colors.green),
-                if (alumni.majeure.isNotEmpty) 
-                  _infoBulle(Icons.auto_awesome, alumni.majeure, Colors.cyan),
+                  _infoBulle(Icons.location_on, alumni.city, Colors.red),
+                if  (alumni.sector.isNotEmpty) 
+                  _infoBulle(Icons.school, alumni.sector.toString(), Colors.green),
+                if (alumni.specialisation.isNotEmpty) 
+                  _infoBulle(Icons.auto_awesome, alumni.specialisation, Colors.cyan),
               ],
             ),
             const SizedBox(height: 40),
@@ -85,7 +85,7 @@ class AlumniPreview extends StatelessWidget {
 
             const SizedBox(height: 40),
 
-            if (alumni.stages.isNotEmpty)...[
+            if (alumni.internships.isNotEmpty)...[
               Text(
                 "Stages :",
                 style: TextStyle(fontSize: 18,   fontWeight: FontWeight.bold),
@@ -94,7 +94,7 @@ class AlumniPreview extends StatelessWidget {
               const SizedBox(height: 10),
               Column(
                 children: [
-                  for (var stage in alumni.stages)
+                  for (var stage in alumni.internships)
                     Container(
                       margin: const EdgeInsets.only(bottom: 15.0),
                       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 5.0),
@@ -116,14 +116,14 @@ class AlumniPreview extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (stage.entreprise.isNotEmpty) 
-                            Expanded(child: _infoBulle(Icons.calendar_today, stage.annee, Colors.purple)),
-                          if (stage.entreprise.isNotEmpty) 
-                            Expanded(child: _infoBulle(Icons.public, stage.pays, Colors.lightBlue)),
-                          if (stage.entreprise.isNotEmpty) 
-                            Expanded(child: _infoBulle(Icons.location_city, stage.ville, Colors.teal)),
-                          if (stage.entreprise.isNotEmpty) 
-                            Expanded(child: _infoBulle(Icons.subject, stage.intitule, Colors.pink)),
+                          if (stage.company.isNotEmpty) 
+                            Expanded(child: _infoBulle(Icons.calendar_today, stage.year, Colors.purple)),
+                          if (stage.company.isNotEmpty) 
+                            Expanded(child: _infoBulle(Icons.public, stage.country, Colors.lightBlue)),
+                          if (stage.company.isNotEmpty) 
+                            Expanded(child: _infoBulle(Icons.location_city, stage.city, Colors.teal)),
+                          if (stage.company.isNotEmpty) 
+                            Expanded(child: _infoBulle(Icons.subject, stage.entitled, Colors.pink)),
                         ],
                       ),
                     ),

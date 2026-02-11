@@ -102,8 +102,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    String prenom = widget.user['prenom'] ?? widget.user['name'] ?? "Utilisateur";
-    String nom = widget.user['nom'] ?? widget.user['family_name'] ?? "";
+    String firstName = widget.user['prenom'] ?? widget.user['name'] ?? "Utilisateur";
+    String lastName = widget.user['nom'] ?? widget.user['family_name'] ?? "";
     String email = widget.user['email'] ?? "";
     String role = widget.user['role'] ?? "";
     String phone = widget.user['phone'] ?? "";
@@ -130,7 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   radius: 50,
                   backgroundColor: AppColors.ensiCyan.withOpacity(0.1),
                   child: Text(
-                    prenom.isNotEmpty ? prenom[0].toUpperCase() : "?",
+                    firstName.isNotEmpty ? firstName[0].toUpperCase() : "?",
                     style: const TextStyle(fontSize: 40, color: AppColors.ensiCyan, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -138,7 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 20),
 
               Text(
-                "$prenom $nom",
+                "$firstName $lastName",
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
               const SizedBox(height: 5),

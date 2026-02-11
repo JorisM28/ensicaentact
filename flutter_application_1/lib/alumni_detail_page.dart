@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/profileBadge.dart';
+import 'package:flutter_application_ensicaentact/profile_badge.dart';
 import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
@@ -21,131 +21,131 @@ class AlumniDetailPage extends StatefulWidget {
   State<AlumniDetailPage> createState() => _AlumniDetailPageState();
 }
 
-class StageEditor {
-  TextEditingController intitule = TextEditingController();
+class InternshipEditor {
+  TextEditingController entilted = TextEditingController();
   TextEditingController entreprise = TextEditingController();
-  TextEditingController ville = TextEditingController();
-  TextEditingController pays = TextEditingController();
+  TextEditingController city = TextEditingController();
+  TextEditingController country = TextEditingController();
   TextEditingController description = TextEditingController();
-  TextEditingController annee = TextEditingController();
-  TextEditingController debut = TextEditingController();
-  TextEditingController fin = TextEditingController();
+  TextEditingController year = TextEditingController();
+  TextEditingController start = TextEditingController();
+  TextEditingController end = TextEditingController();
   String type = "E";
 
   void dispose() {
-    intitule.dispose();
+    entilted.dispose();
     entreprise.dispose();
-    ville.dispose();
-    pays.dispose();
+    city.dispose();
+    country.dispose();
     description.dispose();
-    annee.dispose();
-    debut.dispose();
-    fin.dispose();
+    year.dispose();
+    start.dispose();
+    end.dispose();
   }
 }
 
 class _AlumniDetailPageState extends State<AlumniDetailPage> {
-  bool _enEdition = false;
-  bool _modifiee = false;
-  bool _voirDescription = false;
+  bool _isEdited = false;
+  bool _modified = false;
+  bool _seeDescription = false;
 
-  late TextEditingController _nomCtrl;
-  late TextEditingController _prenomCtrl;
-  late TextEditingController _dateNaissanceCtrl;
-  late TextEditingController _promoCtrl;
-  late TextEditingController _posteCtrl;
-  late TextEditingController _descriptionPosteCtrl;
-  late TextEditingController _dateDebutPosteCtrl;
-  late TextEditingController _entrepriseCtrl;
-  late TextEditingController _villeCtrl;
-  late TextEditingController _emailCtrl;
-  late TextEditingController _telCtrl;
-  late TextEditingController _filiereCtrl;
-  late TextEditingController _majeureCtrl;
-  late TextEditingController _optionCtrl;
-  late TextEditingController _doublediplomeCtrl;
+  late TextEditingController _controllerLastName;
+  late TextEditingController _controllerFirstName;
+  late TextEditingController _controllerDateOfBirth;
+  late TextEditingController _controllerPromotion;
+  late TextEditingController _controllerPosition;
+  late TextEditingController _controllerPositionDescription;
+  late TextEditingController _controllerStartPositionDate;
+  late TextEditingController _controllerCompany;
+  late TextEditingController _controllerCity;
+  late TextEditingController _controllereMail;
+  late TextEditingController _controllerPhone;
+  late TextEditingController _controllerSector;
+  late TextEditingController _controllerSpecialisation;
+  late TextEditingController _controllerOption;
+  late TextEditingController _controllerDoubleDiploma;
 
-  String _sexeSelectionne = 'I';
-  String _formationSelectionne = 'FISE';
+  String _selectedGender = 'I';
+  String _selectedFormation = 'FISE';
 
-  late bool _autorSwitch;
-  late bool _decedeSwitch;
+  late bool _permissionSwitch;
+  late bool _deceasedSwitch;
 
   late Alumnis currentAlumni;
 
-  List<StageEditor> _stageEditors = [];
-  List<Stage> _stagesAffichage = [];
+  List<InternshipEditor> _internshipEditors = [];
+  List<Internship> _internshipDisplay = [];
 
   @override
   void initState() {
     super.initState();
     currentAlumni = widget.alumni;
 
-    _nomCtrl = TextEditingController(text: currentAlumni.nom);
-    _prenomCtrl = TextEditingController(text: currentAlumni.prenom);
-    _dateNaissanceCtrl = TextEditingController(text: currentAlumni.dateNaissance);
-    _promoCtrl = TextEditingController(text: currentAlumni.promo.toString());
+    _controllerLastName = TextEditingController(text: currentAlumni.lastName);
+    _controllerFirstName = TextEditingController(text: currentAlumni.firstname);
+    _controllerDateOfBirth = TextEditingController(text: currentAlumni.dateOfBirth);
+    _controllerPromotion = TextEditingController(text: currentAlumni.promotion.toString());
     
-    _posteCtrl = TextEditingController(text: currentAlumni.job);
-    _descriptionPosteCtrl = TextEditingController(text: currentAlumni.jobDescription);
-    _dateDebutPosteCtrl = TextEditingController(text: currentAlumni.jobDebut ?? "");
-    _entrepriseCtrl = TextEditingController(text: currentAlumni.entreprise);
+    _controllerPosition = TextEditingController(text: currentAlumni.job);
+    _controllerPositionDescription = TextEditingController(text: currentAlumni.jobDescription);
+    _controllerStartPositionDate = TextEditingController(text: currentAlumni.jobStart ?? "");
+    _controllerCompany = TextEditingController(text: currentAlumni.company);
     
-    _villeCtrl = TextEditingController(text: currentAlumni.ville);
-    _emailCtrl = TextEditingController(text: currentAlumni.email);
-    _telCtrl = TextEditingController(text: currentAlumni.tel);
+    _controllerCity = TextEditingController(text: currentAlumni.city);
+    _controllereMail = TextEditingController(text: currentAlumni.email);
+    _controllerPhone = TextEditingController(text: currentAlumni.phone);
     
-    _filiereCtrl = TextEditingController(text: currentAlumni.filiere);
-    _majeureCtrl = TextEditingController(text: currentAlumni.majeure);
-    _optionCtrl = TextEditingController(text: currentAlumni.option);
-    _doublediplomeCtrl = TextEditingController(text: currentAlumni.ddiplome);
+    _controllerSector = TextEditingController(text: currentAlumni.sector);
+    _controllerSpecialisation = TextEditingController(text: currentAlumni.specialisation);
+    _controllerOption = TextEditingController(text: currentAlumni.option);
+    _controllerDoubleDiploma = TextEditingController(text: currentAlumni.doubleDiploma);
 
-    _sexeSelectionne = ['M', 'F', 'I'].contains(currentAlumni.sexe) ? currentAlumni.sexe : 'I';
-    _formationSelectionne = ['FISE', 'FISA', 'MTS'].contains(currentAlumni.formation) ? currentAlumni.formation : 'FISE';
+    _selectedGender = ['M', 'F', 'I'].contains(currentAlumni.gender) ? currentAlumni.gender : 'I';
+    _selectedFormation = ['FISE', 'FISA', 'MTS'].contains(currentAlumni.formation) ? currentAlumni.formation : 'FISE';
 
-    _autorSwitch = currentAlumni.autor == 1;
-    _decedeSwitch = currentAlumni.decede == 1;
+    _permissionSwitch = currentAlumni.permission == 1;
+    _deceasedSwitch = currentAlumni.deceased == 1;
 
-    _stagesAffichage = List.from(currentAlumni.stages);
+    _internshipDisplay = List.from(currentAlumni.internships);
     _initialiserStageEditors();
   }
 
   void _initialiserStageEditors() {
-    for (var editor in _stageEditors) editor.dispose();
-    _stageEditors.clear();
+    for (var editor in _internshipEditors) editor.dispose();
+    _internshipEditors.clear();
 
-    for (var stage in _stagesAffichage) {
-      var editor = StageEditor();
-      editor.intitule.text = stage.intitule;
-      editor.entreprise.text = stage.entreprise;
-      editor.ville.text = stage.ville;
-      editor.pays.text = stage.pays;
+    for (var stage in _internshipDisplay) {
+      var editor = InternshipEditor();
+      editor.entilted.text = stage.entitled;
+      editor.entreprise.text = stage.company;
+      editor.city.text = stage.city;
+      editor.country.text = stage.country;
       editor.description.text = stage.description;
-      editor.annee.text = stage.annee;
+      editor.year.text = stage.year;
       editor.type = stage.type;
-      editor.debut.text = stage.dateDebut;
-      editor.fin.text = stage.dateFin;  
-      _stageEditors.add(editor);
+      editor.start.text = stage.startDate;
+      editor.end.text = stage.endDate;  
+      _internshipEditors.add(editor);
     }
   }
 
   @override
   void dispose() {
-    _nomCtrl.dispose(); 
-    _prenomCtrl.dispose(); 
-    _dateNaissanceCtrl.dispose();
-    _promoCtrl.dispose(); 
-    _posteCtrl.dispose(); 
-    _descriptionPosteCtrl.dispose(); 
-    _dateDebutPosteCtrl.dispose();
-    _entrepriseCtrl.dispose(); 
-    _villeCtrl.dispose(); 
-    _emailCtrl.dispose(); _telCtrl.dispose();
-    _filiereCtrl.dispose()
-    ; _majeureCtrl.dispose(); 
-    _optionCtrl.dispose(); 
-    _doublediplomeCtrl.dispose();
-    for (var editor in _stageEditors) editor.dispose();
+    _controllerLastName.dispose(); 
+    _controllerFirstName.dispose(); 
+    _controllerDateOfBirth.dispose();
+    _controllerPromotion.dispose(); 
+    _controllerPosition.dispose(); 
+    _controllerPositionDescription.dispose(); 
+    _controllerStartPositionDate.dispose();
+    _controllerCompany.dispose(); 
+    _controllerCity.dispose(); 
+    _controllereMail.dispose(); _controllerPhone.dispose();
+    _controllerSector.dispose()
+    ; _controllerSpecialisation.dispose(); 
+    _controllerOption.dispose(); 
+    _controllerDoubleDiploma.dispose();
+    for (var editor in _internshipEditors) editor.dispose();
     super.dispose();
   }
 
@@ -164,7 +164,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     }
   }
 
-  String _calculerAge(String? dateStr) {
+  String _calculateAge(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "";
     try {
       DateTime dn = DateTime.parse(dateStr);
@@ -179,7 +179,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     }
   }
 
-  String _calculerAnciennete(String? dateStr) {
+  String _calculateSeniority(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "";
     try {
       DateTime start = DateTime.parse(dateStr);
@@ -195,63 +195,63 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     }
   }
 
-  void _ajouterStage() {
+  void _addInternship() {
     setState(() {
-      _stageEditors.add(StageEditor());
+      _internshipEditors.add(InternshipEditor());
     });
   }
 
-  void _supprimerStage(int index) {
+  void _deleteInternship(int index) {
     setState(() {
-      _stageEditors[index].dispose();
-      _stageEditors.removeAt(index);
+      _internshipEditors[index].dispose();
+      _internshipEditors.removeAt(index);
     });
   }
 
-  void _sauvegarder() async {
-    int promoInt = int.tryParse(_promoCtrl.text) ?? currentAlumni.promo;
-    int autorInt = _autorSwitch ? 1 : 0;
-    int decedeInt = _decedeSwitch ? 1 : 0;
+  void _save() async {
+    int poromotionInt = int.tryParse(_controllerPromotion.text) ?? currentAlumni.promotion;
+    int permissionInt = _permissionSwitch ? 1 : 0;
+    int deceasedInt = _deceasedSwitch ? 1 : 0;
 
-List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
+List<Map<String, dynamic>> stagesData = _internshipEditors.map((editor) {
   return {
-        "intitule": editor.intitule.text.trim(),
+        "intitule": editor.entilted.text.trim(),
         "entreprise": editor.entreprise.text.trim(),
-        "ville": editor.ville.text.trim(),
-        "pays": editor.pays.text.trim(),
+        "ville": editor.city.text.trim(),
+        "pays": editor.country.text.trim(),
         "description": editor.description.text.trim(),
-        "annee": editor.annee.text.trim(),
+        "annee": editor.year.text.trim(),
         "type": editor.type.trim(),
-        "debut": editor.debut.text.trim(),
-        "fin": editor.fin.text.trim(),
+        "debut": editor.start.text.trim(),
+        "fin": editor.end.text.trim(),
       };
     }).toList();
 
     Map<String, dynamic> updateData = {
       "id": widget.alumni.id,
-      "nom": _nomCtrl.text.trim(),
-      "prenom": _prenomCtrl.text.trim(),
-      "dateNaissance": _dateNaissanceCtrl.text.trim(),
-      "sexe": _sexeSelectionne,
-      "promo": promoInt,
-      "filiere": _filiereCtrl.text.trim(),
-      "formation": _formationSelectionne,
-      "majeure": _majeureCtrl.text.trim(),
-      "option": _optionCtrl.text.trim(),
-      "diplome": _doublediplomeCtrl.text.trim(),
-      "autor": autorInt,
-      "decede": decedeInt,
-      "poste": _posteCtrl.text.trim(),
-      "description": _descriptionPosteCtrl.text.trim(),
-      "debut": _dateDebutPosteCtrl.text.trim(),
-      "entreprise": _entrepriseCtrl.text.trim(),
-      "ville": _villeCtrl.text.trim(),
-      "email": _emailCtrl.text.trim(),
-      "tel": _telCtrl.text.trim(),
+      "nom": _controllerLastName.text.trim(),
+      "prenom": _controllerFirstName.text.trim(),
+      "dateNaissance": _controllerDateOfBirth.text.trim(),
+      "sexe": _selectedGender,
+      "promo": poromotionInt,
+      "filiere": _controllerSector.text.trim(),
+      "formation": _selectedFormation,
+      "majeure": _controllerSpecialisation.text.trim(),
+      "option": _controllerOption.text.trim(),
+      "diplome": _controllerDoubleDiploma.text.trim(),
+      "autor": permissionInt,
+      "decede": deceasedInt,
+      "poste": _controllerPosition.text.trim(),
+      "description": _controllerPositionDescription.text.trim(),
+      "debut": _controllerStartPositionDate.text.trim(),
+      "entreprise": _controllerCompany.text.trim(),
+      "ville": _controllerCity.text.trim(),
+      "email": _controllereMail.text.trim(),
+      "tel": _controllerPhone.text.trim(),
       "stages": stagesData,
     };
 
-    await DatabaseService().modifierEleve(updateData);
+    await DatabaseService().modifyStudent(updateData);
 
     if (widget.onSave != null) {
       widget.onSave!();
@@ -260,48 +260,48 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
     if (!mounted) return;
 
     setState(() {
-      _stagesAffichage = _stageEditors.map((editor) {
-        return Stage(
-          intitule: editor.intitule.text,
-          entreprise: editor.entreprise.text,
-          ville: editor.ville.text,
-          pays: editor.pays.text,
+      _internshipDisplay = _internshipEditors.map((editor) {
+        return Internship(
+          entitled: editor.entilted.text,
+          company: editor.entreprise.text,
+          city: editor.city.text,
+          country: editor.country.text,
           description: editor.description.text,
-          annee: editor.annee.text,
+          year: editor.year.text,
           type: editor.type,
-          dateDebut: editor.debut.text,
-          dateFin: editor.fin.text,
+          startDate: editor.start.text,
+          endDate: editor.end.text,
         );
       }).toList();
 
       currentAlumni = Alumnis(
         id: widget.alumni.id,
-        nom: _nomCtrl.text.trim(),
-        prenom: _prenomCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
-        tel: _telCtrl.text.trim(),
-        autor: autorInt,
-        decede: decedeInt,
-        sexe: _sexeSelectionne,
-        dateNaissance: _dateNaissanceCtrl.text.trim(),
-        promo: promoInt,
-        filiere: _filiereCtrl.text.trim(),
-        formation: _formationSelectionne,
-        majeure: _majeureCtrl.text.trim(),
-        option: _optionCtrl.text.trim(),
-        ddiplome: _doublediplomeCtrl.text.trim(),
-        job: _posteCtrl.text.trim(),
-        jobDescription: _descriptionPosteCtrl.text.trim(),
-        jobDebut: _dateDebutPosteCtrl.text.trim(),
-        jobFin: "",
-        entreprise: _entrepriseCtrl.text.trim(),
-        ville: _villeCtrl.text.trim(),
-        pays: "",
-        stages: _stagesAffichage,
+        lastName: _controllerLastName.text.trim(),
+        firstname: _controllerFirstName.text.trim(),
+        email: _controllereMail.text.trim(),
+        phone: _controllerPhone.text.trim(),
+        permission: permissionInt,
+        deceased: deceasedInt,
+        gender: _selectedGender,
+        dateOfBirth: _controllerDateOfBirth.text.trim(),
+        promotion: poromotionInt,
+        sector: _controllerSector.text.trim(),
+        formation: _selectedFormation,
+        specialisation: _controllerSpecialisation.text.trim(),
+        option: _controllerOption.text.trim(),
+        doubleDiploma: _controllerDoubleDiploma.text.trim(),
+        job: _controllerPosition.text.trim(),
+        jobDescription: _controllerPositionDescription.text.trim(),
+        jobStart: _controllerStartPositionDate.text.trim(),
+        jobEnd: "",
+        company: _controllerCompany.text.trim(),
+        city: _controllerCity.text.trim(),
+        country: "",
+        internships: _internshipDisplay,
       );
 
-      _enEdition = false;
-      _modifiee = true;
+      _isEdited = false;
+      _modified = true;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -315,53 +315,53 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
 @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-    bool estGrand = screenWidth > 800;
+    bool isBig = screenWidth > 800;
     
     double horizontalPadding = 40.0;
     double spacing = 10.0;
     
-    int stageCount = _stagesAffichage.length;
+    int stageCount = _internshipDisplay.length;
     
     int divisor = stageCount > 0 ? stageCount : 1;
     if (divisor > 3) divisor = 3;
     
     double cardWidth = (screenWidth - horizontalPadding - (spacing * (divisor - 1))) / divisor;
 
-    bool estAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = widget.user['role'] == 'admin';
 
     List<Widget> etuItems = [
-      if (currentAlumni.filiere.isNotEmpty || _enEdition)...[
-              _buildEditableTile(Icons.school, Colors.orange, "Filière", _filiereCtrl, currentAlumni.filiere),
+      if (currentAlumni.sector.isNotEmpty || _isEdited)...[
+              _buildEditableTile(Icons.school, Colors.orange, "Filière", _controllerSector, currentAlumni.sector),
               const Divider(height: 1),
       ],
-      if (_enEdition || currentAlumni.majeure.isNotEmpty || currentAlumni.option.isNotEmpty || currentAlumni.ddiplome.isNotEmpty) ...[
-         if (_enEdition) ...[
-            _buildEditableTile(Icons.book, Colors.redAccent, "Majeure", _majeureCtrl, currentAlumni.majeure),
+      if (_isEdited || currentAlumni.specialisation.isNotEmpty || currentAlumni.option.isNotEmpty || currentAlumni.doubleDiploma.isNotEmpty) ...[
+         if (_isEdited) ...[
+            _buildEditableTile(Icons.book, Colors.redAccent, "Majeure", _controllerSpecialisation, currentAlumni.specialisation),
             const Divider(height: 1),
-            _buildEditableTile(Icons.bookmark, Colors.pinkAccent, "Option", _optionCtrl, currentAlumni.option),
+            _buildEditableTile(Icons.bookmark, Colors.pinkAccent, "Option", _controllerOption, currentAlumni.option),
             const Divider(height: 1),
-            _buildEditableTile(Icons.workspace_premium, Colors.purple, "Double Diplôme", _doublediplomeCtrl, currentAlumni.ddiplome),
+            _buildEditableTile(Icons.workspace_premium, Colors.purple, "Double Diplôme", _controllerDoubleDiploma, currentAlumni.doubleDiploma),
          ] else ...[
-            if (currentAlumni.majeure.isNotEmpty)...[
-              _buildEditableTile(Icons.book, Colors.redAccent, "Majeure", _majeureCtrl, currentAlumni.majeure),
+            if (currentAlumni.specialisation.isNotEmpty)...[
+              _buildEditableTile(Icons.book, Colors.redAccent, "Majeure", _controllerSpecialisation, currentAlumni.specialisation),
               const Divider(height: 1),
             ],
             if (currentAlumni.option.isNotEmpty)...[
-              _buildEditableTile(Icons.bookmark, Colors.pinkAccent, "Option", _optionCtrl, currentAlumni.option),
+              _buildEditableTile(Icons.bookmark, Colors.pinkAccent, "Option", _controllerOption, currentAlumni.option),
               const Divider(height: 1),
             ],
-            if (currentAlumni.ddiplome.isNotEmpty)...[
-              _buildEditableTile(Icons.workspace_premium, Colors.purple, "Double Diplôme", _doublediplomeCtrl, currentAlumni.ddiplome),
+            if (currentAlumni.doubleDiploma.isNotEmpty)...[
+              _buildEditableTile(Icons.workspace_premium, Colors.purple, "Double Diplôme", _controllerDoubleDiploma, currentAlumni.doubleDiploma),
             ],
          ],
       ],
     ];
 
     List<Widget> proItems = [
-      if (_enEdition) ...[
-        _buildEditableTile(Icons.work, Colors.blue, "Poste", _posteCtrl, currentAlumni.job),
+      if (_isEdited) ...[
+        _buildEditableTile(Icons.work, Colors.blue, "Poste", _controllerPosition, currentAlumni.job),
         const SizedBox(height: 10),
-        _buildEditableTile(Icons.description, Colors.grey, "Description du poste", _descriptionPosteCtrl, currentAlumni.jobDescription),
+        _buildEditableTile(Icons.description, Colors.grey, "Description du poste", _controllerPositionDescription, currentAlumni.jobDescription),
         const Divider(height: 1),
       ] 
       else if (currentAlumni.job.isNotEmpty) ...[
@@ -376,18 +376,18 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
           trailing: currentAlumni.jobDescription.isNotEmpty
               ? IconButton(
                   icon: Icon(
-                    _voirDescription ? Icons.remove_circle_outline : Icons.add_circle_outline,
+                    _seeDescription ? Icons.remove_circle_outline : Icons.add_circle_outline,
                     color: AppColors.ensiCyan,
                   ),
                   onPressed: () {
                     setState(() {
-                      _voirDescription = !_voirDescription;
+                      _seeDescription = !_seeDescription;
                     });
                   },
                 )
               : null,
         ),
-        if (_voirDescription && currentAlumni.jobDescription.isNotEmpty)
+        if (_seeDescription && currentAlumni.jobDescription.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(left: 20, right: 20, bottom: 15),
             child: Container(
@@ -405,33 +405,33 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
         const Divider(height: 1),
       ],
       
-      if (currentAlumni.ville.isNotEmpty)...[
-        _buildEditableTile(Icons.location_on, Colors.red, "Ville", _villeCtrl, currentAlumni.ville),
+      if (currentAlumni.city.isNotEmpty)...[
+        _buildEditableTile(Icons.location_on, Colors.red, "Ville", _controllerCity, currentAlumni.city),
         const Divider(height: 1),
       ],
-      if (currentAlumni.entreprise.isNotEmpty || _enEdition)...[
-        _buildEditableTile(Icons.business, Colors.indigo, "Entreprise", _entrepriseCtrl, currentAlumni.entreprise),
+      if (currentAlumni.company.isNotEmpty || _isEdited)...[
+        _buildEditableTile(Icons.business, Colors.indigo, "Entreprise", _controllerCompany, currentAlumni.company),
         const Divider(height: 1),
-        if (!_enEdition && _dateDebutPosteCtrl.text.isNotEmpty) ...[
+        if (!_isEdited && _controllerStartPositionDate.text.isNotEmpty) ...[
           ListTile(
             leading: Icon(Icons.timer, color: Colors.teal),
             title: Text("Ancienneté"),
-            subtitle: Text("${_dateDebutPosteCtrl.text} (${_calculerAnciennete(_dateDebutPosteCtrl.text)})"),
+            subtitle: Text("${_controllerStartPositionDate.text} (${_calculateSeniority(_controllerStartPositionDate.text)})"),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           ),
         ]
-        else if (_enEdition)
+        else if (_isEdited)
            Padding(
              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
              child: TextFormField(
-                controller: _dateDebutPosteCtrl,
+                controller: _controllerStartPositionDate,
                 decoration: const InputDecoration(
                   labelText: "Date de début (Poste)", 
                   border: OutlineInputBorder(), 
                   prefixIcon: Icon(Icons.calendar_today)
                 ),
                 readOnly: true,
-                onTap: () => _selectionnerDate(context, _dateDebutPosteCtrl),
+                onTap: () => _selectionnerDate(context, _controllerStartPositionDate),
              ),
            ),
       ],
@@ -441,40 +441,40 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
 
 
     List<Widget> contactItems = [
-      if (_enEdition || (currentAlumni.autor == 1 && currentAlumni.decede == 0)) ...[
+      if (_isEdited || (currentAlumni.permission == 1 && currentAlumni.deceased == 0)) ...[
         const Divider(height: 1),
         if (currentAlumni.email.isNotEmpty)...[
-        _buildEditableTile(Icons.email, Colors.green, "Email", _emailCtrl, currentAlumni.email),
+        _buildEditableTile(Icons.email, Colors.green, "Email", _controllereMail, currentAlumni.email),
         const Divider(height: 1),
         ],
-        if (currentAlumni.tel.isNotEmpty)...[
-        _buildEditableTile(Icons.phone, Colors.amber, "Téléphone", _telCtrl, currentAlumni.tel),
+        if (currentAlumni.phone.isNotEmpty)...[
+        _buildEditableTile(Icons.phone, Colors.amber, "Téléphone", _controllerPhone, currentAlumni.phone),
         ],
       ],
     ];
     if (contactItems.isEmpty) contactItems.add(Text("Aucune information renseignée"));
 
-    bool modeLigne = MediaQuery.of(context).size.width > 600 && currentAlumni.email.isNotEmpty && currentAlumni.tel.isNotEmpty;
+    bool modeLigne = MediaQuery.of(context).size.width > 600 && currentAlumni.email.isNotEmpty && currentAlumni.phone.isNotEmpty;
     return Scaffold(
       appBar: AppBar(
-        title: Text(_enEdition ? "Modifier Alumni" : "${currentAlumni.prenom} ${currentAlumni.nom}"),
+        title: Text(_isEdited ? "Modifier Alumni" : "${currentAlumni.firstname} ${currentAlumni.lastName}"),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context, _modifiee),
+          onPressed: () => Navigator.pop(context, _modified),
         ),
         actions: [
-          if (estAdmin)
+          if (isAdmin)
             IconButton(
-              icon: Icon(_enEdition ? Icons.save : Icons.edit),
-              tooltip: _enEdition ? "Enregistrer" : "Modifier",
+              icon: Icon(_isEdited ? Icons.save : Icons.edit),
+              tooltip: _isEdited ? "Enregistrer" : "Modifier",
               onPressed: () {
-                if (_enEdition) {
-                  _sauvegarder();
+                if (_isEdited) {
+                  _save();
                 } else {
                   setState(() {
-                    _enEdition = true;
+                    _isEdited = true;
                     _initialiserStageEditors();
                   });
                 }
@@ -492,33 +492,33 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
               radius: 50,
               backgroundColor: AppColors.ensiCyan,
               child: Text(
-                currentAlumni.prenom.isNotEmpty ? currentAlumni.prenom[0] : "?",
+                currentAlumni.firstname.isNotEmpty ? currentAlumni.firstname[0] : "?",
                 style: const TextStyle(fontSize: 40, color: Colors.white),
               ),
             ),
             const SizedBox(height: 10),
 
-            if (_enEdition) ...[
+            if (_isEdited) ...[
               Row(
                 children: [
-                  Expanded(child: TextField(controller: _prenomCtrl, decoration: const InputDecoration(labelText: "Prénom", border: OutlineInputBorder()))),
+                  Expanded(child: TextField(controller: _controllerFirstName, decoration: const InputDecoration(labelText: "Prénom", border: OutlineInputBorder()))),
                   const SizedBox(width: 10),
-                  Expanded(child: TextField(controller: _nomCtrl, decoration: const InputDecoration(labelText: "Nom", border: OutlineInputBorder()))),
+                  Expanded(child: TextField(controller: _controllerLastName, decoration: const InputDecoration(labelText: "Nom", border: OutlineInputBorder()))),
                 ],
               ),
               const SizedBox(height: 10),
               TextField(
-                controller: _promoCtrl,
+                controller: _controllerPromotion,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: const InputDecoration(labelText: "Promo (Année)", border: OutlineInputBorder()),
               ),
               const SizedBox(height: 10),
              TextFormField(
-                controller: _dateNaissanceCtrl,
+                controller: _controllerDateOfBirth,
                 decoration: const InputDecoration(labelText: "Date de Naissance", border: OutlineInputBorder(), prefixIcon: Icon(Icons.cake)),
                 readOnly: true,
-                onTap: () => _selectionnerDate(context, _dateNaissanceCtrl),
+                onTap: () => _selectionnerDate(context, _controllerDateOfBirth),
               ),
               const Divider(height: 40),
               Card(
@@ -528,25 +528,25 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                 child: Column(
                   children: [
                     const Padding(padding: EdgeInsets.all(8.0), child: Text("Statut Administrateur", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54))),
-                    SwitchListTile(title: const Text("Autorisation des données"), subtitle: Text(_autorSwitch ? "Visible" : "Caché"), activeColor: Colors.green, value: _autorSwitch, onChanged: (val) => setState(() => _autorSwitch = val)),
+                    SwitchListTile(title: const Text("Autorisation des données"), subtitle: Text(_permissionSwitch ? "Visible" : "Caché"), activeColor: Colors.green, value: _permissionSwitch, onChanged: (val) => setState(() => _permissionSwitch = val)),
                     const Divider(height: 1),
-                    SwitchListTile(title: const Text("Décédé"), subtitle: const Text("Marquer comme décédé"), activeColor: Colors.red, value: _decedeSwitch, onChanged: (val) => setState(() => _decedeSwitch = val)),
+                    SwitchListTile(title: const Text("Décédé"), subtitle: const Text("Marquer comme décédé"), activeColor: Colors.red, value: _deceasedSwitch, onChanged: (val) => setState(() => _deceasedSwitch = val)),
                   ],
                 ),
               ),
               const Divider(height: 20),
             ] else ...[
-              Text("${currentAlumni.prenom} ${currentAlumni.nom}", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-              Text("Promo ${currentAlumni.promo}", style: const TextStyle(fontSize: 20, color: Colors.grey)),
-              if (currentAlumni.dateNaissance.isNotEmpty)
+              Text("${currentAlumni.firstname} ${currentAlumni.lastName}", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+              Text("Promo ${currentAlumni.promotion}", style: const TextStyle(fontSize: 20, color: Colors.grey)),
+              if (currentAlumni.dateOfBirth.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 5),
-                  child: Text("${_calculerAge(currentAlumni.dateNaissance)}", style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
+                  child: Text("${_calculateAge(currentAlumni.dateOfBirth)}", style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
                 ),
               const Divider(height: 40),
             ],
 
-            if (estGrand)...[
+            if (isBig)...[
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -566,7 +566,7 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
               ),
             ],
               
-              if (_enEdition || (currentAlumni.autor == 1 && currentAlumni.decede == 0)) ...[
+              if (_isEdited || (currentAlumni.permission == 1 && currentAlumni.deceased == 0)) ...[
               Card(
                 elevation: 2,
                 margin: const EdgeInsets.symmetric(vertical: 10),
@@ -578,36 +578,36 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                         padding: EdgeInsets.all(10.0),
                         child: Text("Contact", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
-                      
-                      // Si on a assez de place ET les 2 infos : LIGNE
+
+
                       if (modeLigne) 
                         Row(
                           children: [
                             Expanded(
-                              child: _buildEditableTile(Icons.email, Colors.green, "Email", _emailCtrl, currentAlumni.email),
+                              child: _buildEditableTile(Icons.email, Colors.green, "Email", _controllereMail, currentAlumni.email),
                             ),
-                            // Petit trait de séparation vertical optionnel
+
                             Container(width: 1, height: 40, color: Colors.grey[300]),
                             Expanded(
-                              child: _buildEditableTile(Icons.phone, Colors.amber, "Téléphone", _telCtrl, currentAlumni.tel),
+                              child: _buildEditableTile(Icons.phone, Colors.amber, "Téléphone", _controllerPhone, currentAlumni.phone),
                             ),
                           ],
                         )
                       else 
                         Column(
                           children: [
-                            if (currentAlumni.email.isNotEmpty || _enEdition)
-                              _buildEditableTile(Icons.email, Colors.green, "Email", _emailCtrl, currentAlumni.email),
+                            if (currentAlumni.email.isNotEmpty || _isEdited)
+                              _buildEditableTile(Icons.email, Colors.green, "Email", _controllereMail, currentAlumni.email),
                               
-                            if ((currentAlumni.email.isNotEmpty || _enEdition) && (currentAlumni.tel.isNotEmpty || _enEdition))
+                            if ((currentAlumni.email.isNotEmpty || _isEdited) && (currentAlumni.phone.isNotEmpty || _isEdited))
                               const Divider(indent: 20, endIndent: 20, height: 1),
                               
-                            if (currentAlumni.tel.isNotEmpty || _enEdition)
-                              _buildEditableTile(Icons.phone, Colors.amber, "Téléphone", _telCtrl, currentAlumni.tel),
+                            if (currentAlumni.phone.isNotEmpty || _isEdited)
+                              _buildEditableTile(Icons.phone, Colors.amber, "Téléphone", _controllerPhone, currentAlumni.phone),
                           ],
                         ),
                         
-                        if (currentAlumni.email.isEmpty && currentAlumni.tel.isEmpty && !_enEdition)
+                        if (currentAlumni.email.isEmpty && currentAlumni.phone.isEmpty && !_isEdited)
                           const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: Text("Aucune coordonnée renseignée", style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)),
@@ -639,9 +639,9 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                   padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
                   child: Text("Stages", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                 ),
-                if (_enEdition)
+                if (_isEdited)
                   ElevatedButton.icon(
-                    onPressed: _ajouterStage,
+                    onPressed: _addInternship,
                     icon: const Icon(Icons.add, size: 18),
                     label: const Text("Ajouter Stage"),
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.ensiCyan, foregroundColor: Colors.white),
@@ -649,11 +649,11 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
               ],
             ),
 
-            if (_enEdition)
+            if (_isEdited)
               Column(
-                children: _stageEditors.asMap().entries.map((entry) {
+                children: _internshipEditors.asMap().entries.map((entry) {
                   int index = entry.key;
-                  StageEditor editor = entry.value;
+                  InternshipEditor editor = entry.value;
                   return Card(
                     margin: const EdgeInsets.only(bottom: 15),
                     elevation: 3,
@@ -666,14 +666,14 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("Stage #${index + 1}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-                              IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _supprimerStage(index)),
+                              IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteInternship(index)),
                             ],
                           ),
                           Row(children: [
                              Expanded(
                               child: DropdownButtonFormField<String>(
-                                value: ['1A', '2A', '3A'].contains(editor.annee.text) 
-                                    ? editor.annee.text 
+                                value: ['1A', '2A', '3A'].contains(editor.year.text) 
+                                    ? editor.year.text 
                                     : null,
                                     
                                 decoration: const InputDecoration(labelText: "Année", border: OutlineInputBorder()),
@@ -684,7 +684,7 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                                   DropdownMenuItem(value: '3A', child: Text("3A"))
                                 ],
                                 
-                                onChanged: (v) { if (v != null) { setState(() { editor.annee.text = v; });}},
+                                onChanged: (v) { if (v != null) { setState(() { editor.year.text = v; });}},
                               ),
                             ),
                              const SizedBox(width: 10),
@@ -696,14 +696,14 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                              )),
                           ]),
                           const SizedBox(height: 10),
-                          TextField(controller: editor.intitule, decoration: const InputDecoration(labelText: "Intitulé", border: OutlineInputBorder())),
+                          TextField(controller: editor.entilted, decoration: const InputDecoration(labelText: "Intitulé", border: OutlineInputBorder())),
                           const SizedBox(height: 10),
                           TextField(controller: editor.entreprise, decoration: const InputDecoration(labelText: "Entreprise", border: OutlineInputBorder())),
                           const SizedBox(height: 10),
                           Row(children: [
-                            Expanded(child: TextField(controller: editor.ville, decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()))),
+                            Expanded(child: TextField(controller: editor.city, decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()))),
                             const SizedBox(width: 10),
-                            Expanded(child: TextField(controller: editor.pays, decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()))),
+                            Expanded(child: TextField(controller: editor.country, decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()))),
                           ]),
                           const SizedBox(height: 10),
                           TextField(controller: editor.description, maxLines: 3, decoration: const InputDecoration(labelText: "Description", border: OutlineInputBorder())),
@@ -714,26 +714,26 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                 }).toList(),
               )
             else
-              _stagesAffichage.isEmpty
+              _internshipDisplay.isEmpty
                   ? const Card(
                       elevation: 1,
                       child: ListTile(title: Text("Aucun stage renseigné", style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey))),
                     )
-                  : estGrand
+                  : isBig
                       ? SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: IntrinsicHeight(
                             child: Row(
-                              children: _stagesAffichage.map((stage) {
-                                return _buildStageCard(stage, cardWidth, spacing, _stagesAffichage.last == stage);
+                              children: _internshipDisplay.map((stage) {
+                                return _buildStageCard(stage, cardWidth, spacing, _internshipDisplay.last == stage);
                               }).toList(),
                             ),
                           ),
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: _stagesAffichage.map((stage) {
-                            return _buildStageCard(stage, cardWidth, spacing, _stagesAffichage.last == stage);
+                          children: _internshipDisplay.map((stage) {
+                            return _buildStageCard(stage, cardWidth, spacing, _internshipDisplay.last == stage);
                           }).toList(),
                         ),
           ],
@@ -762,7 +762,7 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       leading: Icon(icon, color: color, size: 24),
       title: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
-      subtitle: _enEdition
+      subtitle: _isEdited
           ? TextField(
               controller: controller,
               decoration: const InputDecoration(
@@ -802,7 +802,7 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                   const SizedBox(width: 5),
                   Expanded(
                     child: Text(
-                      "${stage.annee} - ${stage.intitule}",
+                      "${stage.year} - ${stage.entitled}",
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -811,10 +811,10 @@ List<Map<String, dynamic>> stagesData = _stageEditors.map((editor) {
                 ],
               ),
               const Divider(),
-              _buildStageField(stage.type == "U" ? "Université" : "Entreprise", stage.type == "E" ? Icons.apartment : Icons.school, Colors.green, stage.entreprise),
-              _buildStageField("Lieu", Icons.location_on, Colors.red, "${stage.ville}, ${stage.pays}", isItalic: true),
-              if (stage.dateDebut.isNotEmpty || stage.dateFin.isNotEmpty)
-              _buildStageField("Période",Icons.calendar_today , Colors.blue, "${stage.dateDebut} au ${stage.dateFin}"),
+              _buildStageField(stage.type == "U" ? "Université" : "Entreprise", stage.type == "E" ? Icons.apartment : Icons.school, Colors.green, stage.company),
+              _buildStageField("Lieu", Icons.location_on, Colors.red, "${stage.city}, ${stage.country}", isItalic: true),
+              if (stage.startDate.isNotEmpty || stage.endDate.isNotEmpty)
+              _buildStageField("Période",Icons.calendar_today , Colors.blue, "${stage.startDate} au ${stage.endDate}"),
               _buildStageField("Description", Icons.insert_drive_file, Colors.grey, stage.description),
             ],
           ),

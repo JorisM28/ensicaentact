@@ -3,11 +3,11 @@ import 'colors.dart';
 import 'add_alumni.dart';
 
 void main() {
-  runApp(const MonApplicationAlumni());
+  runApp(const MyAlumniApp());
 }
 
-class MonApplicationAlumni extends StatelessWidget {
-  const MonApplicationAlumni({super.key});
+class MyAlumniApp extends StatelessWidget {
+  const MyAlumniApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +18,13 @@ class MonApplicationAlumni extends StatelessWidget {
         primarySwatch: Colors.cyan,
         useMaterial3: true,
       ),
-      home: const PageAjoutAlumni(),
+      home: const AddAlumniPage(),
     );
   }
 }
 
-class PageAjoutAlumni extends StatelessWidget {
-  const PageAjoutAlumni({super.key});
+class AddAlumniPage extends StatelessWidget {
+  const AddAlumniPage({super.key});
 
   @override
   Widget build(BuildContext context) {

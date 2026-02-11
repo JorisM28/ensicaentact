@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'profileBadge.dart';
+import 'profile_badge.dart';
 import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
-import 'filtre_widget.dart';
+import 'widget/filtre_widget.dart';
 import 'alumni_detail_page.dart'; 
-import 'AdminValidatePage.dart';
+import 'admin_validate_page.dart';
 import 'alumni_preview.dart';
 import 'add_alumni.dart'; 
 import 'navigation.dart';
+
 void main() {
-  runApp(const MonReseauAlumni());
+  runApp(const MyAlumniNetwork());
 }
 
-class MonReseauAlumni extends StatelessWidget {
-  const MonReseauAlumni({super.key});
+class MyAlumniNetwork extends StatelessWidget {
+  const MyAlumniNetwork({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,39 +30,39 @@ class MonReseauAlumni extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: AppColors.ensiCyan),
-      home: const PageAnnuaire(user: userConnecte),
+      home: const DirectoryPage(user: userConnecte),
     );
   }
 }
 
-class PageAnnuaire extends StatefulWidget {
+class DirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
 
-  const PageAnnuaire({
+  const DirectoryPage({
     super.key,
     required this.user, 
   });
 
   @override
-  State<PageAnnuaire> createState() => _PageAnnuaireState();
+  State<DirectoryPage> createState() => _DirectoryPageState();
 }
 
-class _PageAnnuaireState extends State<PageAnnuaire> with RouteAware{
-  Alumnis? _eleveSelectionne;
+class _DirectoryPageState extends State<DirectoryPage> with RouteAware{
+  Alumnis? _selectedStudent;
   final ScrollController _scrollController = ScrollController();
-  List<Alumnis> _tousLesAlumnis = [];
-  List<Alumnis> _alumnisAffiches = [];
-  bool _filtresOuverts = false;
-  int _nbDemandesEnAttente = 0;
+  List<Alumnis> _allAlumni = [];
+  List<Alumnis> _alumniPoster = [];
+  bool _openFilters = false;
+  int _numberWaitingRequest = 0;
   
-  final Set<String> _filtresPromoSelectionnes = {};
-  final Set<String> _filtresFiliereSelectionnes = {};
-  final Set<String> _filtresPaysStageSelectionnes = {};
+  final Set<String> _promotionFilterSelected = {};
+  final Set<String> _sectorFilterSelected = {};
+  final Set<String> _internshipCountryFilterSelected = {};
   
-  bool _chargementEnCours = true;
+  bool _loading = true;
   final TextEditingController _searchController = TextEditingController();
 
-  bool get estAdmin => widget.user['role'] == 'admin';
+  bool get isAdmin => widget.user['role'] == 'admin';
 @override
 void didChangeDependencies() {
   super.didChangeDependencies();
@@ -76,19 +77,19 @@ void dispose() {
   @override
   void initState() {
     super.initState();
-    _chargerDonneesInitiales();
-    if (widget.user['role'] == 'admin' || estAdmin) { // Adapte selon ta logique admin
-      _chargerCompteurNotifs();
+    _loadInitialData();
+    if (widget.user['role'] == 'admin' || isAdmin) { 
+      _loadCounterNotifications();
     }
   }
   @override
 void didPopNext() {
-  _chargerDonneesInitiales();
+  _loadInitialData();
 }
 
-  List<String> get _promosDisponibles {
-    final promos = _tousLesAlumnis
-        .map((e) => e.promo.toString())
+  List<String> get _promotionavailable {
+    final promos = _allAlumni
+        .map((e) => e.promotion.toString())
         .where((e) => e != "0" && e.isNotEmpty)
         .toSet()
         .toList();
@@ -96,12 +97,12 @@ void didPopNext() {
     return promos;
   }
 
-  Future<void> _chargerCompteurNotifs() async {
+  Future<void> _loadCounterNotifications() async {
     try {
-      var demandes = await DatabaseService().getDemandesEnAttente();
+      var request = await DatabaseService().getWaitingRequests();
       if (mounted) {
         setState(() {
-          _nbDemandesEnAttente = demandes.length;
+          _numberWaitingRequest = request.length;
         });
       }
     } catch (e) {
@@ -109,111 +110,113 @@ void didPopNext() {
     }
   }
 
-  List<String> get _filieresDisponibles {
-    final filieres = _tousLesAlumnis
-        .map((e) => e.filiere)
+  List<String> get _sectorAvailable {
+    final sector = _allAlumni
+        .map((e) => e.sector)
         .where((e) => e.isNotEmpty)
         .toSet()
         .toList();
-    filieres.sort();
-    return filieres;
+    sector.sort();
+    return sector;
   }
 
-  List<String> get _paysStageDisponibles {
-    final Set<String> paysTrouves = {};
-    for (var alumni in _tousLesAlumnis) {
-      for (var stage in alumni.stages) {
-        if (stage.pays.isNotEmpty && stage.pays != "Non renseigné") {
-          paysTrouves.add(stage.pays);
+  
+  List<String> get _internshipCountryAvailable {
+    final Set<String> foundCountry = {};
+    for (var alumni in _allAlumni) {
+      for (var internship in alumni.internships) {
+        if (internship.country.isNotEmpty && internship.country != "Non renseigné") {
+          foundCountry.add(internship.country);
         }
       }
     }
-    final listeTriee = paysTrouves.toList();
-    listeTriee.sort();
-    return listeTriee;
+    final sortedList = foundCountry.toList();
+    sortedList.sort();
+    return sortedList;
   }
 
-  void _chargerDonneesInitiales() async {
+  void _loadInitialData() async {
     print("rechargement de la page");
     try {
-        var donnees = await DatabaseService().getTousLesEleves();
+        var data = await DatabaseService().getAllStudent();
       
       if (!mounted) return;
 
       setState(() {
-        _tousLesAlumnis = donnees;
-        _alumnisAffiches = donnees;
-        _chargementEnCours = false;
+        _allAlumni = data;
+        _alumniPoster = data;
+        _loading = false;
         
         if (_searchController.text.isNotEmpty || 
-            _filtresPromoSelectionnes.isNotEmpty || 
-            _filtresFiliereSelectionnes.isNotEmpty ||
-            _filtresPaysStageSelectionnes.isNotEmpty) {
+            _promotionFilterSelected.isNotEmpty || 
+            _sectorFilterSelected.isNotEmpty ||
+            _internshipCountryFilterSelected.isNotEmpty) {
             
-            _filtrerResultats(_searchController.text); 
+            _filterResults(_searchController.text); 
         }
       });
     } catch (e) {
       print("Erreur de chargement : $e");
-      if (mounted) setState(() => _chargementEnCours = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  void _filtrerResultats(String recherche) {
-    List<Alumnis> resultats = _tousLesAlumnis;
+  void _filterResults(String recherche) {
+  
+    List<Alumnis> results = _allAlumni;
 
     if (recherche.isNotEmpty) {
-      resultats = resultats.where((eleve) {
-        final nomLower = eleve.nomComplet.toLowerCase();
+      results = results.where((eleve) {
+        final nameLower = eleve.wholeName.toLowerCase();
         final jobLower = eleve.job.toLowerCase();
-        final entrepriseLower = eleve.entreprise.toLowerCase();
+        final companyLower = eleve.company.toLowerCase();
         final queryLower = recherche.toLowerCase();
-        return nomLower.contains(queryLower) ||
+        return nameLower.contains(queryLower) ||
             jobLower.contains(queryLower) ||
-            entrepriseLower.contains(queryLower);
+            companyLower.contains(queryLower);
       }).toList();
     }
 
-    if (_filtresPromoSelectionnes.isNotEmpty) {
-      resultats = resultats.where((e) => _filtresPromoSelectionnes.contains(e.promo.toString())).toList();
+    if (_promotionFilterSelected.isNotEmpty) {
+      results = results.where((e) => _promotionFilterSelected.contains(e.promotion.toString())).toList();
     }
-    if (_filtresFiliereSelectionnes.isNotEmpty) {
-      resultats = resultats.where((e) => _filtresFiliereSelectionnes.contains(e.filiere)).toList();
+    if (_sectorFilterSelected.isNotEmpty) {
+      results = results.where((e) => _sectorFilterSelected.contains(e.sector)).toList();
     }
-    if (_filtresPaysStageSelectionnes.isNotEmpty) {
-      resultats = resultats.where((eleve) {
-        for (var stage in eleve.stages) {
-          if (_filtresPaysStageSelectionnes.contains(stage.pays)) return true;
+    if (_internshipCountryFilterSelected.isNotEmpty) {
+      results = results.where((eleve) {
+        for (var stage in eleve.internships) {
+          if (_internshipCountryFilterSelected.contains(stage.country)) return true;
         }
         return false;
       }).toList();
     }
 
     setState(() {
-      _alumnisAffiches = resultats;
-      if (_eleveSelectionne != null && !resultats.contains(_eleveSelectionne)) {
-        _eleveSelectionne = null;
+      _alumniPoster = results;
+      if (_selectedStudent != null && !results.contains(_selectedStudent)) {
+        _selectedStudent = null;
       }
     });
   }
 
-  Widget _boutonFiltre() {
+  Widget _filterButton() {
   return Container(
     margin: const EdgeInsets.only(left: 10),
     decoration: BoxDecoration(
-      color: _filtresOuverts ? AppColors.ensiCyan : Colors.white,
+      color: _openFilters ? AppColors.ensiCyan : Colors.white,
       borderRadius: BorderRadius.circular(10),
       border: Border.all(color: Colors.grey.shade300),
     ),
     child: IconButton(
       icon: Icon(
-        _filtresOuverts ? Icons.filter_list_off : Icons.filter_list,
-        color: _filtresOuverts ? Colors.white : Colors.grey[700],
+        _openFilters ? Icons.filter_list_off : Icons.filter_list,
+        color: _openFilters ? Colors.white : Colors.grey[700],
       ),
-      tooltip: _filtresOuverts ? "Masquer les filtres" : "Afficher les filtres",
+      tooltip: _openFilters ? "Masquer les filtres" : "Afficher les filtres",
       onPressed: () {
         setState(() {
-          _filtresOuverts = !_filtresOuverts;
+          _openFilters = !_openFilters;
         });
       },
     ),
@@ -222,8 +225,8 @@ void didPopNext() {
 
   @override
   Widget build(BuildContext context) {
-    double largeurEcran = MediaQuery.of(context).size.width;
-    bool estGrandEcran = largeurEcran > 800;
+    double screenWidth = MediaQuery.of(context).size.width;
+    bool isWideScreen = screenWidth > 800;
 
     return Scaffold(
       appBar: AppBar(
@@ -231,20 +234,19 @@ void didPopNext() {
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
-          if (estAdmin)
+          if (isAdmin)
             IconButton(
               icon: const Icon(Icons.history),
               tooltip: "Historique des actions",
-              onPressed: () => _afficherHistorique(context),
+              onPressed: () => _displayHistory(context),
             ),
           ProfileBadge(user: widget.user),
         ],
       ),
-      floatingActionButton: estAdmin 
+      floatingActionButton: isAdmin 
           ? Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // --- BOUTON DE VALIDATION AVEC BADGE ---
                 FloatingActionButton(
                   heroTag: "btn_validation",
                   backgroundColor: Colors.orange,
@@ -254,17 +256,16 @@ void didPopNext() {
                       context,
                       MaterialPageRoute(builder: (context) => const AdminValidationPage()),
                     ).then((_) {
-                      // IMPORTANT : Quand on revient de la page, on rafraîchit le compteur
-                      _chargerCompteurNotifs();
+                      
+                      _loadCounterNotifications();
                     });
                   },
-                  // LE WIDGET BADGE EST ICI
+                  
                   child: Badge(
-                    label: Text('$_nbDemandesEnAttente'), // Le chiffre
-                    isLabelVisible: _nbDemandesEnAttente > 0, // Caché si 0
-                    backgroundColor: Colors.red, // Pastille rouge
+                    label: Text('$_numberWaitingRequest'), 
+                    isLabelVisible: _numberWaitingRequest > 0, 
+                    backgroundColor: Colors.red, 
                     textColor: Colors.white,
-                    // L'icône originale est l'enfant du Badge
                     child: const Icon(Icons.playlist_add_check, color: Colors.white),
                   ),
                 ),
@@ -275,19 +276,19 @@ void didPopNext() {
                   heroTag: "btn_ajout_direct",
                   backgroundColor: AppColors.ensiCyan,
                   tooltip: "Ajouter un alumni directement",
-                  onPressed: _ouvrirModalAjout,
+                  onPressed: _openAddModal,
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
               ],
             ) 
           : null,
 
-      body: _chargementEnCours
+      body: _loading
           ? const Center(child: CircularProgressIndicator())
           : CallbackShortcuts(
               bindings: {
-                const SingleActivator(LogicalKeyboardKey.arrowDown): () => _changerSelectionClavier(1, _alumnisAffiches),
-                const SingleActivator(LogicalKeyboardKey.arrowUp): () => _changerSelectionClavier(-1, _alumnisAffiches),
+                const SingleActivator(LogicalKeyboardKey.arrowDown): () => _changeKeyboardSelection(1, _alumniPoster),
+                const SingleActivator(LogicalKeyboardKey.arrowUp): () => _changeKeyboardSelection(-1, _alumniPoster),
               },
               child: Focus(
                 autofocus: true,
@@ -296,16 +297,16 @@ void didPopNext() {
                     Container(
                       padding: const EdgeInsets.all(20),
                       color: Colors.grey[100],
-                      child: estGrandEcran
+                      child: isWideScreen
                           ? Row(
                               children: [
-                                SizedBox(width: 400, child: _champRecherche()),
+                                SizedBox(width: 400, child: _searchScope()),
                                 const Padding(padding: EdgeInsets.all(15)),
-                                _boutonFiltre(),
+                                _filterButton(),
                                 const Padding(padding: EdgeInsets.all(15)),
-                                if (_filtresOuverts) 
+                                if (_openFilters) 
                                   Expanded(
-                                    child: _construireFiltres()
+                                    child: _buildFilters()
                                   ),
                               ],
                             )
@@ -317,14 +318,14 @@ void didPopNext() {
                               
                               Row(
                                 children: [
-                                  Expanded(child: _champRecherche()),
-                                  _boutonFiltre(),
+                                  Expanded(child: _searchScope()),
+                                  _filterButton(),
                                 ],
                               ),
                               
-                              if (_filtresOuverts) ...[
+                              if (_openFilters) ...[
                                 const SizedBox(height: 15),
-                                _construireFiltres(),
+                                _buildFilters(),
                               ]
                             ],
                             ),
@@ -338,26 +339,26 @@ void didPopNext() {
                             flex: 2,
                             child: Container(
                               color: Colors.white,
-                              child: _alumnisAffiches.isEmpty
+                              child: _alumniPoster.isEmpty
                                   ? const Center(child: Text("Aucun résultat"))
                                   : ListView.builder(
                                       controller: _scrollController,
-                                      itemCount: _alumnisAffiches.length,
+                                      itemCount: _alumniPoster.length,
                                       padding: const EdgeInsets.all(10),
                                       itemBuilder: (context, index) {
-                                        final eleve = _alumnisAffiches[index];
-                                        return _carteEleve(context, eleve, estGrandEcran);
+                                        final eleve = _alumniPoster[index];
+                                        return _studentCard(context, eleve, isWideScreen);
                                       },
                                     ),
                             ),
                           ),
-                          if (estGrandEcran) ...[
+                          if (isWideScreen) ...[
                             const VerticalDivider(width: 1),
                             Expanded(
                               flex: 2,
-                              child: _eleveSelectionne == null
-                                  ? _vueParDefaut()
-                                  : AlumniPreview(alumni: _eleveSelectionne!, user: widget.user), 
+                              child: _selectedStudent == null
+                                  ? _defaultView()
+                                  : AlumniPreview(alumni: _selectedStudent!, user: widget.user), 
                             ),
                           ]
                         ],
@@ -370,39 +371,39 @@ void didPopNext() {
     );
   }
 
-  Widget _construireFiltres() {
+  Widget _buildFilters() {
     return ZoneFiltres(
-      promosDisponibles: _promosDisponibles,
-      promosSelectionnees: _filtresPromoSelectionnes,
-      onPromoChanged: (promo, estCoche) {
+      promotionAvailable: _promotionavailable,
+      selectedPromotion: _promotionFilterSelected,
+      onPromoChanged: (promo, isTicked) {
         setState(() {
-          estCoche ? _filtresPromoSelectionnes.add(promo) : _filtresPromoSelectionnes.remove(promo);
-          _filtrerResultats(_searchController.text);
+          isTicked ? _promotionFilterSelected.add(promo) : _promotionFilterSelected.remove(promo);
+          _filterResults(_searchController.text);
         });
       },
-      filieresDisponibles: _filieresDisponibles,
-      filieresSelectionnees: _filtresFiliereSelectionnes,
-      onFiliereChanged: (filiere, estCoche) {
+      sectorAvailable: _sectorAvailable,
+      sectorFilterSelected: _sectorFilterSelected,
+      onSectorChanged: (filiere, isTicked) {
         setState(() {
-          estCoche ? _filtresFiliereSelectionnes.add(filiere) : _filtresFiliereSelectionnes.remove(filiere);
-          _filtrerResultats(_searchController.text);
+          isTicked ? _sectorFilterSelected.add(filiere) : _sectorFilterSelected.remove(filiere);
+          _filterResults(_searchController.text);
         });
       },
-      paysStageDisponibles: _paysStageDisponibles,
-      paysStageSelectionnees: _filtresPaysStageSelectionnes,
-      onPaysStageChanged: (pays, estCoche) {
+      internshipCountryAvailable: _internshipCountryAvailable,
+      internshipCountryFilterSelected: _internshipCountryFilterSelected,
+      onInternshipCountryChanged: (pays, isTicked) {
         setState(() {
-          estCoche ? _filtresPaysStageSelectionnes.add(pays) : _filtresPaysStageSelectionnes.remove(pays);
-          _filtrerResultats(_searchController.text);
+          isTicked ? _internshipCountryFilterSelected.add(pays) : _internshipCountryFilterSelected.remove(pays);
+          _filterResults(_searchController.text);
         });
       },
     );
   }
 
-  Widget _champRecherche() {
+  Widget _searchScope() {
     return TextField(
       controller: _searchController,
-      onChanged: (value) => _filtrerResultats(value),
+      onChanged: (value) => _filterResults(value),
       decoration: InputDecoration(
         hintText: "Recherche...",
         prefixIcon: const Icon(Icons.search),
@@ -411,7 +412,7 @@ void didPopNext() {
                 icon: const Icon(Icons.clear),
                 onPressed: () {
                   _searchController.clear();
-                  _filtrerResultats('');
+                  _filterResults('');
                   FocusScope.of(context).unfocus();
                 },
               )
@@ -423,36 +424,36 @@ void didPopNext() {
     );
   }
 
-  Widget _carteEleve(BuildContext context, Alumnis eleve, bool estGrandEcran) {
-    final estSelectionne = eleve == _eleveSelectionne;
-    void ouvrirDetail() {
-      if (estGrandEcran) {
-        setState(() => _eleveSelectionne = eleve);
+  Widget _studentCard(BuildContext context, Alumnis Student, bool isWideScreen) {
+    final IsSelected = Student == _selectedStudent;
+    void openDetail() {
+      if (isWideScreen) {
+        setState(() => _selectedStudent = Student);
       } else {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>AlumniDetailPage(alumni: eleve, user: widget.user,
+            builder: (context) =>AlumniDetailPage(alumni: Student, user: widget.user,
             onSave: () {setState(() {}); 
             }, ),
           ),
         ).then((resultat) {
-            _chargerDonneesInitiales();
+            _loadInitialData();
         });
       }
     }
 
     return Card(
-      elevation: estSelectionne ? 5  : 2,
-      color: estSelectionne ? const Color.fromARGB(255, 210, 210, 210).withOpacity(1) : Colors.white,
+      elevation: IsSelected ? 5  : 2,
+      color: IsSelected ? const Color.fromARGB(255, 210, 210, 210).withOpacity(1) : Colors.white,
       margin: const EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: estSelectionne ? const BorderSide(color: Color.fromARGB(255, 118, 118, 118), width: 0.5) : BorderSide.none,
+        side: IsSelected ? const BorderSide(color: Color.fromARGB(255, 118, 118, 118), width: 0.5) : BorderSide.none,
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: ouvrirDetail,
+        onTap: openDetail,
         child: Padding(
           padding: const EdgeInsets.all(15),
           child: Row(
@@ -461,7 +462,7 @@ void didPopNext() {
                 backgroundColor: AppColors.ensiCyan,
                 radius: 30,
                 child: Text(
-                  eleve.prenom.isNotEmpty ? eleve.prenom[0] : "?",
+                  Student.firstname.isNotEmpty ? Student.firstname[0] : "?",
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
@@ -472,29 +473,29 @@ void didPopNext() {
                   children: [
                     Text.rich(
                       TextSpan(
-                        text: eleve.nomComplet,
+                        text: Student.wholeName,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
                         children: [
-                          if (eleve.promo != 0)
+                          if (Student.promotion != 0)
                             TextSpan(
-                              text: " - ${eleve.promo}",
+                              text: " - ${Student.promotion}",
                               style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                         ],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
-                      if (eleve.job.isNotEmpty || eleve.entreprise.isNotEmpty)...[
-                    Text("${eleve.job} ${eleve.entreprise.isEmpty || eleve.job.isEmpty  ? "" : "⟶"} ${eleve.entreprise}", style: TextStyle(color: Colors.grey[800])),
+                      if (Student.job.isNotEmpty || Student.company.isNotEmpty)...[
+                    Text("${Student.job} ${Student.company.isEmpty || Student.job.isEmpty  ? "" : "⟶"} ${Student.company}", style: TextStyle(color: Colors.grey[800])),
                     ],  
                     const SizedBox(height: 5),
                     Wrap(
                       spacing: 5,
                       children: [
-                        if (eleve.filiere.isNotEmpty)
-                        Chip(label: Text(eleve.filiere, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
-                        if (eleve.ville.isNotEmpty)
-                        Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(eleve.ville, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
+                        if (Student.sector.isNotEmpty)
+                        Chip(label: Text(Student.sector, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
+                        if (Student.city.isNotEmpty)
+                        Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(Student.city, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
                       ],
                     ),
                   ],
@@ -508,13 +509,13 @@ void didPopNext() {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 ),
                 onPressed: () {
-                  if (!estGrandEcran) {
-                     ouvrirDetail();
+                  if (!isWideScreen) {
+                     openDetail();
                   } else {
                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>AlumniDetailPage(alumni: eleve, user: widget.user, 
+                          builder: (context) =>AlumniDetailPage(alumni: Student, user: widget.user, 
                           onSave: () {setState(() {}); 
                           },),
                         ),
@@ -525,10 +526,10 @@ void didPopNext() {
                 label: const Text("Voir", style: TextStyle(fontSize: 12)),
               ),
 
-              if (estAdmin) 
+              if (isAdmin) 
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _confirmerSuppression(eleve),
+                  onPressed: () => _deleteComfirm(Student),
                 ),
             ],
           ),
@@ -538,7 +539,7 @@ void didPopNext() {
     
   }
 
-  Widget _vueParDefaut() {
+  Widget _defaultView() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -552,7 +553,7 @@ void didPopNext() {
   }
 
 
-  void _ouvrirModalAjout() {
+  void _openAddModal() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -563,7 +564,7 @@ void didPopNext() {
             isAdmin: true,
             onSuccess: () {
               Navigator.pop(context);
-              _chargerDonneesInitiales();
+              _loadInitialData();
             },
           ),
         ),
@@ -571,12 +572,12 @@ void didPopNext() {
     );
   }
 
-  Future<void> _confirmerSuppression(Alumnis eleve) async {
-    bool confirmation = await showDialog(
+  Future<void> _deleteComfirm(Alumnis student) async {
+    bool comfirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Supprimer ?"),
-        content: Text("Veux-tu vraiment supprimer ${eleve.nomComplet} ?"),
+        content: Text("Veux-tu vraiment supprimer ${student.wholeName} ?"),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Non")),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Oui")),
@@ -584,23 +585,23 @@ void didPopNext() {
       ),
     ) ?? false;
 
-    if (confirmation) {
-      await DatabaseService().supprimerEleve(eleve.nom, eleve.prenom);
+    if (comfirm) {
+      await DatabaseService().deleteStudents(student.lastName, student.firstname);
       
       setState(() {
-        _alumnisAffiches.removeWhere((e) => e.id == eleve.id);
-        _tousLesAlumnis.removeWhere((e) => e.id == eleve.id);
-        if (_eleveSelectionne?.id == eleve.id) {
-          _eleveSelectionne = null;
+        _alumniPoster.removeWhere((e) => e.id == student.id);
+        _allAlumni.removeWhere((e) => e.id == student.id);
+        if (_selectedStudent?.id == student.id) {
+          _selectedStudent = null;
         }
       });
       
-      _chargerDonneesInitiales(); 
+      _loadInitialData(); 
     }
   }
 
-  void _afficherHistorique(BuildContext context) async {
-    final logs = await DatabaseService().getHistorique();
+  void _displayHistory(BuildContext context) async {
+    final logs = await DatabaseService().getHistory();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -631,20 +632,20 @@ void didPopNext() {
     );
   }
 
-  void _changerSelectionClavier(int direction, List<Alumnis> liste) {
+  void _changeKeyboardSelection(int direction, List<Alumnis> liste) {
     if (liste.isEmpty) return;
-    if (_eleveSelectionne == null) {
-      setState(() => _eleveSelectionne = liste.first);
+    if (_selectedStudent == null) {
+      setState(() => _selectedStudent = liste.first);
       return;
     }
-    int indexActuel = liste.indexOf(_eleveSelectionne!);
+    int indexActuel = liste.indexOf(_selectedStudent!);
     if (indexActuel == -1) {
-      setState(() => _eleveSelectionne = liste.first);
+      setState(() => _selectedStudent = liste.first);
       return;
     }
     int nouvelIndex = indexActuel + direction;
     if (nouvelIndex >= 0 && nouvelIndex < liste.length) {
-      setState(() => _eleveSelectionne = liste[nouvelIndex]);
+      setState(() => _selectedStudent = liste[nouvelIndex]);
       if (_scrollController.hasClients) {
         double positionCible = nouvelIndex * 90.0;
         _scrollController.animateTo(

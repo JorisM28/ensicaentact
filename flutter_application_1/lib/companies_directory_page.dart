@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import '../colors.dart';
 import 'database_service.dart';
-import 'carte_entreprise_widget.dart';
+import 'widget/carte_entreprise_widget.dart';
 
-class PageAnnuaireEntreprise extends StatefulWidget {
-  const PageAnnuaireEntreprise({super.key});
+class CompaniesDirectoryPage extends StatefulWidget {
+  const CompaniesDirectoryPage({super.key});
 
   @override
-  State<PageAnnuaireEntreprise> createState() =>
-      _PageAnnuaireEntrepriseState();
+  State<CompaniesDirectoryPage> createState() =>
+      _CompaniesDirectoryPageState();
 }
 
-class _PageAnnuaireEntrepriseState extends State<PageAnnuaireEntreprise> {
+class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
   final DatabaseService _dbService = DatabaseService();
 
   @override
@@ -28,7 +28,7 @@ class _PageAnnuaireEntrepriseState extends State<PageAnnuaireEntreprise> {
         backgroundColor: AppColors.ensiCyan,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _dbService.getEntreprise(),
+        future: _dbService.getCompanies(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -44,15 +44,15 @@ class _PageAnnuaireEntrepriseState extends State<PageAnnuaireEntreprise> {
             return const Center(child: Text("Aucune entreprise trouvée"));
           }
 
-          final entreprises = snapshot.data!;
+          final companies = snapshot.data!;
 
           final listWidget = ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: entreprises.length,
+            itemCount: companies.length,
             separatorBuilder: (_, __) =>
             const Divider(height: 30),
             itemBuilder: (context, index) {
-              final item = entreprises[index];
+              final item = companies[index];
 
               final nom =
                   item['nom_entreprise'] ?? "Inconnu";
@@ -106,7 +106,7 @@ class _PageAnnuaireEntrepriseState extends State<PageAnnuaireEntreprise> {
           );
 
           final mapWidget =
-          CarteEntrepriseWidget(entreprises: entreprises);
+          CarteEntrepriseWidget(companies: companies);
 
           return isWideScreen
               ? Row(
