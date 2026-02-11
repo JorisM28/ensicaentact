@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/navigation.dart';
+import 'package:flutter_application_ensicaentact/View/navigation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';  
-import 'login.dart';
-import 'login_check.dart';
-import 'page_annuaire.dart';
-import 'formulaire_ajout_alumni.dart';
-import 'page_emploi.dart';
-import 'entreprise_annuaire_page.dart';
+import 'View/screens/auth/login.dart';
+import 'View/screens/employment/companies_directory_page.dart';
+import 'ViewModel/admin/login_check.dart';
+import 'View/screens/alumni/directory_page.dart';
+import 'View/screens/alumni/add_alumni_form.dart';
+import 'View/screens/employment/employement_page.dart';
+import 'ViewModel/employment_viewmodel.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -56,7 +57,7 @@ class PageAccueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PageAnnuaire(user: {
+                  MaterialPageRoute(builder: (context) => const DirectoryPage(user: {
                       'prenom': 'Visiteur',
                       'nom': '',
                       'email': '',
@@ -80,7 +81,7 @@ class PageAccueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PageAnnuaire(user: {
+                  MaterialPageRoute(builder: (context) => const DirectoryPage(user: {
                       'prenom': 'Admin',
                       'nom': '',
                       'email': '',
@@ -95,7 +96,7 @@ class PageAccueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PageAjoutAlumni()),
+                  MaterialPageRoute(builder: (context) => const AddAlumniPage()),
                 );
               },
               child: const Text('Formulaire'),
@@ -104,7 +105,7 @@ class PageAccueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PageAnnuaireEntreprise()),
+                  MaterialPageRoute(builder: (context) => CompaniesDirectoryPage(user: {},)),
                 );
               },
               child: const Text('Page Annuaire Entreprise'),
@@ -114,7 +115,7 @@ class PageAccueil extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const PageEmploi(
+                    builder: (context) => const EmploymentPage(
                     
                       user: {
                         'id': '24',

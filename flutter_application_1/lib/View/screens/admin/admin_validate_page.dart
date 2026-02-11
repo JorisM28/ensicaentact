@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'database_service.dart';
-import 'add_alumni.dart';
-import 'colors.dart';
+import '../../../Model/data/services/database_service.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../alumni/add_alumni.dart';
+import '../alumni/add_alumni_form.dart';
 
 class AdminValidationPage extends StatefulWidget {
   const AdminValidationPage({super.key});
@@ -26,7 +27,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
         foregroundColor: Colors.white,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DatabaseService().getDemandesEnAttente(),
+        future: DatabaseService().getWaitingRequests(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -36,25 +37,25 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
             return const Center(child: Text("Aucune demande en attente."));
           }
 
-          final demandes = snapshot.data!;
+          final requests = snapshot.data!;
 
           return ListView.builder(
-            itemCount: demandes.length,
+            itemCount: requests.length,
             itemBuilder: (context, index) {
-              final demande = demandes[index];
-              final date = demande['date_demande'] ?? '?';
+              final request = requests[index];
+              final date = request['date_demande'] ?? '?';
               
               return Card(
                 margin: const EdgeInsets.all(8),
                 child: ListTile(
                   leading: const Icon(Icons.person_add, color: Colors.orange),
-                  title: Text("${demande['prenom']} ${demande['nom']}"),
+                  title: Text("${request['prenom']} ${request['nom']}"),
                   subtitle: Text("Reçu le : $date"),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     try {
-                      Map<String, dynamic> dataDecoded = jsonDecode(demande['contenu_json']);
-                      int idReq = int.parse(demande['id_demande'].toString());
+                      Map<String, dynamic> dataDecoded = jsonDecode(request['contenu_json']);
+                      int idReq = int.parse(request['id_demande'].toString());
                       print("ID de la demande envoyé au formulaire : $idReq");
 
                       Navigator.push(

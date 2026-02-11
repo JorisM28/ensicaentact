@@ -1,7 +1,3 @@
-Voici la mise à jour complète de votre document Markdown. J'ai synchronisé la liste des informations et le diagramme Mermaid pour qu'ils correspondent exactement à la structure et aux contraintes de votre fichier SQL (noms de colonnes, types de données et relations).
-
----
-
 # Documentation de la Base de Données Alumni
 
 ## 1. Dictionnaire des données
@@ -18,6 +14,8 @@ Voici la mise à jour complète de votre document Markdown. J'ai synchronisé la
 | Adresse mail                      | mail                 | VARCHAR(50)   |                        |
 | Autorisation partage du contact   | autor                | BOOLEAN       | Défaut : FALSE (0)     |
 | Décédé                            | decede               | BOOLEAN       | Défaut : FALSE (0)     |
+| Mot de passe                      | password             | VARCHAR(255)  |                        |
+| Rôle                              | role                 | VARCHAR(255)  |                        |
 | **Éducation / Promo**             |                      |               |                        |
 | ID Éducation                      | id_education         | INT (PK)      |                        |
 | Majeure                           | majeure              | VARCHAR(25)   | NOT NULL               |
@@ -36,7 +34,14 @@ Voici la mise à jour complète de votre document Markdown. J'ai synchronisé la
 | Ville                             | ville                | VARCHAR(25)   | Table LIEU             |
 | Pays                              | pays                 | VARCHAR(25)   | Table LIEU             |
 | Date Début                        | debut                | DATE          | Table DATE             |
-| Date Fin                          | fin                  | DATE          | Table DATE             |
+| **Demande**                       |                      |               |                        |
+| ID Demande                        | id_Demande           | INT (PK)      |                        |
+| Nom Alumni                        | nom                  | VARCHAR(50)   | NOT NULL               |
+| Prénom Alumni                     | prenom               | VARCHAR(50)   | NOT NULL               |
+| Adresse mail                      | mail                 | VARCHAR(50)   |                        |
+| Contenu Json                      | contenu_json         | TEXT          |                        |
+| Date de la demande                | date_demande         | DATE          |                        |
+| Statut de la demande              | status               | VARCHAR(20)   |                        |                        
 
 ---
 
@@ -52,7 +57,7 @@ erDiagram
     STAGE }o--|| DATE : "période"
     TRAVAIL }o--|| LIEU : "se situe à"
     TRAVAIL }o--|| DATE : "période"
-    
+
     UTILISATEUR {
         int id_user PK
         varchar nom
@@ -63,6 +68,8 @@ erDiagram
         varchar tel
         boolean autor
         boolean decede
+        varchar password
+        varchar role
     }
 
     EDUCATION {
@@ -84,8 +91,8 @@ erDiagram
     STAGE {
         int id_stage PK
         varchar annee
-        text description 
-        varchar entrepriseUniversite 
+        text description
+        varchar entrepriseUniversite
         int id_user FK
         int id_date FK
         int id_lieu FK
@@ -114,15 +121,14 @@ erDiagram
         date fin
     }
 
+    DEMANDE_AJOUT {
+        int id_demande PK
+        varchar nom
+        varchar prenom
+        varchar mail
+        date date_demande
+        text contenu_json
+        varchar statut
+    }
+
 ```
-
----
-
-## 3. Notes sur les modifications effectuées
-
-* **Correction de l'ID Utilisateur** : Dans votre Mermaid précédent, l'utilisateur avait un `id_education FK`. Dans le SQL, c'est l'inverse : c'est la table `EDUCATION` qui porte la clé étrangère `id_user`.
-* **Nommage SQL** : La colonne `option` a été remplacée par `option_` (car `OPTION` est souvent un mot réservé en SQL).
-* **Précision des types** : Ajout des types `DATE` et `BOOLEAN` conformément au script.
-* **Contraintes** : Le diagramme et le tableau reflètent désormais les contraintes de domaine (comme les types de formation autorisés ou les tranches d'âge).
-
-Souhaitez-vous que j'ajoute une section avec les **requêtes de vérification** pour tester si vos contraintes `CHECK` (comme l'âge ou la formation) fonctionnent bien ?

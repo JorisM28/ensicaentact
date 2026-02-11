@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'colors.dart';
-import 'login_check.dart';
-import 'page_annuaire.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../../../ViewModel/admin/login_check.dart';
+import '../alumni/directory_page.dart';
 
 
 class Login extends StatefulWidget {
@@ -282,7 +282,7 @@ class _LoginState extends State<Login> {
       String role = userData['role'];
 
       if (role == 'admin' || role == 'student' || role == 'alumni') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PageAnnuaire(user: userData!)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage(user: userData!)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connexion Impossible !"), backgroundColor: Colors.red));
       }

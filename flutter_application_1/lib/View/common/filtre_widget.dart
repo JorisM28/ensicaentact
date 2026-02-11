@@ -1,51 +1,51 @@
 import 'package:flutter/material.dart';
-import 'colors.dart';
+import '../../Model/core/theme/colors.dart';
 
 class ZoneFiltres extends StatelessWidget {
-  final List<String> promosDisponibles;
-  final List<String> filieresDisponibles;
-  final List<String> paysStageDisponibles;
+  final List<String> promotionAvailable;
+  final List<String> sectorAvailable;
+  final List<String> internshipCountryAvailable;
 
-  final Set<String> promosSelectionnees;
-  final Set<String> filieresSelectionnees;
-  final Set<String> paysStageSelectionnees;
+  final Set<String> selectedPromotion;
+  final Set<String> sectorFilterSelected;
+  final Set<String> internshipCountryFilterSelected;
 
   final Function(String, bool) onPromoChanged;
-  final Function(String, bool) onFiliereChanged;
-  final Function(String, bool) onPaysStageChanged;
+  final Function(String, bool) onSectorChanged;
+  final Function(String, bool) onInternshipCountryChanged;
 
   const ZoneFiltres({
     super.key,
-    required this.promosDisponibles,
+    required this.promotionAvailable,
     required this.onPromoChanged,
-    required this.promosSelectionnees,
+    required this.selectedPromotion,
 
-    required this.filieresDisponibles,
-    required this.filieresSelectionnees,
-    required this.onFiliereChanged,
+    required this.sectorAvailable,
+    required this.sectorFilterSelected,
+    required this.onSectorChanged,
 
-    required this.paysStageDisponibles,
-    required this.paysStageSelectionnees,
-    required this.onPaysStageChanged,
+    required this.internshipCountryAvailable,
+    required this.internshipCountryFilterSelected,
+    required this.onInternshipCountryChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (promosDisponibles.isEmpty && filieresDisponibles.isEmpty && paysStageDisponibles.isEmpty) {
+    if (promotionAvailable.isEmpty && sectorAvailable.isEmpty && internshipCountryAvailable.isEmpty) {
       return const SizedBox();
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (promosDisponibles.isNotEmpty) ...[
+        if (promotionAvailable.isNotEmpty) ...[
           const Text("Promotions :", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,
             runSpacing: 6.0,
-            children: promosDisponibles.map((promo) {
-              final estCoche = promosSelectionnees.contains(promo);
+            children: promotionAvailable.map((promo) {
+              final estCoche = selectedPromotion.contains(promo);
               return FilterChip(
                 label: Text(promo),
                 selected: estCoche,
@@ -58,14 +58,14 @@ class ZoneFiltres extends StatelessWidget {
           const SizedBox(height: 15),
         ],
 
-        if (filieresDisponibles.isNotEmpty) ...[
+        if (sectorAvailable.isNotEmpty) ...[
           const Text("Filières :", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,
             runSpacing: 6.0,
-            children: filieresDisponibles.map((filiere) {
-              final estCoche = filieresSelectionnees.contains(filiere);
+            children: sectorAvailable.map((filiere) {
+              final estCoche = sectorFilterSelected.contains(filiere);
               return FilterChip(
                 label: Text(filiere),
                 selected: estCoche,
@@ -76,7 +76,7 @@ class ZoneFiltres extends StatelessWidget {
                 ),
                 onSelected: (bool selected) {
                   // On prévient le parent !
-                  onFiliereChanged(filiere, selected);
+                  onSectorChanged(filiere, selected);
                 },
               );
             }).toList(),
@@ -84,14 +84,14 @@ class ZoneFiltres extends StatelessWidget {
         ],
         const SizedBox(height: 15),
 
-        if (paysStageDisponibles.isNotEmpty) ...[
+        if (internshipCountryAvailable.isNotEmpty) ...[
           const Text("Pays Stage :", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,
             runSpacing: 6.0,
-            children: paysStageDisponibles.map((pays) {
-              final estCoche = paysStageSelectionnees.contains(pays);
+            children: internshipCountryAvailable.map((pays) {
+              final estCoche = internshipCountryFilterSelected.contains(pays);
               
               return FilterChip(
                 label: Text(pays),
@@ -103,7 +103,7 @@ class ZoneFiltres extends StatelessWidget {
                 ),
                 onSelected: (bool selected) {
                   // CORRECTION : Appelle le callback pour le pays
-                  onPaysStageChanged(pays, selected);
+                  onInternshipCountryChanged(pays, selected);
                 },
               );
             }).toList(),

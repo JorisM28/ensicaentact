@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'colors.dart';
-import 'login.dart';
-import 'profile.dart';
+import '../../Model/core/theme/colors.dart';
+import '../screens/auth/login.dart';
+import '../screens/alumni/profile.dart';
 
 class ProfileBadge extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -20,9 +20,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
     final String role = widget.user['role'] ?? 'guest';
     final bool isGuest = role == 'guest';
 
-    // ============================================================
-    // CAS 1 : INVITÉ (CORRIGÉ - PLUS D'ERREUR D'OVERFLOW)
-    // ============================================================
+
     if (isGuest) {
       return MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
@@ -78,14 +76,12 @@ class _ProfileBadgeState extends State<ProfileBadge> {
       );
     }
 
-    // ============================================================
-    // CAS 2 : UTILISATEUR CONNECTÉ (STYLE MICROSOFT UNIFIÉ)
-    // ============================================================
 
-    final String nom = widget.user['family_name'] ?? "";
-    final String prenom = widget.user['name'] ?? "";
+
+    final String lastName = widget.user['family_name'] ?? "";
+    final String firstName = widget.user['name'] ?? "";
     final String email = widget.user['email'] ?? "";
-    final String initiale = prenom.isNotEmpty ? prenom[0].toUpperCase() : "?";
+    final String initial = firstName.isNotEmpty ? firstName[0].toUpperCase() : "?";
 
     return Theme(
       data: Theme.of(context).copyWith(
@@ -97,7 +93,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
         ),
       ),
       child: PopupMenuButton(
-        tooltip: "Compte de $prenom",
+        tooltip: "Compte de $firstName",
         offset: const Offset(0, 55),
         constraints: const BoxConstraints(minWidth: 300, maxWidth: 300),
 
@@ -119,7 +115,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                 radius: 18,
                 backgroundColor: AppColors.ensiCyan,
                 child: Text(
-                  initiale,
+                  initial,
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
@@ -130,7 +126,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
         itemBuilder: (_) => [
           PopupMenuItem(
-            enabled: false, // Désactive le clic global pour gérer nos propres boutons
+            enabled: false,
             padding: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -141,7 +137,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Bouton Modifier (Haut Gauche)
+
                       InkWell(
                         onTap: () {
                           Navigator.pop(context);
@@ -189,7 +185,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                     radius: 40,
                     backgroundColor: AppColors.ensiCyan,
                     child: Text(
-                      initiale,
+                      initial,
                       style: const TextStyle(fontSize: 32, color: Colors.white),
                     ),
                   ),
@@ -201,7 +197,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                   const SizedBox(height: 12),
 
                   Text(
-                    "$prenom $nom",
+                    "$firstName $lastName",
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                     textAlign: TextAlign.center,
                   ),
