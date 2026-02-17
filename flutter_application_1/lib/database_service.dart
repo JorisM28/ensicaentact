@@ -212,6 +212,28 @@ Future<bool> supprimerEleve(String nom, String prenom) async {
     return false;
   }
 
+
+  Future<bool> modifierOffre(Map<String, dynamic> data) async {
+    try {
+      final url = Uri.parse("$apiUrl/offer/update_offer.php");
+      print("Envoi modification offre...");
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(data),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['status'] == 'success';
+      }
+    } catch (e) {
+      print("Erreur modification offre : $e");
+    }
+    return false;
+  }
+
   Future<List<Map<String, dynamic>>> getDemandesEnAttente() async {
     try {
       final response = await http.get(Uri.parse("$apiUrl/get_request.php"));
@@ -265,7 +287,7 @@ Future<void> supprimerDemande(int idDemande) async {
 
   Future<bool> proposerEvenement(Map<String, dynamic> data) async {
     try {
-      final url = Uri.parse("$apiUrl/events/add_evenement.php");
+      final url = Uri.parse("$apiUrl/events/proposer_evenements.php");
       
       //print("📤 ENVOI PROPOSITION : ${jsonEncode(data)}");
 
@@ -279,7 +301,8 @@ Future<void> supprimerDemande(int idDemande) async {
 
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        return result['success'] == true;
+        // Gestion souple du retour (success ou status)
+        return result['success'] == true || result['status'] == 'success';
       }
     } catch (e) {
       print("❌ Erreur proposerEvenement: $e");
@@ -292,7 +315,7 @@ Future<void> supprimerDemande(int idDemande) async {
   Future<List<Map<String, dynamic>>> getDemandesEvenements() async {
     try {
       final response = await http.get(
-        Uri.parse("$apiUrl/events/get_request_evenementsts.php"),
+        Uri.parse("$apiUrl/events/get_request_evenements.php"),
         headers: {"Content-Type": "application/json"},
       );
 
@@ -309,7 +332,7 @@ Future<void> supprimerDemande(int idDemande) async {
   Future<bool> validerEvenement(int idDemande) async {
     try {
       final response = await http.post(
-        Uri.parse("$apiUrl/events/validate_event.php"),
+        Uri.parse("$apiUrl/events/validate_evenements.php"),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({"id_demande": idDemande}),
       );
@@ -363,18 +386,16 @@ Future<void> supprimerDemande(int idDemande) async {
   }
 
 
-  // DANS database_service.dart
-
-  // --- GET ACTUALITÉS ---
   Future<List<Map<String, dynamic>>> getActualites() async {
     try {
       final url = Uri.parse("$apiUrl/actualities/get_actualities.php");
-
-      // Ajout timestamp pour éviter le cache
+      
       final response = await http.get(
         url.replace(queryParameters: {'t': DateTime.now().millisecondsSinceEpoch.toString()}),
         headers: {"Content-Type": "application/json"},
       );
+
+      print("📥 RÉPONSE ACTUALITÉS : ${response.body}");
 
       if (response.statusCode == 200) {
         String responseBody = utf8.decode(response.bodyBytes);

@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       navigatorObservers: [routeObserver],
+      
       debugShowCheckedModeBanner: false,
       title: 'Alumni EnsiCaen',
       home: PageAccueil(),

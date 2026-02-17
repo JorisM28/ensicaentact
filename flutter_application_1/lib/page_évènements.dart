@@ -50,7 +50,7 @@ class _PageEvenementsState extends State<PageEvenements> {
     }
   }
 
-  // --- FONCTION SUPPRIMER (ADMIN) ---
+
   void _confirmerSuppression(Map<String, dynamic> ev) {
     showDialog(
       context: context,
@@ -117,12 +117,12 @@ class _PageEvenementsState extends State<PageEvenements> {
                 data["id_event"] = ev['id_event'].toString();
                 success = await DatabaseService().modifierEvenement(data);
               } else {
-                success = await DatabaseService().proposerEvenement(data);
+                success = await DatabaseService().ajouterEvenementDirect(data); 
               }
 
               if (success) {
                 Navigator.pop(ctx);
-                _chargerDonnees();
+                _chargerDonnees(); // Rafraîchit la liste instantanément
               }
             },
             child: const Text("Enregistrer"),
