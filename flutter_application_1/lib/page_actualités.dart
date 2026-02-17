@@ -25,9 +25,9 @@ class _PageActualitesState extends State<PageActualites> {
   void _chargerDonnees() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
-    
-    var dataActus = await DatabaseService().getActualites();    
-    
+
+    var dataActus = await DatabaseService().getActualites();
+
     if (mounted) {
       setState(() {
         _actus = dataActus;
@@ -36,236 +36,117 @@ class _PageActualitesState extends State<PageActualites> {
     }
   }
 
-  Color _parseColor(String? hex) {
-    if (hex == null || !hex.startsWith('#')) return AppColors.ensiCyan;
-    try {
-      return Color(int.parse(hex.replaceFirst('#', '0xFF')));
-    } catch (e) {
-      return AppColors.ensiCyan;
+  String? _getImageUrl(Map<String, dynamic> item) {
+    if (item['image_url'] != null && item['image_url'].toString().isNotEmpty) {
+      return item['image_url'];
     }
+    if (item['image'] != null && item['image'].toString().isNotEmpty) {
+      return item['image'];
+    }
+    return null;
   }
 
-
-  void _confirmerSuppression(BuildContext context, Map<String, dynamic> item) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text("Supprimer l'actualité ?"),
-          content: Text("Voulez-vous vraiment supprimer définitivement : \n\n\"${item['titre']}\" ?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx), 
-              child: const Text("Annuler")
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(ctx); // Ferme la pop-up
-                
-        
-                int idToDelete = int.parse(item['id_actu'].toString()); 
-                // ---------------------
-
-                // Appel BDD
-                bool success = await DatabaseService().supprimerActualite(idToDelete);
-
-                if (success) {
-                  // Rafraîchir la liste locale
-                  _chargerDonnees();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Actualité supprimée avec succès."))
-                    );
-                  }
-                } else {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Erreur lors de la suppression."))
-                    );
-                  }
-                }
-              },
-              child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        ),
+  Widget _buildImage(String? url, {double? width, double? height}) {
+    if (url == null || url.isEmpty) {
+      return Container(
+        width: width ?? double.infinity,
+        height: height ?? 200,
+        color: Colors.grey[300],
+        child: const Icon(Icons.newspaper, color: Colors.grey, size: 40),
       );
     }
-  @override
-  Widget build(BuildContext context) {
-    final actusFiltrees = _actus.where((a) => 
-      (a['titre'] ?? '').toLowerCase().contains(_recherche.toLowerCase())).toList();
+    return Image.network(
+      url,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(
+        width: width ?? double.infinity,
+        height: height ?? 200,
+        color: Colors.grey[300],
+        child: const Icon(Icons.broken_image, color: Colors.grey, size: 40),
+      ),
+    );
+  }
 
-   
-    bool estAdmin = widget.user['role'] == 'admin';
+  //Widget _buildJournalBadge() {
+  //  return Container(
+  //    color: const Color(0xFFFFD700), // Jaune
+  //    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+  //    margin: const EdgeInsets.only(right: 8),
+  //    child: const Text(
+  //      "M", // Tu peux remplacer par "J" pour Journal Alumni
+  //      style: TextStyle(
+  //        fontFamily: 'serif',
+  //        fontWeight: FontWeight.bold,
+  //        fontSize: 14,
+  //        color: Colors.black,
+  //      ),
+  //    ),
+  //  );
+  //}
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Actualités du Réseau"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
+  void _confirmerSuppression(BuildContext context, Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Supprimer l'article ?"),
+        content: Text("Voulez-vous vraiment supprimer définitivement : \n\n\"${item['titre']}\" ?"),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh), 
-            onPressed: _chargerDonnees
-          )
-        ],
-      ),
-
-      floatingActionButton: estAdmin 
-        ? FloatingActionButton(
-            backgroundColor: AppColors.ensiCyan,
-            tooltip: "Ajouter une actualité",
-            child: const Icon(Icons.add, color: Colors.white),
-            onPressed: () => _afficherDialogAjout(context),
-          )
-        : null,
-      
-      body: Column(
-        children: [
-          _buildSearchBar(),
-          Expanded(
-            child: _isLoading 
-                ? const Center(child: CircularProgressIndicator())
-                : _buildSectionActus(actusFiltrees, estAdmin), 
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Annuler")
           ),
-        ],
-      ),
-    );
-  }
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              int idToDelete = int.parse(item['id_actu'].toString());
+              bool success = await DatabaseService().supprimerActualite(idToDelete);
 
-  Widget _buildSearchBar() => Padding(
-    padding: const EdgeInsets.all(10),
-    child: TextField(
-      controller: _searchCtrl,
-      decoration: InputDecoration(
-        labelText: "Rechercher une actualité...",
-        prefixIcon: const Icon(Icons.search),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      onChanged: (v) => setState(() => _recherche = v),
-    ),
-  );
-
-  Widget _buildSectionActus(List<Map<String, dynamic>> liste, bool estAdmin) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          color: Colors.teal.withOpacity(0.1),
-          child: const Text(
-            "Fil d'actualités",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(10),
-            itemCount: liste.length,
-            itemBuilder: (context, i) {
-              final item = liste[i];
-              final String? imageUrl = item['image_url'];
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 15),
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                child: InkWell(
-                  onTap: () { 
-                    Navigator.push(
-                      context, 
-                      MaterialPageRoute(
-                        builder: (context) => DetailsPageSimple(item: item),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        // Barre de couleur (Tag)
-                        Container(
-                          width: 6,
-                          height: 80, 
-                          decoration: BoxDecoration(
-                            color: _parseColor(item['tag_color']),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        
-                        // Image
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            width: 80, height: 80,
-                            color: Colors.grey[200],
-                            child: (imageUrl != null && imageUrl.isNotEmpty)
-                                ? Image.network(imageUrl, fit: BoxFit.cover, 
-                                    errorBuilder: (c,e,s) => const Icon(Icons.image))
-                                : const Icon(Icons.image, size: 30, color: Colors.grey),
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        
-                        // Textes
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item['tag']?.toUpperCase() ?? "NEWS",
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, 
-                                  color: _parseColor(item['tag_color']))),
-                              const SizedBox(height: 5),
-                              Text(item['titre'] ?? "",
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  maxLines: 2, overflow: TextOverflow.ellipsis),
-                              const SizedBox(height: 5),
-                              Text("Par ${item['prenom_auteur'] ?? ''} ${item['nom_auteur'] ?? ''}",
-                                  style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                            ],
-                          ),
-                        ),
-
-                   
-                        if (estAdmin)
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.red),
-                            tooltip: "Supprimer",
-                            onPressed: () => _confirmerSuppression(context, item),
-                          ),
-                        // -----------------------------------
-                      ],
-                    ),
-                  ),
-                ),
-              );
+              if (success) {
+                _chargerDonnees();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Article supprimé."))
+                  );
+                }
+              }
             },
+            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
-
 
   void _afficherDialogAjout(BuildContext context) {
     final titleCtrl = TextEditingController();
-    final descCtrl = TextEditingController();
+    final contentCtrl = TextEditingController(); // Renommé pour plus de clarté
     final imgCtrl = TextEditingController();
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Nouvelle Actualité"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: "Titre")),
-            TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Description"), maxLines: 3),
-            TextField(controller: imgCtrl, decoration: const InputDecoration(labelText: "URL Image (optionnel)")),
-          ],
+        title: const Text("Nouvel Article"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: "Titre")),
+              const SizedBox(height: 10),
+              TextField(
+                  controller: contentCtrl,
+                  decoration: const InputDecoration(
+                      labelText: "Contenu de l'article",
+                      alignLabelWithHint: true,
+                      border: OutlineInputBorder()
+                  ),
+                  maxLines: 5
+              ),
+              const SizedBox(height: 10),
+              TextField(controller: imgCtrl, decoration: const InputDecoration(labelText: "URL Image (optionnel)")),
+            ],
+          ),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
@@ -273,18 +154,21 @@ class _PageActualitesState extends State<PageActualites> {
             onPressed: () async {
               if (titleCtrl.text.isEmpty) return;
 
+              // Debug : Vérifier l'ID utilisateur
+              print("👤 Auteur ID envoyé : ${widget.user['id_user']}");
+
               await DatabaseService().ajouterActualite({
                 "titre": titleCtrl.text,
-                "description": descCtrl.text,
+                "contenu": contentCtrl.text,
+                "description": contentCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": widget.user['id_user'] ?? "0",
+                "auteur_id": widget.user['id_user'] ?? "1", // Mettre "1" par défaut plutôt que "0" si "0" n'existe pas en DB
+                "tag": "NEWS", // Ajout d'un tag par défaut si nécessaire
+                "date_publi": DateTime.now().toIso8601String(), // Parfois le PHP attend la date venant du client
               });
 
               Navigator.pop(ctx);
               _chargerDonnees();
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Actualité publiée !")));
-              }
             },
             child: const Text("Publier"),
           ),
@@ -292,72 +176,312 @@ class _PageActualitesState extends State<PageActualites> {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final actusFiltrees = _actus.where((a) =>
+        (a['titre'] ?? '').toLowerCase().contains(_recherche.toLowerCase())).toList();
+    bool estAdmin = widget.user['role'] == 'admin';
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text("Le Journal Alumni", style: TextStyle(fontFamily: 'serif', fontWeight: FontWeight.w900, color: Colors.black, fontSize: 24)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.black),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.black12, height: 1.0),
+        ),
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _chargerDonnees)
+        ],
+      ),
+      floatingActionButton: estAdmin
+          ? FloatingActionButton(
+        backgroundColor: const Color(0xFF1A1A1A),
+        child: const Icon(Icons.edit_note, color: Colors.white),
+        onPressed: () => _afficherDialogAjout(context),
+      )
+          : null,
+      body: Column(
+        children: [
+          if (_recherche.isNotEmpty || actusFiltrees.length != _actus.length)
+            _buildSearchBar(),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator(color: Colors.black))
+                : _buildNewspaperFeed(actusFiltrees),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+    child: TextField(
+      controller: _searchCtrl,
+      cursorColor: Colors.black,
+      decoration: const InputDecoration(
+        hintText: "Rechercher un article...",
+        prefixIcon: Icon(Icons.search, color: Colors.black54),
+        border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black12)),
+        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+      ),
+      onChanged: (v) => setState(() => _recherche = v),
+    ),
+  );
+
+  Widget _buildHeroArticle(Map<String, dynamic> item, bool isMobile) {
+    final imageUrl = _getImageUrl(item);
+    final contentPreview = item['contenu'] ?? item['description'] ?? "Pas de description";
+
+    Widget textPart = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                item['titre'] ?? "",
+                style: const TextStyle(fontFamily: 'serif', fontSize: 32, fontWeight: FontWeight.w900, height: 1.1, color: Color(0xFF111111)),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 15),
+        Text(
+          contentPreview,
+          maxLines: 4,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 16, height: 1.5, color: Color(0xFF555555)),
+        ),
+      ],
+    );
+
+    Widget imagePart = _buildImage(imageUrl, height: isMobile ? 250 : 350);
+
+    return InkWell(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailsPageNewspaper(item: item))),
+      child: isMobile
+          ? Column(children: [textPart, const SizedBox(height: 20), imagePart])
+          : Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: 5, child: textPart),
+          const SizedBox(width: 30),
+          Expanded(flex: 7, child: imagePart),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecondaryArticle(Map<String, dynamic> item, {bool isFullWidth = false, bool isMobile = false}) {
+    final imageUrl = _getImageUrl(item);
+
+    Widget content = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!isFullWidth && !isMobile) ...[
+          _buildImage(imageUrl, width: 120, height: 90),
+          const SizedBox(width: 15),
+        ],
+        Expanded(
+          flex: isFullWidth ? 3 : 1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      item['titre'] ?? "",
+                      style: TextStyle(fontFamily: 'serif', fontSize: isFullWidth ? 24 : 18, fontWeight: FontWeight.w800, height: 1.2, color: const Color(0xFF202124)),
+                    ),
+                  ),
+                ],
+              ),
+              if (isFullWidth || isMobile) ...[
+                const SizedBox(height: 10),
+                Text(
+                  item['description'] ?? "",
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF555555)),
+                ),
+              ]
+            ],
+          ),
+        ),
+        if (isFullWidth && !isMobile) ...[
+          const SizedBox(width: 20),
+          Expanded(flex: 2, child: _buildImage(imageUrl, height: 160)),
+        ],
+        if (isMobile) ...[
+          const SizedBox(width: 15),
+          _buildImage(imageUrl, width: 100, height: 80),
+        ]
+      ],
+    );
+
+    return InkWell(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailsPageNewspaper(item: item))),
+      child: content,
+    );
+  }
+
+  Widget _buildNewspaperFeed(List<Map<String, dynamic>> liste) {
+    if (liste.isEmpty) {
+      return const Center(child: Text("Aucun article.", style: TextStyle(fontFamily: 'serif', fontSize: 20)));
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        bool isMobile = constraints.maxWidth < 800;
+
+        List<Widget> feedWidgets = [];
+
+        feedWidgets.add(_buildHeroArticle(liste.first, isMobile));
+        feedWidgets.add(const Padding(
+          padding: EdgeInsets.symmetric(vertical: 25),
+          child: Divider(color: Colors.black26, thickness: 1),
+        ));
+
+        List<Map<String, dynamic>> restants = liste.sublist(1);
+
+        for (int i = 0; i < restants.length; i += 2) {
+          if (isMobile) {
+            feedWidgets.add(_buildSecondaryArticle(restants[i], isFullWidth: true, isMobile: true));
+            if (i + 1 < restants.length) {
+              feedWidgets.add(const Padding(padding: EdgeInsets.symmetric(vertical: 15), child: Divider(color: Colors.black12)));
+              feedWidgets.add(_buildSecondaryArticle(restants[i + 1], isFullWidth: true, isMobile: true));
+            }
+          } else {
+            if (i + 1 < restants.length) {
+              feedWidgets.add(
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: _buildSecondaryArticle(restants[i])),
+                      const SizedBox(width: 30),
+                      Expanded(child: _buildSecondaryArticle(restants[i + 1])),
+                    ],
+                  )
+              );
+            } else {
+              feedWidgets.add(_buildSecondaryArticle(restants[i], isFullWidth: true));
+            }
+          }
+
+          if (i + 2 < restants.length || (i + 1 < restants.length && isMobile)) {
+            feedWidgets.add(const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Divider(color: Colors.black12, thickness: 1),
+            ));
+          }
+        }
+
+        return SingleChildScrollView(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1000),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: feedWidgets,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
-
-class DetailsPageSimple extends StatelessWidget {
+class DetailsPageNewspaper extends StatelessWidget {
   final Map<String, dynamic> item;
-  const DetailsPageSimple({super.key, required this.item});
+  const DetailsPageNewspaper({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
     final String title = item['titre'] ?? "Sans titre";
-    final String content = item['contenu'] ?? "Pas de contenu";
+    final String content = item['contenu'] ?? item['description'] ?? "Pas de contenu";
     final String date = item['date_publi'] ?? "";
     final String author = "${item['prenom_auteur'] ?? ''} ${item['nom_auteur'] ?? ''}";
-    final String? imageUrl = item['image_url'];
+
+    String? imageUrl;
+    if (item['image_url'] != null && item['image_url'].toString().isNotEmpty) imageUrl = item['image_url'];
+    else if (item['image'] != null && item['image'].toString().isNotEmpty) imageUrl = item['image'];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Détail de l'actualité"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: const BackButton(color: Colors.black),
+        actions: [
+          IconButton(icon: const Icon(Icons.share, color: Colors.black), onPressed: (){})
+        ],
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (imageUrl != null && imageUrl.isNotEmpty)
-              Image.network(
-                imageUrl,
-                width: double.infinity,
-                height: 300,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 200,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.broken_image, size: 50),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  (item['tag'] ?? "ACTUALITÉ").toUpperCase(),
+                  style: const TextStyle(color: Color(0xFFC00), fontWeight: FontWeight.bold, fontSize: 12),
                 ),
-              ),
+                const SizedBox(height: 10),
+                Text(
+                  title,
+                  style: const TextStyle(fontFamily: 'serif', fontSize: 32, fontWeight: FontWeight.w900, height: 1.1, color: Color(0xFF202124)),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Text("Par $author", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+                    const SizedBox(width: 10),
+                    if (date.isNotEmpty) Text("•  Publié le $date", style: const TextStyle(color: Colors.grey)),
+                  ],
+                ),
+                const SizedBox(height: 25),
 
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                if (imageUrl == null || imageUrl.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    height: 300,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.newspaper, color: Colors.grey, size: 50),
+                  )
+                else ...[
+                  Image.network(imageUrl, width: double.infinity, fit: BoxFit.cover),
+                  const SizedBox(height: 5),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text("Crédit: DR", style: TextStyle(fontSize: 10, color: Colors.grey[600])),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Par $author",
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.blueGrey),
-                  ),
-                  Text(
-                    "Publié le $date",
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const Divider(height: 40),
-                  Text(
-                    content,
-                    style: const TextStyle(fontSize: 16, height: 1.6),
-                  ),
-                  const SizedBox(height: 40),
                 ],
-              ),
+
+                const SizedBox(height: 30),
+                Text(
+                  content,
+                  style: const TextStyle(fontSize: 18, height: 1.6, color: Color(0xFF222222)),
+                ),
+                const SizedBox(height: 50),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

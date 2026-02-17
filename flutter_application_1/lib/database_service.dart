@@ -250,7 +250,7 @@ Future<void> supprimerDemande(int idDemande) async {
         headers: {"Content-Type": "application/json"},
       );
 
-      print("📥 RÉPONSE ÉVÉNEMENTS : ${response.body}");
+      //print("📥 RÉPONSE ÉVÉNEMENTS : ${response.body}");
 
       if (response.statusCode == 200) {
         String responseBody = utf8.decode(response.bodyBytes);
@@ -267,7 +267,7 @@ Future<void> supprimerDemande(int idDemande) async {
     try {
       final url = Uri.parse("$apiUrl/events/add_evenement.php");
       
-      print("📤 ENVOI PROPOSITION : ${jsonEncode(data)}");
+      //print("📤 ENVOI PROPOSITION : ${jsonEncode(data)}");
 
       final response = await http.post(
         url,
@@ -275,7 +275,7 @@ Future<void> supprimerDemande(int idDemande) async {
         body: jsonEncode(data),
       );
 
-      print("📥 RÉPONSE SERVEUR (Proposer) : ${response.body}");
+      //print("📥 RÉPONSE SERVEUR (Proposer) : ${response.body}");
 
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
@@ -363,73 +363,103 @@ Future<void> supprimerDemande(int idDemande) async {
   }
 
 
+  // DANS database_service.dart
+
+  // --- GET ACTUALITÉS ---
   Future<List<Map<String, dynamic>>> getActualites() async {
     try {
       final url = Uri.parse("$apiUrl/actualities/get_actualities.php");
-      
+
+      // Ajout timestamp pour éviter le cache
       final response = await http.get(
-        url,
+        url.replace(queryParameters: {'t': DateTime.now().millisecondsSinceEpoch.toString()}),
         headers: {"Content-Type": "application/json"},
       );
 
-      print("📥 RÉPONSE ACTUALITÉS : ${response.body}");
-
       if (response.statusCode == 200) {
         String responseBody = utf8.decode(response.bodyBytes);
-        List<dynamic> data = jsonDecode(responseBody);
-        return data.map((item) => item as Map<String, dynamic>).toList();
+        dynamic decodedData = jsonDecode(responseBody);
+
+        // Cas 1 : L'API renvoie directement une liste
+        if (decodedData is List) {
+          return List<Map<String, dynamic>>.from(decodedData);
+        }
+        // Cas 2 : L'API renvoie un objet avec une clé "data" (fréquent en PHP)
+        else if (decodedData is Map && decodedData.containsKey('data')) {
+          return List<Map<String, dynamic>>.from(decodedData['data']);
+        }
+        // Cas 3 : Gestion d'erreur renvoyée par l'API
+        else if (decodedData is Map && decodedData.containsKey('error')) {
+          print("❌ API Erreur logique : ${decodedData['message']}");
+        }
       } else {
-        print("❌ Erreur Serveur Actualités : Code ${response.statusCode}");
+        print("❌ Erreur Serveur (Status ${response.statusCode}) : ${response.body}");
       }
     } catch (e) {
-      print("❌ Erreur getActualites: $e");
+      print("❌ Exception Flutter getActualites: $e");
     }
     return [];
   }
 
-
-  Future<bool> supprimerActualite(int idActu) async {
+  // --- AJOUTER ACTUALITÉ ---
+  Future<bool> ajouterActualite(Map<String, dynamic> actu) async {
     try {
+      print("📤 ENVOI AJOUT vers $apiUrl/actualities/add_actualities.php");
+      print("📦 DONNÉES : ${jsonEncode(actu)}");
+
+      final response = await http.post(
+        Uri.parse("$apiUrl/actualities/add_actualities.php"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(actu),
+      );
+
+      print("📥 CODE RETOUR : ${response.statusCode}");
+      print("📥 RÉPONSE SERVEUR : ${response.body}");
+
+      if (response.statusCode == 200) {
+        // On essaie de décoder même si le serveur renvoie un simple "true" ou un json
+        try {
+          final res = jsonDecode(response.body);
+          // On accepte 'success' ou status: 'success'
+          if (res is Map) {
+            return res['status'] == 'success' || res['success'] == true;
+          }
+          return false;
+        } catch (e) {
+          // Si le serveur renvoie juste du texte "success" sans JSON (mauvaise pratique mais possible)
+          if (response.body.contains("success")) return true;
+        }
+      }
+    } catch (e) {
+      print("❌ Erreur ajouterActualite: $e");
+    }
+    return false;
+  }
+
+  // --- SUPPRIMER ACTUALITÉ ---
+  // On accepte dynamic idActu pour gérer String ou int
+  Future<bool> supprimerActualite(dynamic idActu) async {
+    try {
+      print("🗑️ Suppression ID : $idActu");
+
       final response = await http.post(
         Uri.parse("$apiUrl/actualities/delete_actualities.php"),
         headers: {"Content-Type": "application/json"},
+        // On s'assure d'envoyer l'ID sous le bon format
         body: jsonEncode({"id_actu": idActu}),
       );
 
+      print("📥 Réponse Suppression : ${response.body}");
+
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        return result['status'] == 'success';
+        return result['status'] == 'success' || result['success'] == true;
       }
     } catch (e) {
       print("❌ Erreur supprimerActualite: $e");
     }
     return false;
   }
-
-  
-
-  Future<bool> ajouterActualite(Map<String, dynamic> actu) async {
-      try {
-        print("📤 ENVOI AJOUT : ${jsonEncode(actu)}"); 
-
-        final response = await http.post(
-          Uri.parse("$apiUrl/actualities/add_actualities.php"),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(actu),
-        );
-
-        print("📥 CODE RETOUR : ${response.statusCode}");
-        print("📥 RÉPONSE SERVEUR : ${response.body}"); 
-
-        if (response.statusCode == 200) {
-          final res = jsonDecode(response.body);
-          return res['status'] == 'success';
-        }
-      } catch (e) {
-        print("❌ Erreur ajouterActualite: $e");
-      }
-      return false;
-    }
 
   
 

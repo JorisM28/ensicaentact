@@ -89,7 +89,6 @@ class JobOfferWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // TEXTES (GAUCHE)
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,7 +96,7 @@ class JobOfferWidget extends StatelessWidget {
                 Text(
                   job['titre'] ?? "Poste",
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF333333),
                   ),
@@ -106,7 +105,7 @@ class JobOfferWidget extends StatelessWidget {
                 Text(
                   "${job['entreprise'] ?? ''} - ${job['ville'] ?? ''}",
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Colors.grey,
                   ),
@@ -124,7 +123,7 @@ class JobOfferWidget extends StatelessWidget {
             child: Text(
               type.toUpperCase(),
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 15,
                 color: badgeColor,
                 fontWeight: FontWeight.bold,
               ),

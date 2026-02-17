@@ -4,9 +4,9 @@ import 'login.dart';
 import 'profile.dart';
 
 class ProfileBadge extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final Map<String, dynamic>? user;
 
-  const ProfileBadge({super.key, required this.user});
+  const ProfileBadge({super.key, this.user});
 
   @override
   State<ProfileBadge> createState() => _ProfileBadgeState();
@@ -17,8 +17,8 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
   @override
   Widget build(BuildContext context) {
-    final String role = widget.user['role'] ?? 'guest';
-    final bool isGuest = role == 'guest';
+    final String role = widget.user?['role'] ?? 'guest';
+    final bool isGuest = widget.user == null || role == 'guest';
 
     if (isGuest) {
       return MouseRegion(
@@ -77,9 +77,9 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
 
 
-    final String nom = widget.user['family_name'] ?? "";
-    final String prenom = widget.user['name'] ?? "";
-    final String email = widget.user['email'] ?? "";
+    final String nom = widget.user!['family_name'] ?? "";
+    final String prenom = widget.user!['name'] ?? "";
+    final String email = widget.user!['email'] ?? "";
     final String initiale = prenom.isNotEmpty ? prenom[0].toUpperCase() : "?";
 
     return Theme(
@@ -142,7 +142,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user)),
+                            MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user!)),
                           );
                         },
                         child: const Padding(
@@ -219,7 +219,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                         Navigator.pop(context);
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user)),
+                          MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user!)),
                         );
                       },
                       style: OutlinedButton.styleFrom(

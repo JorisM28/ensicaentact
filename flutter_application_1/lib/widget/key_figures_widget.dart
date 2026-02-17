@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-// --- MODELE DE DONNEES ---
 class KeyFigure {
   int id;
   String label;
@@ -71,7 +69,6 @@ final Map<String, IconData> availableIcons = {
   'work': Icons.work,
 };
 
-// --- WIDGET PRINCIPAL ---
 class KeyFiguresWidget extends StatefulWidget {
   final bool isAdmin;
   const KeyFiguresWidget({super.key, required this.isAdmin});
@@ -82,8 +79,8 @@ class KeyFiguresWidget extends StatefulWidget {
 
 class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
   bool _isEditing = false;
-  bool _isLoading = true; // Chargement initial (GET)
-  bool _isSaving = false; // Chargement sauvegarde (POST)
+  bool _isLoading = true;
+  bool _isSaving = false;
   List<KeyFigure> stats = [];
 
   @override
@@ -113,9 +110,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
     }
   }
 
-  // --- LOGIQUE DE SAUVEGARDE CORRIGÉE ---
   Future<void> _saveData() async {
-    // 1. On active l'état "Sauvegarde en cours" pour afficher le loader
     setState(() => _isSaving = true);
 
     try {
@@ -129,7 +124,6 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
 
       final result = json.decode(response.body);
 
-      // 2. Si succès UNIQUEMENT, on ferme le mode édition
       if (result['status'] == 'success') {
         if (mounted) {
           setState(() {
@@ -144,7 +138,6 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
         throw Exception(result['message']);
       }
     } catch (e) {
-      // 3. Si erreur, on reste en mode édition pour laisser l'utilisateur réessayer
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -165,13 +158,11 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
     }
 
     return Container(
-      color: _isEditing ? Colors.grey[50] : Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       child: Stack(
-        clipBehavior: Clip.none, // Permet aux ombres de ne pas être coupées
+        clipBehavior: Clip.none,
         alignment: Alignment.topRight,
         children: [
-          // CONTENU PRINCIPAL (Admin ou Public)
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
             child: _isEditing
@@ -179,7 +170,6 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
                 : _buildPublicInterface(),
           ),
 
-          // BOUTON FLOTTANT SIMPLIFIÉ
           if (widget.isAdmin)
             Positioned(
               top: 0,
@@ -191,16 +181,15 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
     );
   }
 
-  // --- NOUVEAU DESIGN DU BOUTON ---
   Widget _buildSimpleEditButton() {
     return Material(
       color: Colors.white,
-      elevation: 4, // L'ombre demandée
+      elevation: 4,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: _isSaving
-            ? null // Désactivé pendant la sauvegarde
+            ? null
             : () {
           if (_isEditing) {
             _saveData();
@@ -209,16 +198,15 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
           }
         },
         child: Container(
-          width: 50,
-          height: 50,
+          width: 40,
+          height: 40,
           alignment: Alignment.center,
-          // Si sauvegarde : Loader, Si Edition : Check vert, Sinon : Crayon gris/rouge
           child: _isSaving
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : Icon(
             _isEditing ? Icons.check : Icons.edit,
             color: _isEditing ? Colors.green : const Color(0xFFE30613),
-            size: 24,
+            size: 20,
           ),
         ),
       ),
@@ -232,20 +220,35 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
     return Center(
       key: const ValueKey("Public"),
       child: isMobile
-          ? Column(children: stats.map((s) => Padding(padding: const EdgeInsets.only(bottom: 40), child: _buildStatCard(s))).toList())
+          ? Wrap(
+        spacing: 15,
+        runSpacing: 20,
+        alignment: WrapAlignment.center,
+        children: stats.map((s) {
+          double itemWidth = (screenWidth - 60) / 2;
+          return SizedBox(
+            width: itemWidth,
+            child: _buildStatCard(s, compactMode: true),
+          );
+        }).toList(),
+      )
           : Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: stats.map((s) => _buildStatCard(s)).toList()
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: stats.map((s) => _buildStatCard(s, compactMode: false)).toList(),
       ),
     );
   }
 
-  Widget _buildStatCard(KeyFigure stat) {
+  Widget _buildStatCard(KeyFigure stat, {bool compactMode = false}) {
     IconData icon = availableIcons[stat.iconKey] ?? Icons.help;
 
+    double iconSize = compactMode ? 30 : 40;
+    double numberSize = compactMode ? 24 : 32;
+    double labelSize = compactMode ? 12 : 14;
+
     return TweenAnimationBuilder<double>(
-      key: ValueKey(stat.value),
+      key: ValueKey(stat.id),
       tween: Tween<double>(begin: 0, end: 1),
       duration: const Duration(milliseconds: 800),
       builder: (context, val, child) {
@@ -253,17 +256,51 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
           opacity: val,
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - val)),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: stat.color, size: 40),
-                const SizedBox(height: 10),
-                Text(
-                  "${(stat.value * val).toInt()}${stat.suffix}",
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                ),
-                Text(stat.label, style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold)),
-              ],
+            child: Container(
+              decoration: compactMode ? BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+              ) : null,
+              padding: compactMode ? const EdgeInsets.all(10) : EdgeInsets.zero,
+
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(compactMode ? 8 : 12),
+                    decoration: BoxDecoration(
+                      color: stat.color.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: stat.color, size: iconSize),
+                  ),
+                  SizedBox(height: compactMode ? 8 : 10),
+
+                  Text(
+                    "${(stat.value * val).toInt()}${stat.suffix}",
+                    style: TextStyle(
+                      fontSize: numberSize,
+                      fontWeight: FontWeight.bold,
+                      height: 1.0,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  SizedBox(height: compactMode ? 4 : 5),
+
+                  Text(
+                    stat.label,
+                    style: TextStyle(
+                        fontSize: labelSize,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.bold
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -337,11 +374,10 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
       }).toList(),
     );
 
-    // On ajoute un padding en bas pour éviter que le dernier élément soit caché par le clavier ou le scroll
     if (isMobile) {
       return ListView(
-          shrinkWrap: true, // Important si dans une Column parente
-          physics: const NeverScrollableScrollPhysics(), // Scroll géré par la page principale
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           children: [formSection, const SizedBox(height: 20)]
       );
     } else {
@@ -352,8 +388,8 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
           const VerticalDivider(width: 50),
           Expanded(flex: 6, child: Column(
             children: [
-              const Chip(label: Text("APERÇU EN DIRECT")),
-              const SizedBox(height: 50),
+              const Chip(label: Text("Aperçu en direct")),
+              const SizedBox(height: 35),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: stats.map((s) => _buildSimplePreview(s)).toList(),
