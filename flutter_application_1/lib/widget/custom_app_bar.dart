@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/page_%C3%A9v%C3%A8nements.dart';
+import 'package:flutter_application_ensicaentact/page_accueil.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../colors.dart';
 import '../page_actualités.dart';
@@ -32,6 +34,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     bool isDesktop = MediaQuery.of(context).size.width > 900;
     final String role = user?['role'] ?? 'visiteur';
+    final Map<String, dynamic> currentUser = user ?? {};
 
     return Container(
       color: AppColors.ensiCyan,
@@ -39,24 +42,37 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: SafeArea(
         child: Row(
           children: [
-            Image.asset('assets/logo_alumni_1.png', height: 40),
-            const SizedBox(width: 10),
-            _buildBrandIdentity(),
+            InkWell(
+              onTap: () {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => PageAccueil(user: currentUser,))
+                );
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/logo_alumni_1.png', height: 40),
+                  const SizedBox(width: 10),
+                  _buildBrandIdentity(),
+                ],
+              ),
+            ),
             if (isDesktop) ...[
               const Spacer(),
-              _buildLienMenu(context, "Actualités", () => _naviguer(context, PageActualites(user: user ?? {}))),
-              _buildLienMenu(context, "Annuaire", () => _naviguer(context, PageAnnuaire(user: user ?? {}))),
-              _buildLienMenu(context, "Offres", () => _naviguer(context, PageEmploi(user: user ?? {}))),
+              _buildLienMenu(context, "Acceuil", () => _naviguer(context, PageAccueil(user: currentUser))),
+              _buildLienMenu(context, "Actualités", () => _naviguer(context, PageActualites(user: currentUser))),
+              _buildLienMenu(context, "Annuaire", () => _naviguer(context, PageAnnuaire(user: currentUser))),
+              _buildLienMenu(context, "Evènements", () => _naviguer(context, PageEvenements(user: currentUser))),
+              _buildLienMenu(context, "Offres", () => _naviguer(context, PageEmploi(user: currentUser))),
               _buildLienMenu(context, "ENSICAEN", _ouvrirSiteEcole),
               const Spacer(),
 
-              // --- ACTIONS ADMIN ---
               if (role == 'admin') ...[
                 _buildHeaderButton(Icons.admin_panel_settings, "Modération",
-                        () => _naviguer(context, PageModeration(user: user!))), // Ici le user existe forcément si role == admin
+                        () => _naviguer(context, PageModeration(user: user!))),
               ],
 
-              // --- ACTIONS ALUMNI / ETUDIANT ---
               if (role == 'alumni' || role == 'student') ...[
                 _buildHeaderButton(
                     Icons.event_available,
@@ -78,7 +94,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ],
             if (!isDesktop) ...[
               const Spacer(),
-              // Ouvre le drawer du Scaffold parent
               IconButton(
                 icon: const Icon(Icons.menu, color: Colors.white70, size: 30),
                 onPressed: () => Scaffold.of(context).openEndDrawer(),
@@ -120,7 +135,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: TextButton(
         onPressed: action,
-        child: Text(titre, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+        child: Text(titre, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
       ),
     );
   }

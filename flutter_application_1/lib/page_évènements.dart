@@ -34,7 +34,6 @@ class _PageEvenementsState extends State<PageEvenements> {
     }
   }
 
-  // Formatage de la date pour l'affichage
   Map<String, String> _formatDateTime(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return {"day": "??", "month": "???", "time": ""};
     try {
@@ -122,7 +121,7 @@ class _PageEvenementsState extends State<PageEvenements> {
 
               if (success) {
                 Navigator.pop(ctx);
-                _chargerDonnees(); // Rafraîchit la liste instantanément
+                _chargerDonnees();
               }
             },
             child: const Text("Enregistrer"),
@@ -203,7 +202,6 @@ class _PageEvenementsState extends State<PageEvenements> {
                                   ],
                                 ),
                               ),
-                              // Contenu textuel
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -246,7 +244,6 @@ class _PageEvenementsState extends State<PageEvenements> {
   }
 }
 
-// Page de détails
 class DetailsEvenementPage extends StatelessWidget {
   final Map<String, dynamic> item;
   const DetailsEvenementPage({super.key, required this.item});

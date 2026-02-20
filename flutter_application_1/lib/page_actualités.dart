@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../colors.dart';
+import 'widget/custom_app_bar.dart';
 import '../database_service.dart';
 
 class PageActualites extends StatefulWidget {
@@ -68,23 +69,6 @@ class _PageActualitesState extends State<PageActualites> {
       ),
     );
   }
-
-  //Widget _buildJournalBadge() {
-  //  return Container(
-  //    color: const Color(0xFFFFD700), // Jaune
-  //    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-  //    margin: const EdgeInsets.only(right: 8),
-  //    child: const Text(
-  //      "M", // Tu peux remplacer par "J" pour Journal Alumni
-  //      style: TextStyle(
-  //        fontFamily: 'serif',
-  //        fontWeight: FontWeight.bold,
-  //        fontSize: 14,
-  //        color: Colors.black,
-  //      ),
-  //    ),
-  //  );
-  //}
 
   void _confirmerSuppression(BuildContext context, Map<String, dynamic> item) {
     showDialog(
@@ -185,20 +169,7 @@ class _PageActualitesState extends State<PageActualites> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Le Journal Alumni", style: TextStyle(fontFamily: 'serif', fontWeight: FontWeight.w900, color: Colors.black, fontSize: 24)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: Colors.black12, height: 1.0),
-        ),
-        actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _chargerDonnees)
-        ],
-      ),
+      appBar: CustomAppBar(),
       floatingActionButton: estAdmin
           ? FloatingActionButton(
         backgroundColor: const Color(0xFF1A1A1A),

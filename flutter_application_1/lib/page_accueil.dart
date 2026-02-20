@@ -38,15 +38,15 @@ class PageAccueil extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isDesktop = MediaQuery.of(context).size.width > 900;
     // TEST POUR VERIFIER LES FONCTIONALITES.
-    //final Map<String, dynamic> currentUser = user ?? {}
-    final Map<String, dynamic> userTest = {
-      'id_user': '1',
-      'role': 'admin', // Change en 'alumni' ou 'student' pour tester d'autres vues
-      'name': 'Admin',
-      'family_name': 'Test',
-      'email': 'admin@test.fr',
-    };
-    final Map<String, dynamic> currentUser = user ?? userTest;
+    final Map<String, dynamic> currentUser = user ?? {};
+    //final Map<String, dynamic> userTest = {
+    //  'id_user': '2',
+    //  'role': 'admin',
+    //  'name': 'Admin',
+    //  'family_name': 'Test',
+    //  'email': 'admin@test.fr',
+    //};
+    //final Map<String, dynamic> currentUser = user ?? userTest;
     final String role = currentUser['role'] ?? 'guest';
 
     return Scaffold(
@@ -158,7 +158,6 @@ class PageAccueil extends StatelessWidget {
     );
   }
 
-  // --- Drawer Mobile ---
 
   Widget _buildMobileDrawer(BuildContext context) {
     return Drawer(
@@ -184,7 +183,6 @@ class PageAccueil extends StatelessWidget {
           ListTile(leading: const Icon(Icons.work), title: const Text("Offres"), onTap: () => _naviguer(context, PageEmploi(user: user ?? {}))),
           ListTile(leading: const Icon(Icons.school), title: const Text("Site École"), onTap: _ouvrirSiteEcole),
 
-          // On vérifie que user n'est pas null avant de vérifier le rôle
           if (user != null && (user!['role'] == 'student' || user!['role'] == 'alumni')) ...[
             const Divider(),
             ListTile(leading: const Icon(Icons.event), title: const Text("Proposer un évènement"), onTap: () => _naviguer(context, PageProposerEvenement(user: user ?? {}))),
@@ -211,10 +209,8 @@ class PageAccueil extends StatelessWidget {
     );
   }
 
-  // --- Logique d'ajout d'actualité ---
 
   void _afficherDialogAjoutActu(BuildContext context) {
-    // Si pas connecté, on empêche l'action
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez vous connecter pour publier une actualité.")),
@@ -266,7 +262,7 @@ class PageAccueil extends StatelessWidget {
     final titreCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final lieuCtrl = TextEditingController();
-    final dateCtrl = TextEditingController(); // Idéalement un DatePicker
+    final dateCtrl = TextEditingController();
 
     showDialog(
       context: context,
@@ -281,17 +277,38 @@ class PageAccueil extends StatelessWidget {
               TextField(controller: lieuCtrl, decoration: const InputDecoration(labelText: "Lieu")),
               TextField(
                 controller: dateCtrl,
-                decoration: const InputDecoration(labelText: "Date (YYYY-MM-DD)"),
+                decoration: const InputDecoration(labelText: "Date et heure"),
+                readOnly: true,
                 onTap: () async {
-                  FocusScope.of(context).requestFocus(FocusNode()); // Fermer le clavier
-                  DateTime? picked = await showDatePicker(
+                  FocusScope.of(context).requestFocus(FocusNode());
+
+                  // 1. Sélectionner la Date
+                  DateTime? pickedDate = await showDatePicker(
                     context: context,
                     initialDate: DateTime.now(),
                     firstDate: DateTime.now(),
                     lastDate: DateTime(2100),
                   );
-                  if (picked != null) {
-                    dateCtrl.text = picked.toIso8601String().split('T')[0];
+
+                  if (pickedDate != null) {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: const TimeOfDay(hour: 00, minute: 0),
+                      builder: (BuildContext context, Widget? child) {
+                        return MediaQuery(
+                          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                          child: child!,
+                        );
+                      },
+                    );
+
+                    if (pickedTime != null) {
+                      String formattedDate = pickedDate.toIso8601String().split('T')[0];
+                      String formattedHour = pickedTime.hour.toString().padLeft(2, '0');
+                      String formattedMinute = pickedTime.minute.toString().padLeft(2, '0');
+
+                      dateCtrl.text = "$formattedDate $formattedHour:$formattedMinute:00";
+                    }
                   }
                 },
               ),
@@ -310,12 +327,10 @@ class PageAccueil extends StatelessWidget {
                 "lieu": lieuCtrl.text,
                 "date_event": dateCtrl.text,
                 "auteur_id": currentUser['id_user'] ?? "1",
-                // Si admin, on peut imaginer un champ "valide" à 1 directement
                 "valide": 1
               });
 
               Navigator.pop(ctx);
-              // Rafraichir la page
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => PageAccueil(user: currentUser)));
             },
             child: const Text("Publier"),
