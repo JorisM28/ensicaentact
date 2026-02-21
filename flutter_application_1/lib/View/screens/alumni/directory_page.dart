@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../../common/profile_badge.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../Model/alumnis.dart';
-import '../../../Model/data/services/database_service.dart';
 import '../../common/filtre_widget.dart';
 import 'add_alumni.dart';
 import 'add_alumni_form.dart';
@@ -11,7 +10,9 @@ import 'alumni_detail_page.dart';
 import '../admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
 import '../../navigation.dart';
-import '../../../ViewModel/alumni/directory_viewmodel.dart';
+import '../../../service_locator.dart';
+import '../../../Model/data/services/alumni_repository.dart';
+import '../../../ViewModel/alumni/directory_view_model.dart';
 
 class DirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -24,32 +25,39 @@ class DirectoryPage extends StatefulWidget {
 class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   late DirectoryViewModel viewModel;
 
+  Alumnis? _selectedStudent;
+  bool _openFilters = false;
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  bool get isAdmin => widget.user['role'] == 'admin';
   @override
   void initState() {
     super.initState();
-    viewModel = DirectoryViewModel(user: widget.user);
-    viewModel.loadInitialData();
-    viewModel.loadCounterNotifications();
-    viewModel.addListener(() => setState(() {}));
+    viewModel = sl<DirectoryViewModel>();
+    viewModel.loadAlumnis();
+    if(isAdmin)viewModel.loadPendingRequestsCount();
+    viewModel.addListener((){
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
   }
 
   @override
   void dispose() {
-    routeObserver.unsubscribe(this);
-    viewModel.dispose();
+    _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   void didPopNext() {
-    viewModel.loadInitialData();
-    viewModel.loadCounterNotifications();
+    viewModel.loadAlumnis();
+    if(isAdmin)viewModel.loadPendingRequestsCount();
   }
 
   @override
@@ -63,7 +71,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
-          if (viewModel.isAdmin)
+          if (isAdmin)
             IconButton(
               icon: const Icon(Icons.history),
               onPressed: () => _displayHistory(context),
@@ -71,13 +79,13 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
           ProfileBadge(user: widget.user),
         ],
       ),
-      floatingActionButton: viewModel.isAdmin ? _buildFabStack() : null,
-      body: viewModel.loading
+      floatingActionButton: isAdmin ? _buildFabStack() : null,
+      body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
           : CallbackShortcuts(
         bindings: {
-          const SingleActivator(LogicalKeyboardKey.arrowDown): () => viewModel.changeKeyboardSelection(1),
-          const SingleActivator(LogicalKeyboardKey.arrowUp): () => viewModel.changeKeyboardSelection(-1),
+          const SingleActivator(LogicalKeyboardKey.arrowDown): () => _changeKeyboardSelection(1),
+          const SingleActivator(LogicalKeyboardKey.arrowUp): () => _changeKeyboardSelection(-1),
         },
         child: Focus(
           autofocus: true,
@@ -89,22 +97,22 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                   children: [
                     Expanded(
                       flex: 2,
-                      child: viewModel.alumniPoster.isEmpty
+                      child: viewModel.alumnis.isEmpty
                           ? const Center(child: Text("Aucun résultat"))
                           : ListView.builder(
-                        controller: viewModel.scrollController,
-                        itemCount: viewModel.alumniPoster.length,
+                        controller: _scrollController,
+                        itemCount: viewModel.alumnis.length,
                         padding: const EdgeInsets.all(10),
-                        itemBuilder: (context, index) => _studentCard(viewModel.alumniPoster[index], isWideScreen),
+                        itemBuilder: (context, index) => _studentCard(viewModel.alumnis[index], isWideScreen),
                       ),
                     ),
                     if (isWideScreen) ...[
                       const VerticalDivider(width: 1),
                       Expanded(
                         flex: 2,
-                        child: viewModel.selectedStudent == null
+                        child: _selectedStudent == null
                             ? _defaultView()
-                            : AlumniPreview(alumni: viewModel.selectedStudent!, user: widget.user),
+                            : AlumniPreview(alumni: _selectedStudent!, user: widget.user),
                       ),
                     ]
                   ],
@@ -127,13 +135,13 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
           SizedBox(width: 400, child: _searchField()),
           const SizedBox(width: 15),
           _filterToggleButton(),
-          if (viewModel.openFilters) Expanded(child: _buildFilters()),
+          if (_openFilters) Expanded(child: _buildFilters()),
         ],
       )
           : Column(
         children: [
           Row(children: [Expanded(child: _searchField()), _filterToggleButton()]),
-          if (viewModel.openFilters) ...[const SizedBox(height: 15), _buildFilters()],
+          if (_openFilters) ...[const SizedBox(height: 15), _buildFilters()],
         ],
       ),
     );
@@ -141,13 +149,16 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
 
   Widget _searchField() {
     return TextField(
-      controller: viewModel.searchController,
-      onChanged: viewModel.filterResults,
+      controller: _searchController,
+      onChanged: (text) => viewModel.search(text),
       decoration: InputDecoration(
         hintText: "Recherche...",
         prefixIcon: const Icon(Icons.search),
-        suffixIcon: viewModel.searchController.text.isNotEmpty
-            ? IconButton(icon: const Icon(Icons.clear), onPressed: viewModel.clearSearch)
+        suffixIcon: _searchController.text.isNotEmpty
+            ? IconButton(icon: const Icon(Icons.clear),onPressed: () {
+                  _searchController.clear();
+                  viewModel.search('');
+                })
             : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         filled: true,
@@ -160,54 +171,47 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     return Container(
       margin: const EdgeInsets.only(left: 10),
       decoration: BoxDecoration(
-        color: viewModel.openFilters ? AppColors.ensiCyan : Colors.white,
+        color: _openFilters ? AppColors.ensiCyan : Colors.white,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey.shade300),
       ),
       child: IconButton(
-        icon: Icon(viewModel.openFilters ? Icons.filter_list_off : Icons.filter_list,
-            color: viewModel.openFilters ? Colors.white : Colors.grey[700]),
-        onPressed: viewModel.toggleFilters,
+        icon: Icon(_openFilters ? Icons.filter_list_off : Icons.filter_list,
+            color: _openFilters ? Colors.white : Colors.grey[700]),
+        onPressed: () => setState(() => _openFilters = !_openFilters),
       ),
     );
   }
 
   Widget _buildFilters() {
     return ZoneFiltres(
-      promotionAvailable: viewModel.promotionAvailable,
-      selectedPromotion: viewModel.promotionFilterSelected,
-      onPromoChanged: (promo, isTicked) {
-        isTicked ? viewModel.promotionFilterSelected.add(promo) : viewModel.promotionFilterSelected.remove(promo);
-        viewModel.filterResults(viewModel.searchController.text);
-      },
+      promotionAvailable: viewModel.promosAvailable,
+      selectedPromotion: viewModel.selectedPromotions,
+      onPromoChanged: (promo, isTicked) => viewModel.togglePromoFilter(promo, isTicked),
+
       sectorAvailable: viewModel.sectorAvailable,
-      sectorFilterSelected: viewModel.sectorFilterSelected,
-      onSectorChanged: (filiere, isTicked) {
-        isTicked ? viewModel.sectorFilterSelected.add(filiere) : viewModel.sectorFilterSelected.remove(filiere);
-        viewModel.filterResults(viewModel.searchController.text);
-      },
-      internshipCountryAvailable: viewModel.internshipCountryAvailable,
-      internshipCountryFilterSelected: viewModel.internshipCountryFilterSelected,
-      onInternshipCountryChanged: (pays, isTicked) {
-        isTicked ? viewModel.internshipCountryFilterSelected.add(pays) : viewModel.internshipCountryFilterSelected.remove(pays);
-        viewModel.filterResults(viewModel.searchController.text);
-      },
+      sectorFilterSelected: viewModel.selectedSectors,
+      onSectorChanged: (sector, isTicked) => viewModel.toggleSectorFilter(sector, isTicked),
+      
+      internshipCountryAvailable: viewModel.countriesAvailable,
+      internshipCountryFilterSelected: viewModel.selectedCountries,
+      onInternshipCountryChanged: (country, isTicked) => viewModel.toggleCountryFilter(country, isTicked),
     );
   }
 
   Widget _studentCard(Alumnis student, bool isWideScreen) {
-    final isSelected = student == viewModel.selectedStudent;
+    final isSelected = student == _selectedStudent;
     return Card(
       elevation: isSelected ? 5 : 2,
       color: isSelected ? const Color.fromARGB(255, 210, 210, 210) : Colors.white,
       child: InkWell(
         onTap: () {
           if (isWideScreen) {
-            viewModel.selectStudent(student);
+            setState(() => _selectedStudent = student);
           } else {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AlumniDetailPage(alumni: student, user: widget.user, onSave: viewModel.loadInitialData)),
+              MaterialPageRoute(builder: (context) => AlumniDetailPage(alumni: student, user: widget.user, onSave: ()=> viewModel.loadAlumnis())),
             );
           }
         },
@@ -226,7 +230,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                   ],
                 ),
               ),
-              if (viewModel.isAdmin)
+              if (isAdmin)
                 IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _confirmDelete(student)),
             ],
           ),
@@ -235,17 +239,21 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     );
   }
 
-  Widget _buildFabStack() {
+ Widget _buildFabStack() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         FloatingActionButton(
           backgroundColor: Colors.orange,
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminValidationPage())).then((_) => viewModel.loadCounterNotifications()),
-          child: Badge(label: Text('${viewModel.numberWaitingRequest}'), isLabelVisible: viewModel.numberWaitingRequest > 0, child: const Icon(Icons.playlist_add_check, color: Colors.white)),
+          heroTag: 'btn_pending_requests',
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminValidationPage())).then((_) {
+            viewModel.loadPendingRequestsCount();
+            viewModel.loadAlumnis();
+          }),
+          child: Badge(label: Text('${viewModel.pendingRequestsCount}'), isLabelVisible: viewModel.pendingRequestsCount > 0, child: const Icon(Icons.playlist_add_check, color: Colors.white)),
         ),
         const SizedBox(width: 15),
-        FloatingActionButton(backgroundColor: AppColors.ensiCyan, onPressed: _openAddModal, child: const Icon(Icons.add, color: Colors.white)),
+        FloatingActionButton(heroTag: 'btn_add_alumni', backgroundColor: AppColors.ensiCyan, onPressed: _openAddModal, child: const Icon(Icons.add, color: Colors.white)),
       ],
     );
   }
@@ -264,7 +272,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Nouvel Alumni"),
-        content: SizedBox(width: 500, child: AddAlumniForm(isAdmin: true, onSuccess: () { Navigator.pop(context); viewModel.loadInitialData(); })),
+        content: SizedBox(width: 500, child: AddAlumniForm(isAdmin: true, onSuccess: () { Navigator.pop(context); viewModel.loadAlumnis(); })),
       ),
     );
   }
@@ -278,11 +286,12 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
         actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Non")), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Oui"))],
       ),
     ) ?? false;
-    if (confirm) viewModel.deleteStudent(student);
+    if (confirm) viewModel.deleteAlumni(student);
   }
 
   void _displayHistory(BuildContext context) async {
-    final logs = await DatabaseService().getHistory();
+    final logs = await sl<AlumniRepository>().getHistory();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -300,5 +309,34 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
         actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("Fermer"))],
       ),
     );
+  }
+
+  void _changeKeyboardSelection(int direction) {
+    final list = viewModel.alumnis;
+    if (list.isEmpty) return;
+    
+    if (_selectedStudent == null) {
+      setState(() => _selectedStudent = list.first);
+      return;
+    }
+    
+    int currentIndex = list.indexOf(_selectedStudent!);
+    if (currentIndex == -1) {
+      setState(() => _selectedStudent = list.first);
+      return;
+    }
+    
+    int newIndex = currentIndex + direction;
+    if (newIndex >= 0 && newIndex < list.length) {
+      setState(() => _selectedStudent = list[newIndex]);
+      if (_scrollController.hasClients) {
+        double targetPosition = newIndex * 90.0;
+        _scrollController.animateTo(
+          targetPosition > 200 ? targetPosition - 200 : targetPosition,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    }
   }
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../Model/data/services/database_service.dart';
+import '../../../service_locator.dart';
+import '../Model/data/services/alumni_repository.dart';
 
 class CareerViewModel extends ChangeNotifier {
   final Map<String, dynamic> user;
-  final DatabaseService _dbService = DatabaseService();
 
   List<Map<String, dynamic>> allOffers = [];
   List<Map<String, dynamic>> allCompanies = [];
@@ -39,17 +39,33 @@ class CareerViewModel extends ChangeNotifier {
   Future<void> loadOffers() async {
     isLoadingOffers = true;
     notifyListeners();
-    allOffers = await _dbService.getOffers();
-    isLoadingOffers = false;
-    notifyListeners();
+    
+    try {
+      final data = await sl<AlumniRepository>().getOffers({});
+      allOffers = List<Map<String, dynamic>>.from(data);
+    } catch (e) {
+      debugPrint("Error loading offers: $e");
+      allOffers = [];
+    } finally {
+      isLoadingOffers = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadCompanies() async {
     isLoadingCompanies = true;
     notifyListeners();
-    allCompanies = await _dbService.getCompanies();
-    isLoadingCompanies = false;
-    notifyListeners();
+    
+    try {
+      final data = await sl<AlumniRepository>().getCompanies({});
+      allCompanies = List<Map<String, dynamic>>.from(data);
+    } catch (e) {
+      debugPrint("Error loading companies: $e");
+      allCompanies = [];
+    } finally {
+      isLoadingCompanies = false;
+      notifyListeners();
+    }
   }
 
   void updateOfferSearch(String val) {
@@ -58,16 +74,26 @@ class CareerViewModel extends ChangeNotifier {
   }
 
   Future<bool> deleteOffer(String idOffre) async {
-    bool success = await _dbService.deleteOffers(idOffre);
-    if (success) await loadOffers();
-    return success;
+    try {
+      await sl<AlumniRepository>().deleteOffer({'id_offre': idOffre});
+      await loadOffers();
+      return true;
+    } catch (e) {
+      debugPrint("Error deleting offer: $e");
+      return false;
+    }
   }
 
   Future<bool> addOffer(Map<String, dynamic> data) async {
     data['id_auteur'] = myId;
-    bool success = await _dbService.addOffers(data);
-    if (success) await loadOffers();
-    return success;
+    try {
+      await sl<AlumniRepository>().addOffer(data);
+      await loadOffers();
+      return true;
+    } catch (e) {
+      debugPrint("Error adding offer: $e");
+      return false;
+    }
   }
 
   bool canUserDeleteOffer(Map<String, dynamic> offer) {

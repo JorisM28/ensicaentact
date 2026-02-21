@@ -4,10 +4,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import '../../View/navigation.dart';
 
 // TODO : Le transformer avec un patron de conception "Décorateur" Ou "Proxy" ?
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final Config config = Config(
   tenant: dotenv.env['AZURE_TENANT_ID'] ?? "",
@@ -70,21 +69,20 @@ class EnsiCaenConnection {
 
       final response = await http.post(
         Uri.parse(loginUrl),
-        body: {
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
           "email": email,
           "password": password,
-        },
+        }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // DEBUG : Affiche ce que le serveur renvoie vraiment
-        // print("Réponse du serveur : $data");
-
         if (data['status'] == 'success') {
           return {
             'status': 'success',
+            'token': data['token'],
             'name': data['name'] ?? 'Utilisateur',
             'family_name': data['family_name'] ?? '',
             'email': data['email'] ?? "",

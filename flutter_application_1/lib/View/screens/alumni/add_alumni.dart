@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../../Model/data/services/database_service.dart';
 import '../../../Model/core/theme/colors.dart';
+import '../../../service_locator.dart';
+import '../../../Model/data/services/alumni_repository.dart';
 
 class StageFormModel {
   final Key key = UniqueKey();
@@ -280,12 +281,12 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       }
 
       if (widget.isAdmin) {          
-        await DatabaseService().addStudent(data);
+       await sl<AlumniRepository>().addAlumni(data, isAdmin: true);
         if (widget.requestId != null) {
-          await DatabaseService().deleteStudent(widget.requestId!);
+          await sl<AlumniRepository>().deletePendingRequest({'id_demande': widget.requestId!});
         }
       } else {
-        await DatabaseService().askAddStudent(data);
+       await sl<AlumniRepository>().addAlumni(data, isAdmin: false);
       }
 
       if (widget.onSuccess != null) {
@@ -755,7 +756,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                     ) ?? false;
 
                     if (confirm) {
-                      await DatabaseService().deleteStudent(widget.requestId!);
+                      await sl<AlumniRepository>().deletePendingRequest({'id_demande': widget.requestId!});
                       if (widget.onSuccess != null) widget.onSuccess!();
                       if (mounted) Navigator.pop(context);
                     }
