@@ -201,44 +201,117 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
 
   Widget _studentCard(Alumnis student, bool isWideScreen) {
     final isSelected = student == _selectedStudent;
+    
+    void openDetail() {
+      if (isWideScreen) {
+        setState(() => _selectedStudent = student);
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AlumniDetailPage(
+              alumni: student, 
+              user: widget.user,
+              onSave: () {
+                viewModel.loadAlumnis();
+              }, 
+            ),
+          ),
+        );
+      }
+    }
+
     return Card(
-      elevation: isSelected ? 5 : 2,
-      color: isSelected ? const Color.fromARGB(255, 210, 210, 210) : Colors.white,
+      elevation: isSelected ? 5  : 2,
+      color: isSelected ? const Color.fromARGB(255, 210, 210, 210).withOpacity(1) : Colors.white,
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: isSelected ? const BorderSide(color: Color.fromARGB(255, 118, 118, 118), width: 0.5) : BorderSide.none,
+      ),
       child: InkWell(
-        onTap: () {
-          if (isWideScreen) {
-            setState(() => _selectedStudent = student);
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AlumniDetailPage(alumni: student, user: widget.user, onSave: ()=> viewModel.loadAlumnis())),
-            );
-          }
-        },
+        borderRadius: BorderRadius.circular(10),
+        onTap: openDetail,
         child: Padding(
           padding: const EdgeInsets.all(15),
           child: Row(
             children: [
-              CircleAvatar(backgroundColor: AppColors.ensiCyan, child: Text(student.firstname[0], style: const TextStyle(color: Colors.white))),
+              CircleAvatar(
+                backgroundColor: AppColors.ensiCyan,
+                radius: 30,
+                child: Text(
+                  student.firstname.isNotEmpty ? student.firstname[0] : "?",
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ),
               const SizedBox(width: 15),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("${student.wholeName} - ${student.promotion}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                    if (student.job.isNotEmpty) Text("${student.job} @ ${student.company}", style: TextStyle(color: Colors.grey[700])),
+                    Text.rich(
+                      TextSpan(
+                        text: student.wholeName,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+                        children: [
+                          if (student.promotion != 0)
+                            TextSpan(
+                              text: " - ${student.promotion}",
+                              style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                        ],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (student.job.isNotEmpty || student.company.isNotEmpty)...[
+                      Text("${student.job} ${student.company.isEmpty || student.job.isEmpty  ? "" : "⟶"} ${student.company}", style: TextStyle(color: Colors.grey[800])),
+                    ],  
+                    const SizedBox(height: 5),
+                    Wrap(
+                      spacing: 5,
+                      children: [
+                        if (student.sector.isNotEmpty)
+                          Chip(label: Text(student.sector, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
+                        if (student.city.isNotEmpty)
+                          Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(student.city, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
+                      ],
+                    ),
                   ],
                 ),
               ),
-              if (isAdmin)
-                IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _confirmDelete(student)),
+              
+              IconButton(
+                icon: const Icon(Icons.visibility, size: 20, color: Colors.blue),
+                onPressed: () {
+                  if (!isWideScreen) {
+                     openDetail();
+                  } else {
+                     Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AlumniDetailPage(
+                            alumni: student, 
+                            user: widget.user, 
+                            onSave: () => viewModel.loadAlumnis(),
+                          ),
+                        ),
+                      );
+                  }
+                },
+              ),
+
+              if (isAdmin) 
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _confirmDelete(student),
+                ),
             ],
           ),
         ),
       ),
     );
   }
-
+  
  Widget _buildFabStack() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -290,23 +363,56 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   }
 
   void _displayHistory(BuildContext context) async {
-    final logs = await sl<AlumniRepository>().getHistory();
+    await viewModel.loadHistory();
+    final logs = viewModel.historyLogs;
+
+    if (!mounted) return;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Historique"),
-        content: SizedBox(
-          width: 500, height: 400,
-          child: ListView.builder(
-            itemCount: logs.length,
-            itemBuilder: (context, index) => ListTile(
-              title: Text("${logs[index]['prenom_alumni']} ${logs[index]['nom_alumni']}"),
-              subtitle: Text("${logs[index]['action']} le ${logs[index]['date_action']}"),
-            ),
-          ),
+        title: const Row(
+          children: [
+            Icon(Icons.history, color: AppColors.ensiCyan), 
+            SizedBox(width: 10), 
+            Text("History")
+          ]
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("Fermer"))],
+        content: SizedBox(
+          width: 500,
+          height: 400,
+          child: logs.isEmpty
+              ? const Center(child: Text("No actions recorded."))
+              : ListView.builder(
+                  itemCount: logs.length,
+                  itemBuilder: (context, index) {
+                    final log = logs[index];
+                    final bool isDelete = log['action'] == 'SUPPRESSION';
+                    
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
+                        child: Icon(
+                          isDelete ? Icons.delete_forever : Icons.person_add, 
+                          color: isDelete ? Colors.red : Colors.green, 
+                          size: 20
+                        ),
+                      ),
+                      title: Text(
+                        "${log['prenom_alumni']} ${log['nom_alumni']}", 
+                        style: const TextStyle(fontWeight: FontWeight.bold)
+                      ),
+                      subtitle: Text("${log['action']} on ${log['date_action']}"),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: const Text("Close")
+          )
+        ],
       ),
     );
   }
