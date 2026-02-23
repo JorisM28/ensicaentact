@@ -63,7 +63,7 @@ class AlumniViewModel extends ChangeNotifier {
     promotionController = TextEditingController(text: currentAlumni.promotion.toString());
     positionController = TextEditingController(text: currentAlumni.job);
     positionDescController = TextEditingController(text: currentAlumni.jobDescription);
-    startPosDateController = TextEditingController(text: currentAlumni.jobStart ?? "");
+    startPosDateController = TextEditingController(text: currentAlumni.jobStart);
     companyController = TextEditingController(text: currentAlumni.company);
     cityController = TextEditingController(text: currentAlumni.city);
     emailController = TextEditingController(text: currentAlumni.email);
