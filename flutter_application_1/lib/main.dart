@@ -9,10 +9,23 @@ import 'View/screens/alumni/directory_page.dart';
 import 'View/screens/alumni/add_alumni_form.dart';
 import 'View/screens/employment/employement_page.dart';
 import 'ViewModel/employment_viewmodel.dart';
+import 'service_locator.dart';
+import 'ViewModel/alumni/directory_view_model.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'View/navigation.dart';
 
 void main() async {
-  await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  setupLocator();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => sl<DirectoryViewModel>()),
+        ],
+      child: const MyApp(), 
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../../common/profile_badge.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../Model/alumnis.dart';
-import '../../../Model/data/services/database_service.dart';
 import '../../common/filtre_widget.dart';
 import 'add_alumni.dart';
 import 'add_alumni_form.dart';
@@ -11,7 +10,9 @@ import 'alumni_detail_page.dart';
 import '../admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
 import '../../navigation.dart';
-import '../../../ViewModel/alumni/directory_viewmodel.dart';
+import '../../../service_locator.dart';
+import '../../../Model/data/services/alumni_repository.dart';
+import '../../../ViewModel/alumni/directory_view_model.dart';
 
 class DirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -24,32 +25,39 @@ class DirectoryPage extends StatefulWidget {
 class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   late DirectoryViewModel viewModel;
 
+  Alumnis? _selectedStudent;
+  bool _openFilters = false;
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  bool get isAdmin => widget.user['role'] == 'admin';
   @override
   void initState() {
     super.initState();
-    viewModel = DirectoryViewModel(user: widget.user);
-    viewModel.loadInitialData();
-    viewModel.loadCounterNotifications();
-    viewModel.addListener(() => setState(() {}));
+    viewModel = sl<DirectoryViewModel>();
+    viewModel.loadAlumnis();
+    if(isAdmin)viewModel.loadPendingRequestsCount();
+    viewModel.addListener((){
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    routeObserver.subscribe(this, ModalRoute.of(context)! as PageRoute);
   }
 
   @override
   void dispose() {
-    routeObserver.unsubscribe(this);
-    viewModel.dispose();
+    _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   void didPopNext() {
-    viewModel.loadInitialData();
-    viewModel.loadCounterNotifications();
+    viewModel.loadAlumnis();
+    if(isAdmin)viewModel.loadPendingRequestsCount();
   }
 
   @override
@@ -63,7 +71,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
-          if (viewModel.isAdmin)
+          if (isAdmin)
             IconButton(
               icon: const Icon(Icons.history),
               onPressed: () => _displayHistory(context),
@@ -71,13 +79,13 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
           ProfileBadge(user: widget.user),
         ],
       ),
-      floatingActionButton: viewModel.isAdmin ? _buildFabStack() : null,
-      body: viewModel.loading
+      floatingActionButton: isAdmin ? _buildFabStack() : null,
+      body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
           : CallbackShortcuts(
         bindings: {
-          const SingleActivator(LogicalKeyboardKey.arrowDown): () => viewModel.changeKeyboardSelection(1),
-          const SingleActivator(LogicalKeyboardKey.arrowUp): () => viewModel.changeKeyboardSelection(-1),
+          const SingleActivator(LogicalKeyboardKey.arrowDown): () => _changeKeyboardSelection(1),
+          const SingleActivator(LogicalKeyboardKey.arrowUp): () => _changeKeyboardSelection(-1),
         },
         child: Focus(
           autofocus: true,
@@ -89,22 +97,22 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                   children: [
                     Expanded(
                       flex: 2,
-                      child: viewModel.alumniPoster.isEmpty
+                      child: viewModel.alumnis.isEmpty
                           ? const Center(child: Text("Aucun résultat"))
                           : ListView.builder(
-                        controller: viewModel.scrollController,
-                        itemCount: viewModel.alumniPoster.length,
+                        controller: _scrollController,
+                        itemCount: viewModel.alumnis.length,
                         padding: const EdgeInsets.all(10),
-                        itemBuilder: (context, index) => _studentCard(viewModel.alumniPoster[index], isWideScreen),
+                        itemBuilder: (context, index) => _studentCard(viewModel.alumnis[index], isWideScreen),
                       ),
                     ),
                     if (isWideScreen) ...[
                       const VerticalDivider(width: 1),
                       Expanded(
                         flex: 2,
-                        child: viewModel.selectedStudent == null
+                        child: _selectedStudent == null
                             ? _defaultView()
-                            : AlumniPreview(alumni: viewModel.selectedStudent!, user: widget.user),
+                            : AlumniPreview(alumni: _selectedStudent!, user: widget.user),
                       ),
                     ]
                   ],
@@ -127,13 +135,13 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
           SizedBox(width: 400, child: _searchField()),
           const SizedBox(width: 15),
           _filterToggleButton(),
-          if (viewModel.openFilters) Expanded(child: _buildFilters()),
+          if (_openFilters) Expanded(child: _buildFilters()),
         ],
       )
           : Column(
         children: [
           Row(children: [Expanded(child: _searchField()), _filterToggleButton()]),
-          if (viewModel.openFilters) ...[const SizedBox(height: 15), _buildFilters()],
+          if (_openFilters) ...[const SizedBox(height: 15), _buildFilters()],
         ],
       ),
     );
@@ -141,13 +149,16 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
 
   Widget _searchField() {
     return TextField(
-      controller: viewModel.searchController,
-      onChanged: viewModel.filterResults,
+      controller: _searchController,
+      onChanged: (text) => viewModel.search(text),
       decoration: InputDecoration(
         hintText: "Recherche...",
         prefixIcon: const Icon(Icons.search),
-        suffixIcon: viewModel.searchController.text.isNotEmpty
-            ? IconButton(icon: const Icon(Icons.clear), onPressed: viewModel.clearSearch)
+        suffixIcon: _searchController.text.isNotEmpty
+            ? IconButton(icon: const Icon(Icons.clear),onPressed: () {
+                  _searchController.clear();
+                  viewModel.search('');
+                })
             : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
         filled: true,
@@ -160,92 +171,162 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     return Container(
       margin: const EdgeInsets.only(left: 10),
       decoration: BoxDecoration(
-        color: viewModel.openFilters ? AppColors.ensiCyan : Colors.white,
+        color: _openFilters ? AppColors.ensiCyan : Colors.white,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Colors.grey.shade300),
       ),
       child: IconButton(
-        icon: Icon(viewModel.openFilters ? Icons.filter_list_off : Icons.filter_list,
-            color: viewModel.openFilters ? Colors.white : Colors.grey[700]),
-        onPressed: viewModel.toggleFilters,
+        icon: Icon(_openFilters ? Icons.filter_list_off : Icons.filter_list,
+            color: _openFilters ? Colors.white : Colors.grey[700]),
+        onPressed: () => setState(() => _openFilters = !_openFilters),
       ),
     );
   }
 
   Widget _buildFilters() {
     return ZoneFiltres(
-      promotionAvailable: viewModel.promotionAvailable,
-      selectedPromotion: viewModel.promotionFilterSelected,
-      onPromoChanged: (promo, isTicked) {
-        isTicked ? viewModel.promotionFilterSelected.add(promo) : viewModel.promotionFilterSelected.remove(promo);
-        viewModel.filterResults(viewModel.searchController.text);
-      },
+      promotionAvailable: viewModel.promosAvailable,
+      selectedPromotion: viewModel.selectedPromotions,
+      onPromoChanged: (promo, isTicked) => viewModel.togglePromoFilter(promo, isTicked),
+
       sectorAvailable: viewModel.sectorAvailable,
-      sectorFilterSelected: viewModel.sectorFilterSelected,
-      onSectorChanged: (filiere, isTicked) {
-        isTicked ? viewModel.sectorFilterSelected.add(filiere) : viewModel.sectorFilterSelected.remove(filiere);
-        viewModel.filterResults(viewModel.searchController.text);
-      },
-      internshipCountryAvailable: viewModel.internshipCountryAvailable,
-      internshipCountryFilterSelected: viewModel.internshipCountryFilterSelected,
-      onInternshipCountryChanged: (pays, isTicked) {
-        isTicked ? viewModel.internshipCountryFilterSelected.add(pays) : viewModel.internshipCountryFilterSelected.remove(pays);
-        viewModel.filterResults(viewModel.searchController.text);
-      },
+      sectorFilterSelected: viewModel.selectedSectors,
+      onSectorChanged: (sector, isTicked) => viewModel.toggleSectorFilter(sector, isTicked),
+      
+      internshipCountryAvailable: viewModel.countriesAvailable,
+      internshipCountryFilterSelected: viewModel.selectedCountries,
+      onInternshipCountryChanged: (country, isTicked) => viewModel.toggleCountryFilter(country, isTicked),
     );
   }
 
   Widget _studentCard(Alumnis student, bool isWideScreen) {
-    final isSelected = student == viewModel.selectedStudent;
+    final isSelected = student == _selectedStudent;
+    
+    void openDetail() {
+      if (isWideScreen) {
+        setState(() => _selectedStudent = student);
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AlumniDetailPage(
+              alumni: student, 
+              user: widget.user,
+              onSave: () {
+                viewModel.loadAlumnis();
+              }, 
+            ),
+          ),
+        );
+      }
+    }
+
     return Card(
-      elevation: isSelected ? 5 : 2,
-      color: isSelected ? const Color.fromARGB(255, 210, 210, 210) : Colors.white,
+      elevation: isSelected ? 5  : 2,
+      color: isSelected ? const Color.fromARGB(255, 210, 210, 210).withOpacity(1) : Colors.white,
+      margin: const EdgeInsets.only(bottom: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: isSelected ? const BorderSide(color: Color.fromARGB(255, 118, 118, 118), width: 0.5) : BorderSide.none,
+      ),
       child: InkWell(
-        onTap: () {
-          if (isWideScreen) {
-            viewModel.selectStudent(student);
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AlumniDetailPage(alumni: student, user: widget.user, onSave: viewModel.loadInitialData)),
-            );
-          }
-        },
+        borderRadius: BorderRadius.circular(10),
+        onTap: openDetail,
         child: Padding(
           padding: const EdgeInsets.all(15),
           child: Row(
             children: [
-              CircleAvatar(backgroundColor: AppColors.ensiCyan, child: Text(student.firstname[0], style: const TextStyle(color: Colors.white))),
+              CircleAvatar(
+                backgroundColor: AppColors.ensiCyan,
+                radius: 30,
+                child: Text(
+                  student.firstname.isNotEmpty ? student.firstname[0] : "?",
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ),
               const SizedBox(width: 15),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("${student.wholeName} - ${student.promotion}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                    if (student.job.isNotEmpty) Text("${student.job} @ ${student.company}", style: TextStyle(color: Colors.grey[700])),
+                    Text.rich(
+                      TextSpan(
+                        text: student.wholeName,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
+                        children: [
+                          if (student.promotion != 0)
+                            TextSpan(
+                              text: " - ${student.promotion}",
+                              style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                        ],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (student.job.isNotEmpty || student.company.isNotEmpty)...[
+                      Text("${student.job} ${student.company.isEmpty || student.job.isEmpty  ? "" : "⟶"} ${student.company}", style: TextStyle(color: Colors.grey[800])),
+                    ],  
+                    const SizedBox(height: 5),
+                    Wrap(
+                      spacing: 5,
+                      children: [
+                        if (student.sector.isNotEmpty)
+                          Chip(label: Text(student.sector, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
+                        if (student.city.isNotEmpty)
+                          Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(student.city, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
+                      ],
+                    ),
                   ],
                 ),
               ),
-              if (viewModel.isAdmin)
-                IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _confirmDelete(student)),
+              
+              IconButton(
+                icon: const Icon(Icons.visibility, size: 20, color: Colors.blue),
+                onPressed: () {
+                  if (!isWideScreen) {
+                     openDetail();
+                  } else {
+                     Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AlumniDetailPage(
+                            alumni: student, 
+                            user: widget.user, 
+                            onSave: () => viewModel.loadAlumnis(),
+                          ),
+                        ),
+                      );
+                  }
+                },
+              ),
+
+              if (isAdmin) 
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _confirmDelete(student),
+                ),
             ],
           ),
         ),
       ),
     );
   }
-
-  Widget _buildFabStack() {
+  
+ Widget _buildFabStack() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         FloatingActionButton(
           backgroundColor: Colors.orange,
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminValidationPage())).then((_) => viewModel.loadCounterNotifications()),
-          child: Badge(label: Text('${viewModel.numberWaitingRequest}'), isLabelVisible: viewModel.numberWaitingRequest > 0, child: const Icon(Icons.playlist_add_check, color: Colors.white)),
+          heroTag: 'btn_pending_requests',
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminValidationPage())).then((_) {
+            viewModel.loadPendingRequestsCount();
+            viewModel.loadAlumnis();
+          }),
+          child: Badge(label: Text('${viewModel.pendingRequestsCount}'), isLabelVisible: viewModel.pendingRequestsCount > 0, child: const Icon(Icons.playlist_add_check, color: Colors.white)),
         ),
         const SizedBox(width: 15),
-        FloatingActionButton(backgroundColor: AppColors.ensiCyan, onPressed: _openAddModal, child: const Icon(Icons.add, color: Colors.white)),
+        FloatingActionButton(heroTag: 'btn_add_alumni', backgroundColor: AppColors.ensiCyan, onPressed: _openAddModal, child: const Icon(Icons.add, color: Colors.white)),
       ],
     );
   }
@@ -264,7 +345,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Nouvel Alumni"),
-        content: SizedBox(width: 500, child: AddAlumniForm(isAdmin: true, onSuccess: () { Navigator.pop(context); viewModel.loadInitialData(); })),
+        content: SizedBox(width: 500, child: AddAlumniForm(isAdmin: true, onSuccess: () { Navigator.pop(context); viewModel.loadAlumnis(); })),
       ),
     );
   }
@@ -278,27 +359,90 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
         actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Non")), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Oui"))],
       ),
     ) ?? false;
-    if (confirm) viewModel.deleteStudent(student);
+    if (confirm) viewModel.deleteAlumni(student);
   }
 
   void _displayHistory(BuildContext context) async {
-    final logs = await DatabaseService().getHistory();
+    await viewModel.loadHistory();
+    final logs = viewModel.historyLogs;
+
+    if (!mounted) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Historique"),
-        content: SizedBox(
-          width: 500, height: 400,
-          child: ListView.builder(
-            itemCount: logs.length,
-            itemBuilder: (context, index) => ListTile(
-              title: Text("${logs[index]['prenom_alumni']} ${logs[index]['nom_alumni']}"),
-              subtitle: Text("${logs[index]['action']} le ${logs[index]['date_action']}"),
-            ),
-          ),
+        title: const Row(
+          children: [
+            Icon(Icons.history, color: AppColors.ensiCyan), 
+            SizedBox(width: 10), 
+            Text("History")
+          ]
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("Fermer"))],
+        content: SizedBox(
+          width: 500,
+          height: 400,
+          child: logs.isEmpty
+              ? const Center(child: Text("No actions recorded."))
+              : ListView.builder(
+                  itemCount: logs.length,
+                  itemBuilder: (context, index) {
+                    final log = logs[index];
+                    final bool isDelete = log['action'] == 'SUPPRESSION';
+                    
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
+                        child: Icon(
+                          isDelete ? Icons.delete_forever : Icons.person_add, 
+                          color: isDelete ? Colors.red : Colors.green, 
+                          size: 20
+                        ),
+                      ),
+                      title: Text(
+                        "${log['prenom_alumni']} ${log['nom_alumni']}", 
+                        style: const TextStyle(fontWeight: FontWeight.bold)
+                      ),
+                      subtitle: Text("${log['action']} on ${log['date_action']}"),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: const Text("Close")
+          )
+        ],
       ),
     );
+  }
+
+  void _changeKeyboardSelection(int direction) {
+    final list = viewModel.alumnis;
+    if (list.isEmpty) return;
+    
+    if (_selectedStudent == null) {
+      setState(() => _selectedStudent = list.first);
+      return;
+    }
+    
+    int currentIndex = list.indexOf(_selectedStudent!);
+    if (currentIndex == -1) {
+      setState(() => _selectedStudent = list.first);
+      return;
+    }
+    
+    int newIndex = currentIndex + direction;
+    if (newIndex >= 0 && newIndex < list.length) {
+      setState(() => _selectedStudent = list[newIndex]);
+      if (_scrollController.hasClients) {
+        double targetPosition = newIndex * 90.0;
+        _scrollController.animateTo(
+          targetPosition > 200 ? targetPosition - 200 : targetPosition,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    }
   }
 }

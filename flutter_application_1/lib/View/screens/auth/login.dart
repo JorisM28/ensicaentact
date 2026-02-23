@@ -3,6 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/admin/login_check.dart';
 import '../alumni/directory_page.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 
 
 class Login extends StatefulWidget {
@@ -279,6 +281,11 @@ class _LoginState extends State<Login> {
     if (userData == null) return;
 
     if (userData['status'] == 'success') {
+      if (userData.containsKey('token') && userData['token'] != null) {
+        const storage = FlutterSecureStorage();
+        await storage.write(key: 'jwt_token', value: userData['token']);
+        print("Token sauvegardé avec succès !");
+      }
       String role = userData['role'];
 
       if (role == 'admin' || role == 'student' || role == 'alumni') {

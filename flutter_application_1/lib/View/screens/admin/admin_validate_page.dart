@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../../../Model/data/services/database_service.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../alumni/add_alumni.dart';
 import '../alumni/add_alumni_form.dart';
+import 'package:flutter_application_ensicaentact/service_locator.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/alumni_repository.dart';
 
 class AdminValidationPage extends StatefulWidget {
   const AdminValidationPage({super.key});
@@ -27,7 +28,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
         foregroundColor: Colors.white,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DatabaseService().getWaitingRequests(),
+        future: sl<AlumniRepository>().getPendingRequests().then((list) => list.cast<Map<String, dynamic>>()),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

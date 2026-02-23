@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../auth/login.dart';
-import '../../../Model/data/services/database_service.dart';
+import '../../../service_locator.dart';
+import '../../../Model/data/services/alumni_repository.dart';
 
 class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -69,22 +70,34 @@ class _ProfilePageState extends State<ProfilePage> {
                     if (_formKey.currentState!.validate()) {
                       setState(() => _isLoading = true);
 
-                      final result = await DatabaseService().updatePassword(
-                          widget.user['email'],
-                          _oldPassController.text,
-                          _newPassController.text
-                      );
+                      try {
+                          await sl<AlumniRepository>().updatePassword({
+                            'email': widget.user['email'],
+                            'old_password': _oldPassController.text,
+                            'new_password': _newPassController.text
+                          });
 
-                      setState(() => _isLoading = false);
-                      Navigator.pop(context);
+                          setState(() => _isLoading = false);
+                          Navigator.pop(context);
 
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(result['message'] ?? "Erreur"),
-                            backgroundColor: result['status'] == 'success' ? Colors.green : Colors.red,
-                          ),
-                        );
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Mot de passe modifié avec succès"),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                      } catch (e) {
+                        setState(() => _isLoading = false);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Erreur : Impossible de modifier le mot de passe"),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     }
                   },
