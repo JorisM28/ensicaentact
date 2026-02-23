@@ -5,13 +5,10 @@ import '../../../Model/core/theme/colors.dart';
 import '../../../Model/alumnis.dart';
 import '../../common/filtre_widget.dart';
 import 'add_alumni.dart';
-import 'add_alumni_form.dart';
 import 'alumni_detail_page.dart';
 import '../admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
-import '../../navigation.dart';
 import '../../../service_locator.dart';
-import '../../../Model/data/services/alumni_repository.dart';
 import '../../../ViewModel/alumni/directory_view_model.dart';
 
 class DirectoryPage extends StatefulWidget {

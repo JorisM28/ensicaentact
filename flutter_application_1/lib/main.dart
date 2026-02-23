@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/View/navigation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';  
 import 'View/screens/auth/login.dart';
 import 'View/screens/employment/companies_directory_page.dart';
-import 'ViewModel/admin/login_check.dart';
 import 'View/screens/alumni/directory_page.dart';
 import 'View/screens/alumni/add_alumni_form.dart';
 import 'View/screens/employment/employement_page.dart';
-import 'ViewModel/employment_viewmodel.dart';
 import 'service_locator.dart';
 import 'ViewModel/alumni/directory_view_model.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'View/navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
