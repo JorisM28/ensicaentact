@@ -355,17 +355,34 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
           }).toList()
         else
           viewModel.internshipDisplay.isEmpty
-              ? const Card(child: ListTile(title: Text("Aucun stage renseigné", style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey))))
+              ? const Card(
+                  child: ListTile(
+                      title: Text("Aucun stage renseigné",
+                          style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey))))
               : isBig
-              ? SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: viewModel.internshipDisplay.map((s) => _buildStageCard(s, 300, 10, s == viewModel.internshipDisplay.last)).toList(),
-            ),
-          )
-              : Column(
-            children: viewModel.internshipDisplay.map((s) => _buildStageCard(s, screenWidth, 10, true)).toList(),
-          ),
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: viewModel.internshipDisplay.map((s) {
+                        bool isLast = s == viewModel.internshipDisplay.last;
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: isLast ? 0 : 15.0),
+                            child: _buildInternshipCard(s),
+                          ),
+                        );
+                      }).toList(),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: viewModel.internshipDisplay
+                          .map((s) => Padding(
+                                padding: const EdgeInsets.only(bottom: 15.0),
+                                child: _buildInternshipCard(s),
+                              ))
+                          .toList(),
+                    ),
       ],
     );
   }
@@ -394,39 +411,52 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     );
   }
 
-  Widget _buildStageCard(dynamic stage, double width, double spacing, bool isLast) {
-    return Container(
-      width: width,
-      margin: EdgeInsets.only(right: isLast ? 0 : spacing, bottom: 10),
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(stage.type == "E" ? Icons.apartment : Icons.school, color: AppColors.ensiCyan, size: 18),
-                  const SizedBox(width: 5),
-                  Expanded(child: Text("${stage.year} - ${stage.entitled}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                ],
-              ),
-              const Divider(),
-              _buildStageField(stage.type == "U" ? "Université" : "Entreprise", stage.type == "E" ? Icons.apartment : Icons.school, Colors.green, stage.company),
-              _buildStageField("Lieu", Icons.location_on, Colors.red, "${stage.city}, ${stage.country}", isItalic: true),
-              if (stage.startDate.isNotEmpty || stage.endDate.isNotEmpty)
-                _buildStageField("Période", Icons.calendar_today, Colors.blue, "${stage.startDate} au ${stage.endDate}"),
-              _buildStageField("Description", Icons.insert_drive_file, Colors.grey, stage.description),
-            ],
-          ),
+  Widget _buildInternshipCard(dynamic stage) {
+    return Card(
+      elevation: 3,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0), // Un peu plus d'air à l'intérieur
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(stage.type == "E" ? Icons.apartment : Icons.school,
+                    color: AppColors.ensiCyan, size: 22), // Icône un peu plus grande
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "${stage.year} - ${stage.entitled}",
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    maxLines: 2, // Permet au titre de s'afficher sur 2 lignes si besoin
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24), // Un divider plus espacé
+            _buildInternshipField(
+                stage.type == "U" ? "Université" : "Entreprise",
+                stage.type == "E" ? Icons.apartment : Icons.school,
+                Colors.green,
+                stage.company),
+            _buildInternshipField("Lieu", Icons.location_on, Colors.red,
+                "${stage.city}, ${stage.country}",
+                isItalic: true),
+            if (stage.startDate.isNotEmpty || stage.endDate.isNotEmpty)
+              _buildInternshipField("Période", Icons.calendar_today, Colors.blue,
+                  "${stage.startDate} au ${stage.endDate}"),
+            _buildInternshipField("Description", Icons.insert_drive_file,
+                Colors.grey, stage.description),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStageField(String label, IconData icon, Color color, String value, {bool isItalic = false}) {
+  Widget _buildInternshipField(String label, IconData icon, Color color, String value, {bool isItalic = false}) {
     if (value.isEmpty || value == ", ") return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
