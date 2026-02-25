@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 import '../../Model/alumnis.dart';
 import '../../Model/data/services/alumni_repository.dart';
+import 'package:flutter_application_ensicaentact/service_locator.dart';
 
 class DirectoryViewModel extends ChangeNotifier {
   final AlumniRepository _repository;
+
+  final Map<String, dynamic> user = sl<AuthService>().currentUser!;
   DirectoryViewModel({required AlumniRepository repository}) : _repository = repository;
 
   List<Alumnis> _allAlumnis = [];
@@ -14,6 +18,9 @@ class DirectoryViewModel extends ChangeNotifier {
 
   List<Alumnis> _filteredAlumnis = [];
   bool _isLoading = false;
+
+  bool _hasAccessError = false;
+  bool get hasAccessError => _hasAccessError;
 
   List<Alumnis> get alumnis => _filteredAlumnis;
   bool get isLoading => _isLoading;
@@ -42,6 +49,7 @@ class DirectoryViewModel extends ChangeNotifier {
 
   Future<void> loadAlumnis() async {
     _isLoading = true;
+    _hasAccessError = false;
     notifyListeners();
 
     try {
@@ -49,6 +57,10 @@ class DirectoryViewModel extends ChangeNotifier {
       _applyFilters();
     } catch (e) {
       print("Erreur ViewModel: $e");
+      String errorStr = e.toString().toLowerCase();
+      if (errorStr.contains("403") || errorStr.contains("401") || errorStr.contains("non autorisé")) {
+        _hasAccessError = true;
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

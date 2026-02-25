@@ -19,6 +19,9 @@ class CareerViewModel extends ChangeNotifier {
   bool get isAdmin => role == 'admin';
   bool get canAddOffer => isAdmin || role == 'alumni';
 
+  bool _hasAccessError = false;
+  bool get hasAccessError => _hasAccessError;
+
   List<Map<String, dynamic>> get internshipOffers {
     return _filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
   }
@@ -38,6 +41,7 @@ class CareerViewModel extends ChangeNotifier {
 
   Future<void> loadOffers() async {
     isLoadingOffers = true;
+    _hasAccessError = false;
     notifyListeners();
     
     try {
@@ -45,6 +49,10 @@ class CareerViewModel extends ChangeNotifier {
       allOffers = List<Map<String, dynamic>>.from(data);
     } catch (e) {
       debugPrint("Error loading offers: $e");
+      String errorStr = e.toString().toLowerCase();
+      if (errorStr.contains("403") || errorStr.contains("401") || errorStr.contains("non autorisé")) {
+        _hasAccessError = true;
+      }
       allOffers = [];
     } finally {
       isLoadingOffers = false;
@@ -54,6 +62,7 @@ class CareerViewModel extends ChangeNotifier {
 
   Future<void> loadCompanies() async {
     isLoadingCompanies = true;
+    _hasAccessError = false;
     notifyListeners();
     
     try {
@@ -61,6 +70,10 @@ class CareerViewModel extends ChangeNotifier {
       allCompanies = List<Map<String, dynamic>>.from(data);
     } catch (e) {
       debugPrint("Error loading companies: $e");
+      String errorStr = e.toString().toLowerCase();
+      if (errorStr.contains("403") || errorStr.contains("401") || errorStr.contains("non autorisé")) {
+        _hasAccessError = true;
+      }
       allCompanies = [];
     } finally {
       isLoadingCompanies = false;

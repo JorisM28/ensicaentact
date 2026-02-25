@@ -1,13 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'api_service.dart';
 
 class AuthService {
   final _storage = const FlutterSecureStorage();
+  final ApiService _api = ApiService();
+
   Map<String, dynamic>? currentUser;
   bool get isLoggedIn => currentUser!=null;
   bool get isAdmin => currentUser?['role'] == 'admin';
-
+  
   Future<void> saveSession(Map<String, dynamic> user, String token) async {
     currentUser = user;
     await _storage.write(key: 'jwt_token', value:token);

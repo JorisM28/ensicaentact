@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/admin/login_check.dart';
@@ -285,8 +284,15 @@ class _LoginState extends State<Login> {
       String role = userData['role'] ?? 'guest';
 
       if (role == 'admin' || role == 'student' || role == 'alumni') {
+        
+        // --- LA MAGIE EST ICI ✨ ---
+        // On récupère le token (ou on met un faux token si c'est Microsoft)
         String token = userData['token'] ?? 'microsoft_session_token';
+        
+        // On donne les infos au "Coffre-fort" pour qu'il garde la session active !
         await sl<AuthService>().saveSession(userData, token);
+        // ---------------------------
+
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage(user: userData!)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Connexion Impossible !"), backgroundColor: Colors.red));
