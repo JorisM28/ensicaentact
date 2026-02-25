@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'Model/data/services/auth_service.dart';
 import 'View/screens/home_page.dart';
 import '/service_locator.dart';
 import '/View/navigation.dart';
-import 'ViewModel/alumni/directory_view_model.dart';
+import '/ViewModel/alumni/directory_view_model.dart';
 
 
 void main() async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/View/widget/custom_app_bar.dart';
 import '/View/screens/admin/admin_validate_page.dart';
 import '/Model/core/theme/colors.dart';
 
@@ -11,11 +12,7 @@ class PageModeration extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Interface de Modération"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-      ),
+      appBar: CustomAppBar(),
      
       body: const AdminValidationPage(),
     );

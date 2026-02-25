@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
-import '../../common/company_card_widget.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
-import '../../common/error_pages.dart';
+
+import '../../widget/company_card_widget.dart';
+import '../../widget/error_pages.dart';
+import '/View/widget/custom_app_bar.dart';
+
 
 class CompaniesDirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -92,11 +95,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     final mapData = _getMapData();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Annuaire des Entreprises", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-      ),
+        appBar: CustomAppBar(),
       body: viewModel.isLoadingCompanies
           ? const Center(child: CircularProgressIndicator())
           : Column(

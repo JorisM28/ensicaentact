@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/View/screens/employment/companies_directory_page.dart';
 import 'package:flutter_application_ensicaentact/View/screens/event/event_page.dart';
 import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,14 +20,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(80);
 
-  Future<void> _ouvrirSiteEcole() async {
+  Future<void> _openSchoolWebsite() async {
     final Uri url = Uri.parse('https://www.ensicaen.fr');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       debugPrint('Impossible de lancer $url');
     }
   }
 
-  void _naviguer(BuildContext context, Widget page) {
+  void _navigate(BuildContext context, Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (c) => page));
   }
 
@@ -60,31 +61,32 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             if (isDesktop) ...[
               const Spacer(),
-              _buildMenuLink(context, "Accueil", () => _naviguer(context, HomePage(user: currentUser))),
-              _buildMenuLink(context, "Actualités", () => _naviguer(context, NewsPage(user: currentUser))),
-              _buildMenuLink(context, "Annuaire", () => _naviguer(context, DirectoryPage(user: currentUser))),
-              _buildMenuLink(context, "Evènements", () => _naviguer(context, EventPage(user: currentUser))),
-              _buildMenuLink(context, "Offres", () => _naviguer(context, JobPage(user: currentUser))),
-              _buildMenuLink(context, "ENSICAEN", _ouvrirSiteEcole),
+              _buildMenuLink(context, "Accueil", () => _navigate(context, HomePage(user: currentUser))),
+              _buildMenuLink(context, "Actualités", () => _navigate(context, NewsPage(user: currentUser))),
+              _buildMenuLink(context, "Annuaire", () => _navigate(context, DirectoryPage(user: currentUser))),
+              _buildMenuLink(context, "Evènements", () => _navigate(context, EventPage(user: currentUser))),
+              _buildMenuLink(context, "Cartes des entreprises", () => _navigate(context, CompaniesDirectoryPage(user: currentUser))),
+              _buildMenuLink(context, "Offres", () => _navigate(context, JobPage(user: currentUser))),
+              _buildMenuLink(context, "ENSICAEN", _openSchoolWebsite),
               const Spacer(),
 
               if (role == 'admin') ...[
                 _buildHeaderButton(Icons.admin_panel_settings, "Modération",
-                        () => _naviguer(context, PageModeration(user: user!))),
+                        () => _navigate(context, PageModeration(user: user!))),
               ],
 
               if (role == 'alumni' || role == 'student') ...[
                 _buildHeaderButton(
                     Icons.event_available,
                     "Proposer évènement",
-                        () => _naviguer(context, ProposeEventPage(user: user!))
+                        () => _navigate(context, ProposeEventPage(user: user!))
                 ),
                 if (role == 'alumni') ...[
                   const SizedBox(width: 10),
                   _buildHeaderButton(
                       Icons.thumb_up_alt_outlined,
                       "Rejoindre",
-                          () => _naviguer(context, JoinPage(user: user!))
+                          () => _navigate(context, JoinPage(user: user!))
                   ),
                 ],
               ],

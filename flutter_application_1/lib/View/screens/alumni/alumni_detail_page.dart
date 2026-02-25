@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../Model/alumnis.dart';
 import '../../../ViewModel/alumni/alumni_viewmodel.dart';
+import '/View/widget/custom_app_bar.dart';
 
 class AlumniDetailPage extends StatefulWidget {
   final Alumnis alumni;
@@ -52,22 +53,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     final bool isBig = screenWidth > 800;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(viewModel.isEdited ? "Modifier Alumni" : "${viewModel.currentAlumni.firstname} ${viewModel.currentAlumni.lastName}"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context, viewModel.modified),
-        ),
-        actions: [
-          if (isAdmin)
-            IconButton(
-              icon: Icon(viewModel.isEdited ? Icons.save : Icons.edit),
-              onPressed: () => viewModel.isEdited ? viewModel.save(context, widget.onSave) : viewModel.toggleEdit(),
-            ),
-        ],
-      ),
+        appBar: CustomAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
