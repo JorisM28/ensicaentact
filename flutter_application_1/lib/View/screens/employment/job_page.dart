@@ -3,6 +3,7 @@ import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/Model/core/theme/colors.dart';
 
+import '/View/widget/custom_app_bar.dart';
 class JobPage extends StatefulWidget {
   final Map<String, dynamic> user;
 
@@ -180,14 +181,7 @@ class _JobPageState extends State<JobPage> {
     final jobList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Carrières & Stages"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadRealOffers)
-        ],
-      ),
+        appBar: CustomAppBar(),
       body: Column(
         children: [
           Padding(

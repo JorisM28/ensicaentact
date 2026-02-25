@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
-import '../alumni/add_alumni.dart';
+import '/View/widget/custom_app_bar.dart';
+import '/Model/core/theme/colors.dart';
+import '/View/screens/alumni/add_alumni.dart';
 import 'package:flutter_application_ensicaentact/service_locator.dart';
 import 'package:flutter_application_ensicaentact/Model/data/services/alumni_repository.dart';
 
@@ -21,11 +22,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Demandes en attente"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-      ),
+      appBar: CustomAppBar(),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: sl<AlumniRepository>().getPendingRequests().then((list) => list.cast<Map<String, dynamic>>()),
         builder: (context, snapshot) {

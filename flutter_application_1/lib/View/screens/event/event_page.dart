@@ -3,6 +3,7 @@ import '/Model/core/theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
 
+import '/View/widget/custom_app_bar.dart';
 class EventPage extends StatefulWidget {
   final Map<String, dynamic> user;
   const EventPage({super.key, required this.user});
@@ -141,19 +142,7 @@ class _EventPageState extends State<EventPage> {
     ).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Agenda ENSICAEN"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
-          if (isAdmin)
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline), 
-              onPressed: () => _openFormEvent()
-            ),
-        ],
-      ),
+        appBar: CustomAppBar(),
       body: Column(
         children: [
           

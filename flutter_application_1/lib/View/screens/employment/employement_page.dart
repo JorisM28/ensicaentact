@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
 
+import '/View/widget/custom_app_bar.dart';
 class EmploymentPage extends StatefulWidget {
   final Map<String, dynamic> user;
   const EmploymentPage({super.key, required this.user});
@@ -50,12 +51,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Carrières & Stages"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-        actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: viewModel.loadOffers)],
-      ),
+        appBar: CustomAppBar(),
       body: Column(
         children: [
           Padding(

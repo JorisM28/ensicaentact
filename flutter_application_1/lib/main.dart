@@ -5,7 +5,7 @@ import 'View/screens/home_page.dart';
 
 import '/service_locator.dart';
 import '/View/navigation.dart';
-import 'ViewModel/alumni/directory_view_model.dart';
+import '/ViewModel/alumni/directory_view_model.dart';
 
 
 void main() async {

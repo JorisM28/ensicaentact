@@ -3,6 +3,7 @@ import '../../../Model/core/theme/colors.dart';
 import '../../widget/carte_entreprise_widget.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
 
+import '/View/widget/custom_app_bar.dart';
 class CompaniesDirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
   const CompaniesDirectoryPage({super.key, required this.user});
@@ -27,10 +28,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     final isWideScreen = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Annuaire des Entreprises", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: AppColors.ensiCyan,
-      ),
+        appBar: CustomAppBar(),
       body: viewModel.isLoadingCompanies
           ? const Center(child: CircularProgressIndicator())
           : isWideScreen
