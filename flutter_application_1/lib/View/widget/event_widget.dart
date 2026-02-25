@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '/Model/data/services/alumni_repository.dart';
+import '/service_locator.dart';
 import '/Model/core/theme/colors.dart';
 import '/View/screens/event/event_page.dart';
 
@@ -25,7 +27,7 @@ class _EventWidgetState extends State<EventWidget> {
   void _loadData() async {
     if (!mounted) return;
     try {
-      var data = await DatabaseService().getEvenements();
+      var data = await sl<AlumniRepository>().getEvents();
       if (mounted) setState(() { _events = data; _isLoading = false; });
     } catch (e) { if (mounted) setState(() => _isLoading = false); }
   }
@@ -42,7 +44,7 @@ class _EventWidgetState extends State<EventWidget> {
             onPressed: () async {
               Navigator.pop(ctx);
               int idToDelete = int.tryParse(item['id_event'].toString()) ?? 0;
-              bool success = await DatabaseService().supprimerEvenement(idToDelete);
+              bool success = await sl<AlumniRepository>().deleteEvent(idToDelete);
 
               if (success && mounted) {
                 setState(() {

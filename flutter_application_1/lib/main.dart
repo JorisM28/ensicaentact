@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 import 'View/screens/home_page.dart';
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
+import '/service_locator.dart';
+import '/View/navigation.dart';
+import 'ViewModel/alumni/directory_view_model.dart';
+
 
 void main() async {
   await dotenv.load(fileName: ".env");
+  WidgetsFlutterBinding.ensureInitialized();
+  setupLocator();
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => sl<DirectoryViewModel>()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+
+
   runApp(const MyApp());
 }
 

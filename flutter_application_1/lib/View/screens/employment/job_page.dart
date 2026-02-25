@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '/Model/data/services/alumni_repository.dart';
+import '/service_locator.dart';
 import '/Model/core/theme/colors.dart';
 
 class JobPage extends StatefulWidget {
@@ -26,7 +28,7 @@ class _JobPageState extends State<JobPage> {
 
   void _loadRealOffers() async {
     setState(() => _isLoading = true);
-    var data = await DatabaseService().getOffres();
+    var data = await sl<AlumniRepository>().getOffers();
     if (mounted) {
       setState(() {
         _everyOffer = data;
@@ -46,7 +48,7 @@ class _JobPageState extends State<JobPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              bool success = await DatabaseService().supprimerOffre(idOffre);
+              bool success = await sl<AlumniRepository>().deleteOffer(idOffre);
               if (success) {
                 _loadRealOffers();
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Offre supprimée.")));
@@ -129,9 +131,9 @@ class _JobPageState extends State<JobPage> {
                     bool success;
                     if (isEditing) {
                       dataToSend["id_offre"] = existingOffer['id_offre'].toString();
-                      success = await DatabaseService().modifierOffre(dataToSend);
+                      success = await sl<AlumniRepository>().addOffer(dataToSend);;
                     } else {
-                      success = await DatabaseService().ajouterOffre(dataToSend);
+                      success = await sl<AlumniRepository>().updateOffer(dataToSend);
                     }
 
                     if (success && mounted) {

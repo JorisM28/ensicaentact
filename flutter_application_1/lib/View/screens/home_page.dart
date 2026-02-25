@@ -13,6 +13,8 @@ import '/View/widget/job_offer_widget.dart';
 import '/View/widget/event_proposition_widget.dart';
 import '/View/widget/key_figures_widget.dart';
 import '/View/widget/custom_app_bar.dart';
+import '/service_locator.dart';
+import '/Model/data/services/alumni_repository.dart';
 
 class HomePage extends StatelessWidget {
   final Map<String, dynamic>? user;
@@ -231,7 +233,7 @@ class HomePage extends StatelessWidget {
             onPressed: () async {
               if (titleCtrl.text.isEmpty) return;
 
-              await DatabaseService().ajouterActualite({
+              await sl<AlumniRepository>().addNews({
                 "titre": titleCtrl.text,
                 "description": descCtrl.text,
                 "image": imgCtrl.text,
@@ -312,7 +314,7 @@ class HomePage extends StatelessWidget {
             onPressed: () async {
               if (titreCtrl.text.isEmpty) return;
 
-              await DatabaseService().proposerEvenement({ 
+              await sl<AlumniRepository>().addEvent({
                 "titre": titreCtrl.text,
                 "description": descCtrl.text,
                 "lieu": lieuCtrl.text,

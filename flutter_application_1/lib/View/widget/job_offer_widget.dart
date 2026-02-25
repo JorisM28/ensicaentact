@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '/Model/data/services/alumni_repository.dart';
+import '/service_locator.dart';
 import '/View/screens/employment/job_page.dart';
 
 class JobOfferWidget extends StatelessWidget {
@@ -27,7 +29,7 @@ class JobOfferWidget extends StatelessWidget {
           const SizedBox(height: 30),
 
           FutureBuilder<List<Map<String, dynamic>>>(
-            future: DatabaseService().getOffres(),
+            future: sl<AlumniRepository>().getOffers(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

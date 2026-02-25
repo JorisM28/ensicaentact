@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '/View/widget/custom_app_bar.dart';
+import '/Model/data/services/alumni_repository.dart';
+import '/service_locator.dart';
+
 
 class NewsPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -25,7 +28,7 @@ class _NewsPageState extends State<NewsPage> {
     if (!mounted) return;
     setState(() => _isLoading = true);
 
-    var dataNews = await DatabaseService().getActualites();
+    var dataNews = await sl<AlumniRepository>().getNews();
 
     if (mounted) {
       setState(() {
@@ -83,7 +86,7 @@ class _NewsPageState extends State<NewsPage> {
             onPressed: () async {
               Navigator.pop(ctx);
               int idToDelete = int.parse(item['id_actu'].toString());
-              bool success = await DatabaseService().supprimerActualite(idToDelete);
+              bool success = await sl<AlumniRepository>().deleteNews(idToDelete);
 
               if (success) {
                 _loadData();
@@ -139,7 +142,7 @@ class _NewsPageState extends State<NewsPage> {
 
               print("👤 Auteur ID envoyé : ${widget.user['id_user']}");
 
-              await DatabaseService().ajouterActualite({
+              await await sl<AlumniRepository>().addNews({
                 "titre": titleCtrl.text,
                 "contenu": contentCtrl.text,
                 "description": contentCtrl.text,

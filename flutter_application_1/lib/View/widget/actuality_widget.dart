@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '/Model/data/services/alumni_repository.dart';
+import '/service_locator.dart';
 import '/Model/core/theme/colors.dart';
 import '/View/screens/event/news_page.dart';
 
@@ -25,7 +27,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
   void _chargerDonnees() async {
     if (!mounted) return;
     try {
-      var data = await DatabaseService().getActualites();
+      var data = await sl<AlumniRepository>().getNews();
       if (mounted) {
         setState(() {
           _news = data;
@@ -57,7 +59,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
               }
 
 
-              bool success = await DatabaseService().supprimerActualite(rawId);
+              bool success = await sl<AlumniRepository>().deleteNews(rawId);
 
               if (success && mounted) {
                 setState(() {

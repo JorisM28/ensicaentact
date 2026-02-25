@@ -41,7 +41,7 @@ class CareerViewModel extends ChangeNotifier {
     notifyListeners();
     
     try {
-      final data = await sl<AlumniRepository>().getOffers({});
+      final data = await sl<AlumniRepository>().getOffers();
       allOffers = List<Map<String, dynamic>>.from(data);
     } catch (e) {
       debugPrint("Error loading offers: $e");
@@ -75,7 +75,7 @@ class CareerViewModel extends ChangeNotifier {
 
   Future<bool> deleteOffer(String idOffre) async {
     try {
-      await sl<AlumniRepository>().deleteOffer({'id_offre': idOffre});
+      await sl<AlumniRepository>().deleteOffer(idOffre);
       await loadOffers();
       return true;
     } catch (e) {

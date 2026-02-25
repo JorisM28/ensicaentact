@@ -63,7 +63,7 @@ class _EventPageState extends State<EventPage> {
             onPressed: () async {
               Navigator.pop(ctx);
               int id = int.parse(ev['id_event'].toString());
-              bool success = await DatabaseService().supprimerEvenement(id);
+              bool success = await sl<AlumniRepository>().deleteEvent(id);
               if (success) {
                 _loadData();
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Évènement supprimé")));
@@ -115,9 +115,9 @@ class _EventPageState extends State<EventPage> {
               bool success;
               if (isEdit) {
                 data["id_event"] = ev['id_event'].toString();
-                success = await DatabaseService().modifierEvenement(data);
+                success = await sl<AlumniRepository>().editEvent(data);
               } else {
-                success = await DatabaseService().ajouterEvenementDirect(data); 
+                success = await sl<AlumniRepository>().addEvent(data);
               }
 
               if (success) {

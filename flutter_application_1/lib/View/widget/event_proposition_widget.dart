@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '/Model/data/services/alumni_repository.dart';
 import '/Model/core/theme/colors.dart';
+import '/service_locator.dart';
 
 class ProposeEventPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -33,7 +35,7 @@ if (_formKey.currentState!.validate()) {
     };
 
   
-      bool succes = await DatabaseService().proposerEvenement(proposition);
+      bool succes = await sl<AlumniRepository>().requestEvent(proposition);
 
       if (succes && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
