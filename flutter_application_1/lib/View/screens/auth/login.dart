@@ -290,7 +290,7 @@ class _LoginState extends State<Login> {
       String role = userData['role'];
 
       if (role == 'admin' || role == 'student' || role == 'alumni') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage(user: userData!)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage(user: userData!)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connexion Impossible !"), backgroundColor: Colors.red));
       }

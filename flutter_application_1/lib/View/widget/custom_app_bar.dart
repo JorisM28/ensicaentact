@@ -60,7 +60,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             if (isDesktop) ...[
               const Spacer(),
-              _buildMenuLink(context, "Acceuil", () => _naviguer(context, HomePage(user: currentUser))),
+              _buildMenuLink(context, "Accueil", () => _naviguer(context, HomePage(user: currentUser))),
               _buildMenuLink(context, "Actualités", () => _naviguer(context, NewsPage(user: currentUser))),
               _buildMenuLink(context, "Annuaire", () => _naviguer(context, DirectoryPage(user: currentUser))),
               _buildMenuLink(context, "Evènements", () => _naviguer(context, EventPage(user: currentUser))),
