@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'Model/data/services/alumni_repository.dart';
 import 'ViewModel/alumni/directory_view_model.dart';
+import 'Model/data/services/auth_service.dart';
 
 final GetIt sl = GetIt.instance; // sl = Service Locator
 
@@ -10,4 +11,6 @@ void setupLocator() {
 
   // 2. ViewModels (Factory : une nouvelle instance à chaque appel)
   sl.registerFactory<DirectoryViewModel>(() => DirectoryViewModel(repository: sl()));
+
+  sl.registerLazySingleton<AuthService>(()=>AuthService());
 }

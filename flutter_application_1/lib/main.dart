@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 import 'package:flutter_application_ensicaentact/View/navigation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';  
 import 'View/screens/auth/login.dart';
@@ -13,6 +14,7 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupLocator();
+  await sl<AuthService>().loadSession();
   runApp(
     MultiProvider(
       providers: [
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
+    final bool isConnected = sl<AuthService>().isLoggedIn;
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
@@ -43,7 +45,7 @@ class MyApp extends StatelessWidget {
       ],
       title: 'Réseau Alumni',
       navigatorObservers: [routeObserver],
-      home: const PageAccueil(),
+      home: isConnected ?  const PageAccueil() : const Login(),
     );
   }
 }
@@ -84,6 +86,12 @@ class PageAccueil extends StatelessWidget {
                 );
               },
               child: const Text('Login'),
+            ),
+             ElevatedButton(
+              onPressed: () {
+                AuthService().logout();
+              },
+              child: const Text('virer moi ce token'),
             ),
             ElevatedButton(
               onPressed: () {

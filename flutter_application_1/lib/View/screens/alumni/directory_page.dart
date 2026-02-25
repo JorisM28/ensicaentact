@@ -10,6 +10,7 @@ import '../admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
 import '../../../service_locator.dart';
 import '../../../ViewModel/alumni/directory_view_model.dart';
+import '../../common/error_pages.dart';
 
 class DirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -28,6 +29,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   final ScrollController _scrollController = ScrollController();
 
   bool get isAdmin => widget.user['role'] == 'admin';
+
   @override
   void initState() {
     super.initState();
@@ -61,6 +63,15 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isWideScreen = screenWidth > 800;
+
+    if (viewModel.hasAccessError) {
+      return ErrorPage.forbidden(
+        onRetry: () {
+          viewModel.loadAlumnis();
+          if (isAdmin) viewModel.loadPendingRequestsCount();
+        },
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

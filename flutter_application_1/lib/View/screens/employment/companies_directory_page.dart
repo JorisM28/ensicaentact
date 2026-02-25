@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../common/carte_entreprise_widget.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
+import '../../common/error_pages.dart';
 
 class CompaniesDirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -26,16 +27,23 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 900;
 
+    if (viewModel.hasAccessError) {
+      return ErrorPage.forbidden(
+        onRetry: () => viewModel.loadCompanies(),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Annuaire des Entreprises", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.ensiCyan,
+        foregroundColor: Colors.white,
       ),
       body: viewModel.isLoadingCompanies
           ? const Center(child: CircularProgressIndicator())
           : isWideScreen
-          ? Row(children: [Expanded(flex: 2, child: _buildList()), const VerticalDivider(width: 1), Expanded(flex: 3, child: CarteEntrepriseWidget(companies: viewModel.allCompanies))])
-          : Column(children: [Expanded(flex: 2, child: _buildList()), const Divider(height: 1), Expanded(flex: 3, child: CarteEntrepriseWidget(companies: viewModel.allCompanies))]),
+          ? Row(children: [Expanded(flex: 2, child: _buildList()), const VerticalDivider(width: 1), Expanded(flex: 3, child: CompaniesMapWidget(companies: viewModel.allCompanies))])
+          : Column(children: [Expanded(flex: 2, child: _buildList()), const Divider(height: 1), Expanded(flex: 3, child: CompaniesMapWidget(companies: viewModel.allCompanies))]),
     );
   }
 

@@ -2,24 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class CarteEntrepriseWidget extends StatelessWidget {
+class CompaniesMapWidget extends StatelessWidget {
   final List<Map<String, dynamic>> companies;
+  
 
-  const CarteEntrepriseWidget({
+  const CompaniesMapWidget({
     super.key,
     required this.companies,
   });
 
   @override
   Widget build(BuildContext context) {
-    final validEntreprises = companies.where((e) {
+    final validCompanies = companies.where((e) {
       return e['latitude'] != null &&
           e['longitude'] != null &&
           double.tryParse(e['latitude'].toString()) != null &&
           double.tryParse(e['longitude'].toString()) != null;
     }).toList();
 
-    final markers = validEntreprises.map((e) {
+    final markers = validCompanies.map((e) {
       final lat = double.parse(e['latitude'].toString());
       final lng = double.parse(e['longitude'].toString());
 
@@ -44,7 +45,7 @@ class CarteEntrepriseWidget extends StatelessWidget {
     return FlutterMap(
       options: MapOptions(
         initialCenter: center,
-        initialZoom: validEntreprises.isNotEmpty ? 6 : 3,
+        initialZoom: validCompanies.isNotEmpty ? 6 : 3,
       ),
       children: [
         TileLayer(
