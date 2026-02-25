@@ -2,31 +2,31 @@ import 'package:flutter/material.dart';
 import '../colors.dart';
 import '../database_service.dart';
 
-class PageProposerEvenement extends StatefulWidget {
+class ProposeEventPage extends StatefulWidget {
   final Map<String, dynamic> user;
-  const PageProposerEvenement({super.key, required this.user});
+  const ProposeEventPage({super.key, required this.user});
 
   @override
-  State<PageProposerEvenement> createState() => _PageProposerEvenementState();
+  State<ProposeEventPage> createState() => _ProposeEventPageState();
 }
 
-class _PageProposerEvenementState extends State<PageProposerEvenement> {
+class _ProposeEventPageState extends State<ProposeEventPage> {
   final _formKey = GlobalKey<FormState>();
   
-  final _titreCtrl = TextEditingController();
-  final _lieuCtrl = TextEditingController();
-  final _descCtrl = TextEditingController();
-  String _typeSelectionne = 'Rencontre';
-  DateTime _dateSelectionnee = DateTime.now();
+  final _titleControlelr = TextEditingController();
+  final _placecontroller = TextEditingController();
+  final _descriptionController = TextEditingController();
+  String _selectedType = 'Rencontre';
+  DateTime _selectedDate = DateTime.now();
 
-  void _soumettreProposition() async {
+  void _submitPropose() async {
 if (_formKey.currentState!.validate()) {
     Map<String, dynamic> proposition = {
-      "titre": _titreCtrl.text,
-      "type": _typeSelectionne,
-      "date_event": _dateSelectionnee.toString(),
-      "lieu": _lieuCtrl.text,
-      "description": _descCtrl.text,
+      "titre": _titleControlelr.text,
+      "type": _selectedType,
+      "date_event": _selectedDate.toString(),
+      "lieu": _placecontroller.text,
+      "description": _descriptionController.text,
       "id_auteur": widget.user['id_user'],
       "nom_auteur": widget.user['nom'], 
       "prenom_auteur": widget.user['prenom'],
@@ -60,39 +60,39 @@ if (_formKey.currentState!.validate()) {
           child: Column(
             children: [
               TextFormField(
-                controller: _titreCtrl,
+                controller: _titleControlelr,
                 decoration: const InputDecoration(labelText: "Titre de l'évènement"),
                 validator: (v) => v!.isEmpty ? "Champ obligatoire" : null,
               ),
               const SizedBox(height: 15),
               DropdownButtonFormField<String>(
-                value: _typeSelectionne,
+                value: _selectedType,
                 items: ["Rencontre", "Conférence", "Afterwork", "Webinaire"]
                     .map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                onChanged: (v) => setState(() => _typeSelectionne = v!),
+                onChanged: (v) => setState(() => _selectedType = v!),
                 decoration: const InputDecoration(labelText: "Type"),
               ),
               const SizedBox(height: 15),
               ListTile(
-                title: Text("Date : ${_dateSelectionnee.day}/${_dateSelectionnee.month}/${_dateSelectionnee.year}"),
+                title: Text("Date : ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   DateTime? picked = await showDatePicker(
                     context: context,
-                    initialDate: _dateSelectionnee,
+                    initialDate: _selectedDate,
                     firstDate: DateTime.now(),
                     lastDate: DateTime(2030),
                   );
-                  if (picked != null) setState(() => _dateSelectionnee = picked);
+                  if (picked != null) setState(() => _selectedDate = picked);
                 },
               ),
               TextFormField(
-                controller: _lieuCtrl,
+                controller: _placecontroller,
                 decoration: const InputDecoration(labelText: "Lieu"),
               ),
               const SizedBox(height: 15),
               TextFormField(
-                controller: _descCtrl,
+                controller: _descriptionController,
                 maxLines: 4,
                 decoration: const InputDecoration(labelText: "Description détaillée"),
               ),
@@ -105,7 +105,7 @@ if (_formKey.currentState!.validate()) {
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.all(15)
                   ),
-                  onPressed: _soumettreProposition,
+                  onPressed: _submitPropose,
                   child: const Text("Envoyer la proposition", style: TextStyle(fontSize: 16)),
                 ),
               ),

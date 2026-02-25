@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../database_service.dart';
 import '../colors.dart';
-import '../page_actualités.dart';
+import '../news_page.dart';
 
 class ActualityWidget extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -14,7 +14,7 @@ class ActualityWidget extends StatefulWidget {
 }
 
 class _ActualityWidgetState extends State<ActualityWidget> {
-  List<Map<String, dynamic>> _actus = [];
+  List<Map<String, dynamic>> _news = [];
   bool _isLoading = true;
 
   @override
@@ -29,7 +29,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
       var data = await DatabaseService().getActualites();
       if (mounted) {
         setState(() {
-          _actus = data;
+          _news = data;
           _isLoading = false;
         });
       }
@@ -50,20 +50,20 @@ class _ActualityWidgetState extends State<ActualityWidget> {
             onPressed: () async {
               Navigator.pop(ctx);
 
-              // On récupère l'ID de façon sécurisée (String ou int)
+
               var rawId = item['id_actu'];
               if (rawId == null) {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur: ID introuvable")));
                 return;
               }
 
-              // DatabaseService gère maintenant le type dynamic
+
               bool success = await DatabaseService().supprimerActualite(rawId);
 
               if (success && mounted) {
                 setState(() {
-                  // On compare en convertissant tout en String pour être sûr
-                  _actus.removeWhere((element) => element['id_actu'].toString() == rawId.toString());
+
+                  _news.removeWhere((element) => element['id_actu'].toString() == rawId.toString());
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Actualité supprimée !"))
@@ -97,8 +97,8 @@ class _ActualityWidgetState extends State<ActualityWidget> {
   Widget build(BuildContext context) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
-    final displayList = _actus.take(2).toList();
-    bool estAdmin = widget.user['role'] == 'admin';
+    final displayList = _news.take(2).toList();
+    bool isAdmin = widget.user['role'] == 'admin';
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -108,14 +108,14 @@ class _ActualityWidgetState extends State<ActualityWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (estAdmin && widget.onAddPress != null) ...[
+              if (isAdmin && widget.onAddPress != null) ...[
                 const Spacer(),
               ],
               const Text(
                 "ACTUALITÉS",
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.ensiCyan),
               ),
-              if (estAdmin && widget.onAddPress != null) ...[
+              if (isAdmin && widget.onAddPress != null) ...[
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.add_circle, color: AppColors.ensiCyan, size: 24),
@@ -135,11 +135,11 @@ class _ActualityWidgetState extends State<ActualityWidget> {
               : Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: _buildAdaptiveCard(displayList[0], estAdmin)),
+              Expanded(child: _buildAdaptiveCard(displayList[0], isAdmin)),
               const SizedBox(width: 20),
               Expanded(
                 child: displayList.length > 1
-                    ? _buildAdaptiveCard(displayList[1], estAdmin)
+                    ? _buildAdaptiveCard(displayList[1], isAdmin)
                     : const SizedBox(),
               ),
             ],
@@ -149,7 +149,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
         const SizedBox(height: 20),
 
         OutlinedButton(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PageActualites(user: widget.user))),
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NewsPage(user: widget.user))),
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Color(0xFFE30613)),
             backgroundColor: Colors.white,
@@ -175,11 +175,11 @@ class _ActualityWidgetState extends State<ActualityWidget> {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DetailsPageNewspaper(item: item))),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NewspaperDetailsPage(item: item))),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image
+
             Stack(
               children: [
                 Container(

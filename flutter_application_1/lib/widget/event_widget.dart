@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../database_service.dart';
 import '../colors.dart';
-import '../page_évènements.dart';
+import '../event_page.dart';
 
 class EventWidget extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -20,10 +20,10 @@ class _EventWidgetState extends State<EventWidget> {
   @override
   void initState() {
     super.initState();
-    _chargerDonnees();
+    _loadData();
   }
 
-  void _chargerDonnees() async {
+  void _loadData() async {
     if (!mounted) return;
     try {
       var data = await DatabaseService().getEvenements();
@@ -31,7 +31,7 @@ class _EventWidgetState extends State<EventWidget> {
     } catch (e) { if (mounted) setState(() => _isLoading = false); }
   }
 
-  void _confirmerSuppression(Map<String, dynamic> item) {
+  void _confirmDeletion(Map<String, dynamic> item) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -75,7 +75,7 @@ class _EventWidgetState extends State<EventWidget> {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     final displayList = _events.take(3).toList();
-    bool estAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = widget.user['role'] == 'admin';
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -85,14 +85,14 @@ class _EventWidgetState extends State<EventWidget> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (estAdmin && widget.onAddPress != null) ...const [
+            if (isAdmin && widget.onAddPress != null) ...const [
               const Spacer(),
             ],
             const Text(
             "ÉVÈNEMENTS",
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.ensiCyan),
             ),
-            if (estAdmin && widget.onAddPress != null) ...[
+            if (isAdmin && widget.onAddPress != null) ...[
             const Spacer(),
             IconButton(
               icon: const Icon(Icons.add_circle, color: AppColors.ensiCyan, size: 24),
@@ -110,7 +110,7 @@ class _EventWidgetState extends State<EventWidget> {
               : SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
-              children: displayList.map((item) => _buildEventCard(item, estAdmin)).toList(),
+              children: displayList.map((item) => _buildEventCard(item, isAdmin)).toList(),
             ),
           ),
         ),
@@ -118,7 +118,7 @@ class _EventWidgetState extends State<EventWidget> {
         const SizedBox(height: 20),
 
         OutlinedButton(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PageEvenements(user: widget.user))),
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(user: widget.user))),
           style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFFE30613)),
               backgroundColor: Colors.white
@@ -148,7 +148,7 @@ class _EventWidgetState extends State<EventWidget> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DetailsEvenementPage(item: item),
+              builder: (context) => DetailEventPage(item: item),
             ),
           );
         },
@@ -171,7 +171,7 @@ class _EventWidgetState extends State<EventWidget> {
         trailing: estAdmin
             ? IconButton(
           icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-          onPressed: () => _confirmerSuppression(item),
+          onPressed: () => _confirmDeletion(item),
         )
             : const Icon(Icons.arrow_forward_ios, size: 14),
       ),

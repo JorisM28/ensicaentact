@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/profileBadge.dart';
+import 'package:flutter_application_ensicaentact/profil_badge.dart';
 import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';

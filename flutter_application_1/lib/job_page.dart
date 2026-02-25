@@ -2,41 +2,41 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'database_service.dart';
 
-class PageEmploi extends StatefulWidget {
+class JobPage extends StatefulWidget {
   final Map<String, dynamic> user;
 
-  const PageEmploi({super.key, required this.user});
+  const JobPage({super.key, required this.user});
 
   @override
-  State<PageEmploi> createState() => _PageEmploiState();
+  State<JobPage> createState() => _JobPageState();
 }
 
-class _PageEmploiState extends State<PageEmploi> {
+class _JobPageState extends State<JobPage> {
   
-  List<Map<String, dynamic>> _toutesLesOffres = [];
+  List<Map<String, dynamic>> _everyOffer = [];
   bool _isLoading = true;
 
-  String _recherche = "";
+  String _search = "";
   final TextEditingController _searchCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _chargerLesVraiesOffres();
+    _loadRealOffers();
   }
 
-  void _chargerLesVraiesOffres() async {
+  void _loadRealOffers() async {
     setState(() => _isLoading = true);
     var data = await DatabaseService().getOffres();
     if (mounted) {
       setState(() {
-        _toutesLesOffres = data;
+        _everyOffer = data;
         _isLoading = false;
       });
     }
   }
 
-  void _confirmerSuppression(String idOffre) {
+  void _confirmDeletion(String idOffre) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -49,7 +49,7 @@ class _PageEmploiState extends State<PageEmploi> {
               Navigator.pop(ctx);
               bool success = await DatabaseService().supprimerOffre(idOffre);
               if (success) {
-                _chargerLesVraiesOffres();
+                _loadRealOffers();
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Offre supprimée.")));
               }
             },
@@ -60,24 +60,24 @@ class _PageEmploiState extends State<PageEmploi> {
     );
   }
 
-  void _ouvrirFormulaire({Map<String, dynamic>? offreExistante, required bool isStage, required Color couleur}) {
-    final bool estModification = offreExistante != null;
+  void _ouvrirFormulaire({Map<String, dynamic>? existingOffer, required bool isInternship, required Color color}) {
+    final bool isEditing = existingOffer != null;
 
-    final titreCtrl = TextEditingController(text: estModification ? offreExistante['titre'] : "");
-    final entCtrl = TextEditingController(text: estModification ? offreExistante['entreprise'] : "");
-    final villeCtrl = TextEditingController(text: estModification ? offreExistante['ville'] : "");
-    final emailCtrl = TextEditingController(text: estModification ? offreExistante['contact_email'] : "");
-    final descCtrl = TextEditingController(text: estModification ? offreExistante['description'] : "");
+    final titreCtrl = TextEditingController(text: isEditing ? existingOffer['titre'] : "");
+    final entCtrl = TextEditingController(text: isEditing ? existingOffer['entreprise'] : "");
+    final villeCtrl = TextEditingController(text: isEditing ? existingOffer['ville'] : "");
+    final emailCtrl = TextEditingController(text: isEditing ? existingOffer['contact_email'] : "");
+    final descCtrl = TextEditingController(text: isEditing ? existingOffer['description'] : "");
     
-    // Type par défaut
-    String typeSelect = estModification ? (offreExistante['type'] ?? 'CDI') : (isStage ? 'Stage' : 'CDI');
     
-    final List<String> typesPossibles = isStage 
+    String typeSelect = isEditing ? (existingOffer['type'] ?? 'CDI') : (isInternship ? 'Stage' : 'CDI');
+    
+    final List<String> possibleTypes = isInternship 
         ? ['Stage'] 
         : ['CDI', 'CDD', 'Alternance', 'Freelance', 'Intérim'];
 
-    if (!typesPossibles.contains(typeSelect)) {
-      typeSelect = typesPossibles.first;
+    if (!possibleTypes.contains(typeSelect)) {
+      typeSelect = possibleTypes.first;
     }
 
     showDialog(
@@ -85,7 +85,7 @@ class _PageEmploiState extends State<PageEmploi> {
       builder: (context) => StatefulBuilder(
         builder: (context, setStateDialog) {
           return AlertDialog(
-            title: Text(estModification ? "Modifier l'offre" : (isStage ? "Nouveau Stage" : "Nouvel Emploi")),
+            title: Text(isEditing ? "Modifier l'offre" : (isInternship ? "Nouveau Stage" : "Nouvel Emploi")),
             content: SizedBox(
               width: 400,
               child: SingleChildScrollView(
@@ -98,7 +98,7 @@ class _PageEmploiState extends State<PageEmploi> {
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: typeSelect,
-                      items: typesPossibles.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                      items: possibleTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                       onChanged: (v) => setStateDialog(() => typeSelect = v!),
                       decoration: const InputDecoration(labelText: "Type"),
                     ),
@@ -111,7 +111,7 @@ class _PageEmploiState extends State<PageEmploi> {
             actions: [
               TextButton(onPressed: () => Navigator.pop(context), child: const Text("Annuler")),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: couleur, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(backgroundColor: color, foregroundColor: Colors.white),
                 onPressed: () async { 
                   if (titreCtrl.text.isNotEmpty && entCtrl.text.isNotEmpty) {
                     
@@ -128,8 +128,8 @@ class _PageEmploiState extends State<PageEmploi> {
                     };
 
                     bool success;
-                    if (estModification) {
-                      dataToSend["id_offre"] = offreExistante['id_offre'].toString();
+                    if (isEditing) {
+                      dataToSend["id_offre"] = existingOffer['id_offre'].toString();
                       success = await DatabaseService().modifierOffre(dataToSend);
                     } else {
                       success = await DatabaseService().ajouterOffre(dataToSend);
@@ -137,9 +137,9 @@ class _PageEmploiState extends State<PageEmploi> {
 
                     if (success && mounted) {
                       Navigator.pop(context); 
-                      _chargerLesVraiesOffres();
+                      _loadRealOffers();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(estModification ? "Offre modifiée !" : "Offre publiée !"))
+                        SnackBar(content: Text(isEditing ? "Offre modifiée !" : "Offre publiée !"))
                       );
                     } else {
                        ScaffoldMessenger.of(context).showSnackBar(
@@ -148,7 +148,7 @@ class _PageEmploiState extends State<PageEmploi> {
                     }
                   }
                 },
-                child: Text(estModification ? "Enregistrer" : "Publier"),
+                child: Text(isEditing ? "Enregistrer" : "Publier"),
               ),
             ],
           );
@@ -162,21 +162,21 @@ class _PageEmploiState extends State<PageEmploi> {
     String role = widget.user['role'] ?? 'guest';
     
 
-    String monId = (widget.user['id_user'] ?? widget.user['id'] ?? '0').toString();
+    String myId = (widget.user['id_user'] ?? widget.user['id'] ?? '0').toString();
     
     bool isAdmin = (role == 'admin');
-    bool estAlumni = (role == 'alumni');
-    bool peutAjouter = (isAdmin || estAlumni);
+    bool isAlumni = (role == 'alumni');
+    bool canAdd = (isAdmin || isAlumni);
 
-    final offresFiltrees = _toutesLesOffres.where((o) {
+    final filteredOffers = _everyOffer.where((o) {
       final titre = (o['titre'] ?? '').toLowerCase();
-      final entreprise = (o['entreprise'] ?? '').toLowerCase();
-      final motCle = _recherche.toLowerCase();
-      return titre.contains(motCle) || entreprise.contains(motCle);
+      final companies = (o['entreprise'] ?? '').toLowerCase();
+      final keyWord = _search.toLowerCase();
+      return titre.contains(keyWord) || companies.contains(keyWord);
     }).toList();
 
-    final listeStages = offresFiltrees.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
-    final listeEmplois = offresFiltrees.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
+    final internshipList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
+    final jobList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -184,12 +184,11 @@ class _PageEmploiState extends State<PageEmploi> {
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _chargerLesVraiesOffres)
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadRealOffers)
         ],
       ),
       body: Column(
         children: [
-          // Barre de recherche
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: TextField(
@@ -198,15 +197,15 @@ class _PageEmploiState extends State<PageEmploi> {
                 labelText: "Rechercher (Poste, Entreprise...)",
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                suffixIcon: _recherche.isNotEmpty 
-                  ? IconButton(icon: const Icon(Icons.clear), onPressed: () => setState(() { _searchCtrl.clear(); _recherche = ""; })) 
+                suffixIcon: _search.isNotEmpty 
+                  ? IconButton(icon: const Icon(Icons.clear), onPressed: () => setState(() { _searchCtrl.clear(); _search = ""; })) 
                   : null,
               ),
-              onChanged: (val) => setState(() => _recherche = val),
+              onChanged: (val) => setState(() => _search = val),
             ),
           ),
 
-          // Colonnes Stages / Emplois
+          
           Expanded(
             child: _isLoading 
             ? const Center(child: CircularProgressIndicator())
@@ -216,10 +215,10 @@ class _PageEmploiState extends State<PageEmploi> {
                     child: _buildColonne(
                       titre: "Offres d'Emploi",
                       couleur: Colors.blue[800]!,
-                      liste: listeEmplois,
+                      liste: jobList,
                       isStage: false,
-                      peutAjouter: peutAjouter,
-                      monId: monId, // On passe l'ID connecté
+                      canAdd: canAdd,
+                      monId: myId, 
                       isAdmin: isAdmin
                     ),
                   ),
@@ -228,10 +227,10 @@ class _PageEmploiState extends State<PageEmploi> {
                     child: _buildColonne(
                       titre: "Offres de Stage",
                       couleur: Colors.orange[800]!,
-                      liste: listeStages,
+                      liste: internshipList,
                       isStage: true,
-                      peutAjouter: peutAjouter,
-                      monId: monId, // On passe l'ID connecté
+                      canAdd: canAdd,
+                      monId: myId, 
                       isAdmin: isAdmin
                     ),
                   ),
@@ -248,13 +247,12 @@ class _PageEmploiState extends State<PageEmploi> {
     required Color couleur,
     required List<Map<String, dynamic>> liste,
     required bool isStage,
-    required bool peutAjouter,
+    required bool canAdd,
     required String monId,
     required bool isAdmin,
   }) {
     return Column(
       children: [
-        // En-tête colonne
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(15),
@@ -266,7 +264,6 @@ class _PageEmploiState extends State<PageEmploi> {
           ),
         ),
 
-        // Liste des offres
         Expanded(
           child: liste.isEmpty
               ? const Center(child: Text("Aucune offre trouvée", style: TextStyle(color: Colors.grey)))
@@ -277,13 +274,13 @@ class _PageEmploiState extends State<PageEmploi> {
                     final offre = liste[index];
                     
                    
-                    String idAuteurOffre = (offre['id_auteur'] ?? '').toString();
+                    String idOfferAuthor = (offre['id_auteur'] ?? '').toString();
                     
                
-                    bool estMonOffre = (idAuteurOffre == monId);
+                    bool isMyOffer = (idOfferAuthor == monId);
                     
                 
-                    bool aLeDroit = isAdmin || estMonOffre;
+                    bool can = isAdmin || isMyOffer;
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 10),
@@ -301,27 +298,27 @@ class _PageEmploiState extends State<PageEmploi> {
                               ),
                           ],
                         ),
-                        onTap: () => _voirDetail(offre),
+                        onTap: () => _seeDetail(offre),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                             if (!aLeDroit)
+                             if (!can)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(color: couleur.withOpacity(0.1), borderRadius: BorderRadius.circular(5)),
                                 child: Text(offre['type'] ?? '', style: TextStyle(fontSize: 10, color: couleur, fontWeight: FontWeight.bold)),
                               ),
 
-                            // --- BOUTONS VISIBLES UNIQUEMENT SI C'EST MON OFFRE OU SI JE SUIS ADMIN ---
-                            if (aLeDroit) ...[
+                            
+                            if (can) ...[
                               IconButton(
                                 icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
-                                onPressed: () => _ouvrirFormulaire(offreExistante: offre, isStage: isStage, couleur: couleur),
+                                onPressed: () => _ouvrirFormulaire(existingOffer: offre, isInternship: isStage, color: couleur),
                                 tooltip: "Modifier",
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                                onPressed: () => _confirmerSuppression(offre['id_offre'].toString()),
+                                onPressed: () => _confirmDeletion(offre['id_offre'].toString()),
                                 tooltip: "Supprimer",
                               ),
                             ]
@@ -333,8 +330,8 @@ class _PageEmploiState extends State<PageEmploi> {
                 ),
         ),
 
-        // Bouton Ajouter en bas
-        if (peutAjouter)
+        
+        if (canAdd)
           Padding(
             padding: const EdgeInsets.all(15),
             child: SizedBox(
@@ -347,7 +344,7 @@ class _PageEmploiState extends State<PageEmploi> {
                 ),
                 icon: const Icon(Icons.add),
                 label: Text(isStage ? "Ajouter un Stage" : "Ajouter un Emploi"),
-                onPressed: () => _ouvrirFormulaire(isStage: isStage, couleur: couleur),
+                onPressed: () => _ouvrirFormulaire(isInternship: isStage, color: couleur),
               ),
             ),
           ),
@@ -355,7 +352,7 @@ class _PageEmploiState extends State<PageEmploi> {
     );
   }
 
-  void _voirDetail(Map<String, dynamic> offre) {
+  void _seeDetail(Map<String, dynamic> offre) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

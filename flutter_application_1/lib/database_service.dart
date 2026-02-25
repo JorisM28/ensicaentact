@@ -121,7 +121,7 @@ class DatabaseService {
   }
 
 
-  Future<List<Alumnis>> getTousLesEleves() async {
+  Future<List<Alumnis>> getEveryStudent() async {
     final res = await _get("get_alumni.php");
     if (res is List) {
       return res.map((item) => Alumnis.fromMap(item)).toList();

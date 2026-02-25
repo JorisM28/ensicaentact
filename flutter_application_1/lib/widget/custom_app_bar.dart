@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/page_%C3%A9v%C3%A8nements.dart';
-import 'package:flutter_application_ensicaentact/page_accueil.dart';
+import 'package:flutter_application_ensicaentact/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../colors.dart';
-import '../page_actualités.dart';
-import '../page_annuaire.dart';
-import '../page_emploi.dart';
-import '../page_moderation.dart';
-import '../page_rejoindre.dart';
-import '../profileBadge.dart';
+import '../news_page.dart';
+import '../directory_page.dart';
+import '../job_page.dart';
+import '../moderation_page.dart';
+import '../join_page.dart';
+import '../profil_badge.dart';
 import '../widget/event_proposition_widget.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -46,7 +46,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               onTap: () {
                 Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => PageAccueil(user: currentUser,))
+                    MaterialPageRoute(builder: (context) => HomePage(user: currentUser,))
                 );
               },
               child: Row(
@@ -60,12 +60,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             if (isDesktop) ...[
               const Spacer(),
-              _buildLienMenu(context, "Acceuil", () => _naviguer(context, PageAccueil(user: currentUser))),
-              _buildLienMenu(context, "Actualités", () => _naviguer(context, PageActualites(user: currentUser))),
-              _buildLienMenu(context, "Annuaire", () => _naviguer(context, PageAnnuaire(user: currentUser))),
-              _buildLienMenu(context, "Evènements", () => _naviguer(context, PageEvenements(user: currentUser))),
-              _buildLienMenu(context, "Offres", () => _naviguer(context, PageEmploi(user: currentUser))),
-              _buildLienMenu(context, "ENSICAEN", _ouvrirSiteEcole),
+              _buildMenuLink(context, "Acceuil", () => _naviguer(context, HomePage(user: currentUser))),
+              _buildMenuLink(context, "Actualités", () => _naviguer(context, NewsPage(user: currentUser))),
+              _buildMenuLink(context, "Annuaire", () => _naviguer(context, DirectoryPage(user: currentUser))),
+              _buildMenuLink(context, "Evènements", () => _naviguer(context, PageEvenements(user: currentUser))),
+              _buildMenuLink(context, "Offres", () => _naviguer(context, JobPage(user: currentUser))),
+              _buildMenuLink(context, "ENSICAEN", _ouvrirSiteEcole),
               const Spacer(),
 
               if (role == 'admin') ...[
@@ -77,14 +77,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 _buildHeaderButton(
                     Icons.event_available,
                     "Proposer évènement",
-                        () => _naviguer(context, PageProposerEvenement(user: user!))
+                        () => _naviguer(context, ProposeEventPage(user: user!))
                 ),
                 if (role == 'alumni') ...[
                   const SizedBox(width: 10),
                   _buildHeaderButton(
                       Icons.thumb_up_alt_outlined,
                       "Rejoindre",
-                          () => _naviguer(context, PageRejoindre(user: user!))
+                          () => _naviguer(context, JoinPage(user: user!))
                   ),
                 ],
               ],
@@ -130,7 +130,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  Widget _buildLienMenu(BuildContext context, String titre, VoidCallback action) {
+  Widget _buildMenuLink(BuildContext context, String titre, VoidCallback action) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: TextButton(

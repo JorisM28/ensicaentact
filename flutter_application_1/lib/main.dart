@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'page_accueil.dart'; 
+import 'home_page.dart'; 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
 
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       
       debugShowCheckedModeBanner: false,
       title: 'Alumni EnsiCaen',
-      home: PageAccueil(),
+      home: HomePage(),
     );
   }
 }

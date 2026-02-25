@@ -39,7 +39,7 @@ class _AdminPageState extends State<AdminPage> {
         ],
       ),
       body: FutureBuilder<List<Alumnis>>(
-        future: _dbService.getTousLesEleves(),
+        future: _dbService.getEveryStudent(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -65,7 +65,7 @@ class _AdminPageState extends State<AdminPage> {
                     backgroundColor: AppColors.ensiCyan,
                     child: Text(eleve.prenom.isNotEmpty ? eleve.prenom[0] : "?", style: const TextStyle(color: Colors.white)),
                   ),
-                  title: Text("${eleve.nomComplet} (Promo ${eleve.promo})"),
+                  title: Text("${eleve.fullName} (Promo ${eleve.promo})"),
                   subtitle: Text(eleve.job),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),

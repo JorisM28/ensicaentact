@@ -2,33 +2,33 @@ import 'package:flutter/material.dart';
 import '../colors.dart';
 import '../database_service.dart';
 
-class PageEvenements extends StatefulWidget {
+class EventPage extends StatefulWidget {
   final Map<String, dynamic> user;
-  const PageEvenements({super.key, required this.user});
+  const EventPage({super.key, required this.user});
 
   @override
-  State<PageEvenements> createState() => _PageEvenementsState();
+  State<EventPage> createState() => _EventPageState();
 }
 
-class _PageEvenementsState extends State<PageEvenements> {
-  List<Map<String, dynamic>> _evenements = [];
+class _EventPageState extends State<EventPage> {
+  List<Map<String, dynamic>> _event = [];
   bool _isLoading = true;
-  String _recherche = "";
+  String _search = "";
 
   @override
   void initState() {
     super.initState();
-    _chargerDonnees();
+    _loadData();
   }
 
-  // Chargement des données
-  void _chargerDonnees() async {
+  
+  void _loadData() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
     var data = await DatabaseService().getEvenements();    
     if (mounted) {
       setState(() {
-        _evenements = data;
+        _event = data;
         _isLoading = false;
       });
     }
@@ -50,7 +50,7 @@ class _PageEvenementsState extends State<PageEvenements> {
   }
 
 
-  void _confirmerSuppression(Map<String, dynamic> ev) {
+  void _confirmDeletion(Map<String, dynamic> ev) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -64,7 +64,7 @@ class _PageEvenementsState extends State<PageEvenements> {
               int id = int.parse(ev['id_event'].toString());
               bool success = await DatabaseService().supprimerEvenement(id);
               if (success) {
-                _chargerDonnees();
+                _loadData();
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Évènement supprimé")));
               }
             },
@@ -75,7 +75,7 @@ class _PageEvenementsState extends State<PageEvenements> {
     );
   }
 
-  void _ouvrirFormulaireEvent([Map<String, dynamic>? ev]) {
+  void _openFormEvent([Map<String, dynamic>? ev]) {
     final bool isEdit = ev != null;
     final titleCtrl = TextEditingController(text: isEdit ? ev['titre'] : "");
     final lieuCtrl = TextEditingController(text: isEdit ? ev['lieu'] : "");
@@ -121,7 +121,7 @@ class _PageEvenementsState extends State<PageEvenements> {
 
               if (success) {
                 Navigator.pop(ctx);
-                _chargerDonnees();
+                _loadData();
               }
             },
             child: const Text("Enregistrer"),
@@ -133,10 +133,10 @@ class _PageEvenementsState extends State<PageEvenements> {
 
   @override
   Widget build(BuildContext context) {
-    bool estAdmin = widget.user['role'] == 'admin';
-    final evFiltres = _evenements.where((e) => 
-      (e['titre'] ?? '').toLowerCase().contains(_recherche.toLowerCase()) ||
-      (e['lieu'] ?? '').toLowerCase().contains(_recherche.toLowerCase())
+    bool isAdmin = widget.user['role'] == 'admin';
+    final evFiltres = _event.where((e) => 
+      (e['titre'] ?? '').toLowerCase().contains(_search.toLowerCase()) ||
+      (e['lieu'] ?? '').toLowerCase().contains(_search.toLowerCase())
     ).toList();
 
     return Scaffold(
@@ -145,17 +145,17 @@ class _PageEvenementsState extends State<PageEvenements> {
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _chargerDonnees),
-          if (estAdmin)
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
+          if (isAdmin)
             IconButton(
               icon: const Icon(Icons.add_circle_outline), 
-              onPressed: () => _ouvrirFormulaireEvent()
+              onPressed: () => _openFormEvent()
             ),
         ],
       ),
       body: Column(
         children: [
-          // Barre de recherche
+          
           Padding(
             padding: const EdgeInsets.all(10),
             child: TextField(
@@ -164,7 +164,7 @@ class _PageEvenementsState extends State<PageEvenements> {
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              onChanged: (v) => setState(() => _recherche = v),
+              onChanged: (v) => setState(() => _search = v),
             ),
           ),
 
@@ -183,11 +183,11 @@ class _PageEvenementsState extends State<PageEvenements> {
                         child: InkWell(
                           onTap: () => Navigator.push(
                             context, 
-                            MaterialPageRoute(builder: (context) => DetailsEvenementPage(item: ev)),
+                            MaterialPageRoute(builder: (context) => DetailEventPage(item: ev)),
                           ),
                           child: Row(
                             children: [
-                              // Bloc Date
+                              
                               Container(
                                 width: 80, height: 100,
                                 decoration: BoxDecoration(
@@ -217,15 +217,15 @@ class _PageEvenementsState extends State<PageEvenements> {
                                 ),
                               ),
                               
-                              // ACTIONS ADMIN : EDITER & SUPPRIMER
-                              if (estAdmin) ...[
+                              
+                              if (isAdmin) ...[
                                 IconButton(
                                   icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                                  onPressed: () => _ouvrirFormulaireEvent(ev),
+                                  onPressed: () => _openFormEvent(ev),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                                  onPressed: () => _confirmerSuppression(ev),
+                                  onPressed: () => _confirmDeletion(ev),
                                 ),
                               ] else 
                                 const Icon(Icons.chevron_right, color: Colors.grey),
@@ -244,9 +244,9 @@ class _PageEvenementsState extends State<PageEvenements> {
   }
 }
 
-class DetailsEvenementPage extends StatelessWidget {
+class DetailEventPage extends StatelessWidget {
   final Map<String, dynamic> item;
-  const DetailsEvenementPage({super.key, required this.item});
+  const DetailEventPage({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {

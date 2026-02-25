@@ -80,7 +80,7 @@ class Alumnis {
     required this.stages,
   });
 
-  String get nomComplet => "${decede == 1 ? "† " : ""}$prenom $nom";
+  String get fullName => "${decede == 1 ? "† " : ""}$prenom $nom";
 
   factory Alumnis.fromMap(Map<String, dynamic> map) {
     var listStages = map['stages'] as List<dynamic>?;

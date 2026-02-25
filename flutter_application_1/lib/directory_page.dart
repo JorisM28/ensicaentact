@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'profileBadge.dart';
+import 'profil_badge.dart';
 import 'colors.dart';
 import 'alumnis.dart';
 import 'database_service.dart';
 import 'filtre_widget.dart';
 import 'alumni_detail_page.dart'; 
-import 'AdminValidatePage.dart';
+import 'admin_validate_page.dart';
 import 'alumni_preview.dart';
 import 'add_alumni.dart'; 
 import 'navigation.dart';
-import 'profileBadge.dart';
-import 'page_moderation.dart';
+import 'profil_badge.dart';
+import 'moderation_page.dart';
 
 void main() {
-  runApp(const MonReseauAlumni());
+  runApp(const MyAlumniNetwork());
 }
 
-class MonReseauAlumni extends StatelessWidget {
-  const MonReseauAlumni({super.key});
+class MyAlumniNetwork extends StatelessWidget {
+  const MyAlumniNetwork({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,39 +32,39 @@ class MonReseauAlumni extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primaryColor: AppColors.ensiCyan),
-      home: const PageAnnuaire(user: userConnecte),
+      home: const DirectoryPage(user: userConnecte),
     );
   }
 }
 
-class PageAnnuaire extends StatefulWidget {
+class DirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
 
-  const PageAnnuaire({
+  const DirectoryPage({
     super.key,
     required this.user, 
   });
 
   @override
-  State<PageAnnuaire> createState() => _PageAnnuaireState();
+  State<DirectoryPage> createState() => _DirectoryPageState();
 }
 
-class _PageAnnuaireState extends State<PageAnnuaire> with RouteAware{
-  Alumnis? _eleveSelectionne;
+class _DirectoryPageState extends State<DirectoryPage> with RouteAware{
+  Alumnis? _studentSelected;
   final ScrollController _scrollController = ScrollController();
-  List<Alumnis> _tousLesAlumnis = [];
-  List<Alumnis> _alumnisAffiches = [];
-  bool _filtresOuverts = false;
-  int _nbDemandesEnAttente = 0;
+  List<Alumnis> _allAlumni = [];
+  List<Alumnis> _displayAlumni = [];
+  bool _openFilter = false;
+  int _numberWaitingRequest = 0;
   
-  final Set<String> _filtresPromoSelectionnes = {};
-  final Set<String> _filtresFiliereSelectionnes = {};
-  final Set<String> _filtresPaysStageSelectionnes = {};
+  final Set<String> _selectedPromoFilters = {};
+  final Set<String> _selectedSectorFilters = {};
+  final Set<String> _selectedInternshipCountryFilters = {};
   
-  bool _chargementEnCours = true;
+  bool _loading = true;
   final TextEditingController _searchController = TextEditingController();
 
-  bool get estAdmin => widget.user['role'] == 'admin';
+  bool get IsAdmin => widget.user['role'] == 'admin';
 @override
 void didChangeDependencies() {
   super.didChangeDependencies();
@@ -79,32 +79,32 @@ void dispose() {
   @override
   void initState() {
     super.initState();
-    _chargerDonneesInitiales();
-    if (widget.user['role'] == 'admin' || estAdmin) { // Adapte selon ta logique admin
-      _chargerCompteurNotifs();
+    _loadInitialData();
+    if (widget.user['role'] == 'admin' || IsAdmin) { // Adapte selon ta logique admin
+      _loadNotificationCounter();
     }
   }
   @override
 void didPopNext() {
-  _chargerDonneesInitiales();
+  _loadInitialData();
 }
 
-  List<String> get _promosDisponibles {
-    final promos = _tousLesAlumnis
+  List<String> get _availablePromo {
+    final promo = _allAlumni
         .map((e) => e.promo.toString())
         .where((e) => e != "0" && e.isNotEmpty)
         .toSet()
         .toList();
-    promos.sort();
-    return promos;
+    promo.sort();
+    return promo;
   }
 
-  Future<void> _chargerCompteurNotifs() async {
+  Future<void> _loadNotificationCounter() async {
     try {
-      var demandes = await DatabaseService().getDemandesEnAttente();
+      var request = await DatabaseService().getDemandesEnAttente();
       if (mounted) {
         setState(() {
-          _nbDemandesEnAttente = demandes.length;
+          _numberWaitingRequest = request.length;
         });
       }
     } catch (e) {
@@ -112,111 +112,111 @@ void didPopNext() {
     }
   }
 
-  List<String> get _filieresDisponibles {
-    final filieres = _tousLesAlumnis
+  List<String> get _availableSectors {
+    final sectors = _allAlumni
         .map((e) => e.filiere)
         .where((e) => e.isNotEmpty)
         .toSet()
         .toList();
-    filieres.sort();
-    return filieres;
+    sectors.sort();
+    return sectors;
   }
 
-  List<String> get _paysStageDisponibles {
-    final Set<String> paysTrouves = {};
-    for (var alumni in _tousLesAlumnis) {
-      for (var stage in alumni.stages) {
-        if (stage.pays.isNotEmpty && stage.pays != "Non renseigné") {
-          paysTrouves.add(stage.pays);
+  List<String> get _availableInternshipCountries {
+    final Set<String> foundCountries = {};
+    for (var alumni in _allAlumni) {
+      for (var internship in alumni.stages) {
+        if (internship.pays.isNotEmpty && internship.pays != "Non renseigné") {
+          foundCountries.add(internship.pays);
         }
       }
     }
-    final listeTriee = paysTrouves.toList();
-    listeTriee.sort();
-    return listeTriee;
+    final sortedList = foundCountries.toList();
+    sortedList.sort();
+    return sortedList;
   }
 
-  void _chargerDonneesInitiales() async {
+  void _loadInitialData() async {
     print("rechargement de la page");
     try {
-        var donnees = await DatabaseService().getTousLesEleves();
+        var data = await DatabaseService().getEveryStudent();
       
       if (!mounted) return;
 
       setState(() {
-        _tousLesAlumnis = donnees;
-        _alumnisAffiches = donnees;
-        _chargementEnCours = false;
+        _allAlumni = data;
+        _displayAlumni = data;
+        _loading = false;
         
         if (_searchController.text.isNotEmpty || 
-            _filtresPromoSelectionnes.isNotEmpty || 
-            _filtresFiliereSelectionnes.isNotEmpty ||
-            _filtresPaysStageSelectionnes.isNotEmpty) {
+            _selectedPromoFilters.isNotEmpty || 
+            _selectedSectorFilters.isNotEmpty ||
+            _selectedInternshipCountryFilters.isNotEmpty) {
             
-            _filtrerResultats(_searchController.text); 
+            _filterResult(_searchController.text); 
         }
       });
     } catch (e) {
       print("Erreur de chargement : $e");
-      if (mounted) setState(() => _chargementEnCours = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  void _filtrerResultats(String recherche) {
-    List<Alumnis> resultats = _tousLesAlumnis;
+  void _filterResult(String search) {
+    List<Alumnis> result = _allAlumni;
 
-    if (recherche.isNotEmpty) {
-      resultats = resultats.where((eleve) {
-        final nomLower = eleve.nomComplet.toLowerCase();
-        final jobLower = eleve.job.toLowerCase();
-        final entrepriseLower = eleve.entreprise.toLowerCase();
-        final queryLower = recherche.toLowerCase();
-        return nomLower.contains(queryLower) ||
+    if (search.isNotEmpty) {
+      result = result.where((student) {
+        final lowerName = student.fullName.toLowerCase();
+        final jobLower = student.job.toLowerCase();
+        final companyLower = student.entreprise.toLowerCase();
+        final queryLower = search.toLowerCase();
+        return lowerName.contains(queryLower) ||
             jobLower.contains(queryLower) ||
-            entrepriseLower.contains(queryLower);
+            companyLower.contains(queryLower);
       }).toList();
     }
 
-    if (_filtresPromoSelectionnes.isNotEmpty) {
-      resultats = resultats.where((e) => _filtresPromoSelectionnes.contains(e.promo.toString())).toList();
+    if (_selectedPromoFilters.isNotEmpty) {
+      result = result.where((e) => _selectedPromoFilters.contains(e.promo.toString())).toList();
     }
-    if (_filtresFiliereSelectionnes.isNotEmpty) {
-      resultats = resultats.where((e) => _filtresFiliereSelectionnes.contains(e.filiere)).toList();
+    if (_selectedSectorFilters.isNotEmpty) {
+      result = result.where((e) => _selectedSectorFilters.contains(e.filiere)).toList();
     }
-    if (_filtresPaysStageSelectionnes.isNotEmpty) {
-      resultats = resultats.where((eleve) {
+    if (_selectedInternshipCountryFilters.isNotEmpty) {
+      result = result.where((eleve) {
         for (var stage in eleve.stages) {
-          if (_filtresPaysStageSelectionnes.contains(stage.pays)) return true;
+          if (_selectedInternshipCountryFilters.contains(stage.pays)) return true;
         }
         return false;
       }).toList();
     }
 
     setState(() {
-      _alumnisAffiches = resultats;
-      if (_eleveSelectionne != null && !resultats.contains(_eleveSelectionne)) {
-        _eleveSelectionne = null;
+      _displayAlumni = result;
+      if (_studentSelected != null && !result.contains(_studentSelected)) {
+        _studentSelected = null;
       }
     });
   }
 
-  Widget _boutonFiltre() {
+  Widget _buttonFilter() {
   return Container(
     margin: const EdgeInsets.only(left: 10),
     decoration: BoxDecoration(
-      color: _filtresOuverts ? AppColors.ensiCyan : Colors.white,
+      color: _openFilter ? AppColors.ensiCyan : Colors.white,
       borderRadius: BorderRadius.circular(10),
       border: Border.all(color: Colors.grey.shade300),
     ),
     child: IconButton(
       icon: Icon(
-        _filtresOuverts ? Icons.filter_list_off : Icons.filter_list,
-        color: _filtresOuverts ? Colors.white : Colors.grey[700],
+        _openFilter ? Icons.filter_list_off : Icons.filter_list,
+        color: _openFilter ? Colors.white : Colors.grey[700],
       ),
-      tooltip: _filtresOuverts ? "Masquer les filtres" : "Afficher les filtres",
+      tooltip: _openFilter ? "Masquer les filtres" : "Afficher les filtres",
       onPressed: () {
         setState(() {
-          _filtresOuverts = !_filtresOuverts;
+          _openFilter = !_openFilter;
         });
       },
     ),
@@ -234,7 +234,7 @@ void didPopNext() {
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
-          if (estAdmin)
+          if (IsAdmin)
             IconButton(
               icon: const Icon(Icons.history),
               tooltip: "Historique des actions",
@@ -243,7 +243,7 @@ void didPopNext() {
           ProfileBadge(user: widget.user),
         ],
       ),
-      floatingActionButton: estAdmin 
+      floatingActionButton: IsAdmin 
           ? Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -258,14 +258,14 @@ void didPopNext() {
                       MaterialPageRoute(builder: (context) => PageModeration(user: widget.user)),
                     ).then((_) {
                       // IMPORTANT : Quand on revient de la page, on rafraîchit le compteur
-                      _chargerCompteurNotifs();
-                      _chargerDonneesInitiales();
+                      _loadNotificationCounter();
+                      _loadInitialData();
                     });
                   },
                   // LE WIDGET BADGE EST ICI
                   child: Badge(
-                    label: Text('$_nbDemandesEnAttente'), // Le chiffre
-                    isLabelVisible: _nbDemandesEnAttente > 0, // Caché si 0
+                    label: Text('$_numberWaitingRequest'), // Le chiffre
+                    isLabelVisible: _numberWaitingRequest > 0, // Caché si 0
                     backgroundColor: Colors.red, // Pastille rouge
                     textColor: Colors.white,
                     // L'icône originale est l'enfant du Badge
@@ -286,12 +286,12 @@ void didPopNext() {
             ) 
           : null,
 
-      body: _chargementEnCours
+      body: _loading
           ? const Center(child: CircularProgressIndicator())
           : CallbackShortcuts(
               bindings: {
-                const SingleActivator(LogicalKeyboardKey.arrowDown): () => _changerSelectionClavier(1, _alumnisAffiches),
-                const SingleActivator(LogicalKeyboardKey.arrowUp): () => _changerSelectionClavier(-1, _alumnisAffiches),
+                const SingleActivator(LogicalKeyboardKey.arrowDown): () => _changerSelectionClavier(1, _displayAlumni),
+                const SingleActivator(LogicalKeyboardKey.arrowUp): () => _changerSelectionClavier(-1, _displayAlumni),
               },
               child: Focus(
                 autofocus: true,
@@ -305,9 +305,9 @@ void didPopNext() {
                               children: [
                                 SizedBox(width: 400, child: _champRecherche()),
                                 const Padding(padding: EdgeInsets.all(15)),
-                                _boutonFiltre(),
+                                _buttonFilter(),
                                 const Padding(padding: EdgeInsets.all(15)),
-                                if (_filtresOuverts) 
+                                if (_openFilter) 
                                   Expanded(
                                     child: _construireFiltres()
                                   ),
@@ -322,11 +322,11 @@ void didPopNext() {
                               Row(
                                 children: [
                                   Expanded(child: _champRecherche()),
-                                  _boutonFiltre(),
+                                  _buttonFilter(),
                                 ],
                               ),
                               
-                              if (_filtresOuverts) ...[
+                              if (_openFilter) ...[
                                 const SizedBox(height: 15),
                                 _construireFiltres(),
                               ]
@@ -342,14 +342,14 @@ void didPopNext() {
                             flex: 2,
                             child: Container(
                               color: Colors.white,
-                              child: _alumnisAffiches.isEmpty
+                              child: _displayAlumni.isEmpty
                                   ? const Center(child: Text("Aucun résultat"))
                                   : ListView.builder(
                                       controller: _scrollController,
-                                      itemCount: _alumnisAffiches.length,
+                                      itemCount: _displayAlumni.length,
                                       padding: const EdgeInsets.all(10),
                                       itemBuilder: (context, index) {
-                                        final eleve = _alumnisAffiches[index];
+                                        final eleve = _displayAlumni[index];
                                         return _carteEleve(context, eleve, estGrandEcran);
                                       },
                                     ),
@@ -359,9 +359,9 @@ void didPopNext() {
                             const VerticalDivider(width: 1),
                             Expanded(
                               flex: 2,
-                              child: _eleveSelectionne == null
+                              child: _studentSelected == null
                                   ? _vueParDefaut()
-                                  : AlumniPreview(alumni: _eleveSelectionne!, user: widget.user), 
+                                  : AlumniPreview(alumni: _studentSelected!, user: widget.user), 
                             ),
                           ]
                         ],
@@ -376,28 +376,28 @@ void didPopNext() {
 
   Widget _construireFiltres() {
     return ZoneFiltres(
-      promosDisponibles: _promosDisponibles,
-      promosSelectionnees: _filtresPromoSelectionnes,
+      promosDisponibles: _availablePromo,
+      promosSelectionnees: _selectedPromoFilters,
       onPromoChanged: (promo, estCoche) {
         setState(() {
-          estCoche ? _filtresPromoSelectionnes.add(promo) : _filtresPromoSelectionnes.remove(promo);
-          _filtrerResultats(_searchController.text);
+          estCoche ? _selectedPromoFilters.add(promo) : _selectedPromoFilters.remove(promo);
+          _filterResult(_searchController.text);
         });
       },
-      filieresDisponibles: _filieresDisponibles,
-      filieresSelectionnees: _filtresFiliereSelectionnes,
+      filieresDisponibles: _availableSectors,
+      filieresSelectionnees: _selectedSectorFilters,
       onFiliereChanged: (filiere, estCoche) {
         setState(() {
-          estCoche ? _filtresFiliereSelectionnes.add(filiere) : _filtresFiliereSelectionnes.remove(filiere);
-          _filtrerResultats(_searchController.text);
+          estCoche ? _selectedSectorFilters.add(filiere) : _selectedSectorFilters.remove(filiere);
+          _filterResult(_searchController.text);
         });
       },
-      paysStageDisponibles: _paysStageDisponibles,
-      paysStageSelectionnees: _filtresPaysStageSelectionnes,
+      paysStageDisponibles: _availableInternshipCountries,
+      paysStageSelectionnees: _selectedInternshipCountryFilters,
       onPaysStageChanged: (pays, estCoche) {
         setState(() {
-          estCoche ? _filtresPaysStageSelectionnes.add(pays) : _filtresPaysStageSelectionnes.remove(pays);
-          _filtrerResultats(_searchController.text);
+          estCoche ? _selectedInternshipCountryFilters.add(pays) : _selectedInternshipCountryFilters.remove(pays);
+          _filterResult(_searchController.text);
         });
       },
     );
@@ -406,7 +406,7 @@ void didPopNext() {
   Widget _champRecherche() {
     return TextField(
       controller: _searchController,
-      onChanged: (value) => _filtrerResultats(value),
+      onChanged: (value) => _filterResult(value),
       decoration: InputDecoration(
         hintText: "Recherche...",
         prefixIcon: const Icon(Icons.search),
@@ -415,7 +415,7 @@ void didPopNext() {
                 icon: const Icon(Icons.clear),
                 onPressed: () {
                   _searchController.clear();
-                  _filtrerResultats('');
+                  _filterResult('');
                   FocusScope.of(context).unfocus();
                 },
               )
@@ -428,10 +428,10 @@ void didPopNext() {
   }
 
   Widget _carteEleve(BuildContext context, Alumnis eleve, bool estGrandEcran) {
-    final estSelectionne = eleve == _eleveSelectionne;
+    final estSelectionne = eleve == _studentSelected;
     void ouvrirDetail() {
       if (estGrandEcran) {
-        setState(() => _eleveSelectionne = eleve);
+        setState(() => _studentSelected = eleve);
       } else {
         Navigator.push(
           context,
@@ -441,7 +441,7 @@ void didPopNext() {
             }, ),
           ),
         ).then((resultat) {
-            _chargerDonneesInitiales();
+            _loadInitialData();
         });
       }
     }
@@ -476,7 +476,7 @@ void didPopNext() {
                   children: [
                     Text.rich(
                       TextSpan(
-                        text: eleve.nomComplet,
+                        text: eleve.fullName,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
                         children: [
                           if (eleve.promo != 0)
@@ -529,7 +529,7 @@ void didPopNext() {
                 label: const Text("Voir", style: TextStyle(fontSize: 12)),
               ),
 
-              if (estAdmin) 
+              if (IsAdmin) 
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () => _confirmerSuppression(eleve),
@@ -567,7 +567,7 @@ void didPopNext() {
             isAdmin: true,
             onSuccess: () {
               Navigator.pop(context);
-              _chargerDonneesInitiales();
+              _loadInitialData();
             },
           ),
         ),
@@ -580,7 +580,7 @@ void didPopNext() {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Supprimer ?"),
-        content: Text("Veux-tu vraiment supprimer ${eleve.nomComplet} ?"),
+        content: Text("Veux-tu vraiment supprimer ${eleve.fullName} ?"),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Non")),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Oui")),
@@ -592,14 +592,14 @@ void didPopNext() {
       await DatabaseService().supprimerEleve(eleve.nom, eleve.prenom);
       
       setState(() {
-        _alumnisAffiches.removeWhere((e) => e.id == eleve.id);
-        _tousLesAlumnis.removeWhere((e) => e.id == eleve.id);
-        if (_eleveSelectionne?.id == eleve.id) {
-          _eleveSelectionne = null;
+        _displayAlumni.removeWhere((e) => e.id == eleve.id);
+        _allAlumni.removeWhere((e) => e.id == eleve.id);
+        if (_studentSelected?.id == eleve.id) {
+          _studentSelected = null;
         }
       });
       
-      _chargerDonneesInitiales(); 
+      _loadInitialData(); 
     }
   }
 
@@ -637,18 +637,18 @@ void didPopNext() {
 
   void _changerSelectionClavier(int direction, List<Alumnis> liste) {
     if (liste.isEmpty) return;
-    if (_eleveSelectionne == null) {
-      setState(() => _eleveSelectionne = liste.first);
+    if (_studentSelected == null) {
+      setState(() => _studentSelected = liste.first);
       return;
     }
-    int indexActuel = liste.indexOf(_eleveSelectionne!);
+    int indexActuel = liste.indexOf(_studentSelected!);
     if (indexActuel == -1) {
-      setState(() => _eleveSelectionne = liste.first);
+      setState(() => _studentSelected = liste.first);
       return;
     }
     int nouvelIndex = indexActuel + direction;
     if (nouvelIndex >= 0 && nouvelIndex < liste.length) {
-      setState(() => _eleveSelectionne = liste[nouvelIndex]);
+      setState(() => _studentSelected = liste[nouvelIndex]);
       if (_scrollController.hasClients) {
         double positionCible = nouvelIndex * 90.0;
         _scrollController.animateTo(

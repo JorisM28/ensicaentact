@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'page_emploi.dart';
-import 'page_annuaire.dart';
-import 'page_actualités.dart';
-import 'page_moderation.dart';
+import 'job_page.dart';
+import 'directory_page.dart';
+import 'news_page.dart';
+import 'moderation_page.dart';
 import 'add_alumni.dart';
 import 'colors.dart';
 import 'database_service.dart';
@@ -15,11 +15,11 @@ import 'widget/event_proposition_widget.dart';
 import 'widget/key_figures_widget.dart';
 import 'widget/custom_app_bar.dart';
 
-class PageAccueil extends StatelessWidget {
+class HomePage extends StatelessWidget {
   final Map<String, dynamic>? user;
 
 
-  const PageAccueil({super.key, this.user});
+  const HomePage({super.key, this.user});
 
   final Color contentColor = const Color(0xFFF8F9FA);
 
@@ -37,16 +37,8 @@ class PageAccueil extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isDesktop = MediaQuery.of(context).size.width > 900;
-    // TEST POUR VERIFIER LES FONCTIONALITES.
     final Map<String, dynamic> currentUser = user ?? {};
-    //final Map<String, dynamic> userTest = {
-    //  'id_user': '2',
-    //  'role': 'admin',
-    //  'name': 'Admin',
-    //  'family_name': 'Test',
-    //  'email': 'admin@test.fr',
-    //};
-    //final Map<String, dynamic> currentUser = user ?? userTest;
+    
     final String role = currentUser['role'] ?? 'guest';
 
     return Scaffold(
@@ -101,7 +93,7 @@ class PageAccueil extends StatelessWidget {
               flex: 2,
               child: ActualityWidget(
                 user: user,
-                onAddPress: () => _afficherDialogAjoutActu(context),
+                onAddPress: () => _showAddNewsDialog(context),
               ),
             ),
 
@@ -111,7 +103,7 @@ class PageAccueil extends StatelessWidget {
               flex: 1,
               child: EventWidget(
                 user: user,
-                onAddPress: () => _afficherDialogAjoutEvent(context, user),
+                onAddPress: () => _showAddEventDialog(context, user),
               ),
             ),
           ],
@@ -134,7 +126,7 @@ class PageAccueil extends StatelessWidget {
           padding: const EdgeInsets.all(15),
           child: ActualityWidget(
             user: user,
-            onAddPress: () => _afficherDialogAjoutActu(context),
+            onAddPress: () => _showAddNewsDialog(context),
           ),
         ),
 
@@ -151,7 +143,7 @@ class PageAccueil extends StatelessWidget {
           padding: const EdgeInsets.all(15),
           child: EventWidget(
             user: user,
-            onAddPress: () => _afficherDialogAjoutEvent(context, user)
+            onAddPress: () => _showAddEventDialog(context, user)
           ),
         ),
       ],
@@ -178,14 +170,14 @@ class PageAccueil extends StatelessWidget {
               ),
             ),
           ),
-          ListTile(leading: const Icon(Icons.newspaper), title: const Text("Actualités"), onTap: () => _naviguer(context, PageActualites(user: user ?? {}))),
-          ListTile(leading: const Icon(Icons.people), title: const Text("Annuaire"), onTap: () => _naviguer(context, PageAnnuaire(user: user ?? {}))),
-          ListTile(leading: const Icon(Icons.work), title: const Text("Offres"), onTap: () => _naviguer(context, PageEmploi(user: user ?? {}))),
+          ListTile(leading: const Icon(Icons.newspaper), title: const Text("Actualités"), onTap: () => _naviguer(context, NewsPage(user: user ?? {}))),
+          ListTile(leading: const Icon(Icons.people), title: const Text("Annuaire"), onTap: () => _naviguer(context, DirectoryPage(user: user ?? {}))),
+          ListTile(leading: const Icon(Icons.work), title: const Text("Offres"), onTap: () => _naviguer(context, JobPage(user: user ?? {}))),
           ListTile(leading: const Icon(Icons.school), title: const Text("Site École"), onTap: _ouvrirSiteEcole),
 
           if (user != null && (user!['role'] == 'student' || user!['role'] == 'alumni')) ...[
             const Divider(),
-            ListTile(leading: const Icon(Icons.event), title: const Text("Proposer un évènement"), onTap: () => _naviguer(context, PageProposerEvenement(user: user ?? {}))),
+            ListTile(leading: const Icon(Icons.event), title: const Text("Proposer un évènement"), onTap: () => _naviguer(context, ProposeEventPage(user: user ?? {}))),
             if (user!['role'] == 'alumni') ...[
               ListTile(leading: const Icon(Icons.thumb_up), title: const Text("Rejoindre"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => Scaffold(appBar: AppBar(title: const Text("Rejoindre"), backgroundColor: AppColors.ensiCyan), body: AddAlumniForm(onSuccess: () => Navigator.pop(c)))))),
             ],
@@ -210,7 +202,7 @@ class PageAccueil extends StatelessWidget {
   }
 
 
-  void _afficherDialogAjoutActu(BuildContext context) {
+  void _showAddNewsDialog(BuildContext context) {
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez vous connecter pour publier une actualité.")),
@@ -244,12 +236,12 @@ class PageAccueil extends StatelessWidget {
                 "titre": titleCtrl.text,
                 "description": descCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": user!['id_user'] ?? "0", // Ici on peut utiliser ! car on a vérifié null au début de la fonction
+                "auteur_id": user!['id_user'] ?? "0",
               });
 
               Navigator.pop(ctx);
 
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => PageAccueil(user: user)));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => HomePage(user: user)));
             },
             child: const Text("Publier"),
           ),
@@ -258,7 +250,7 @@ class PageAccueil extends StatelessWidget {
     );
   }
 
-  void _afficherDialogAjoutEvent(BuildContext context, Map<String, dynamic> currentUser) {
+  void _showAddEventDialog(BuildContext context, Map<String, dynamic> currentUser) {
     final titreCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final lieuCtrl = TextEditingController();
@@ -282,7 +274,7 @@ class PageAccueil extends StatelessWidget {
                 onTap: () async {
                   FocusScope.of(context).requestFocus(FocusNode());
 
-                  // 1. Sélectionner la Date
+                  
                   DateTime? pickedDate = await showDatePicker(
                     context: context,
                     initialDate: DateTime.now(),
@@ -321,7 +313,7 @@ class PageAccueil extends StatelessWidget {
             onPressed: () async {
               if (titreCtrl.text.isEmpty) return;
 
-              await DatabaseService().proposerEvenement({ // Ou une fonction ajouterEvenementDirectement si tu en as une pour admin
+              await DatabaseService().proposerEvenement({ 
                 "titre": titreCtrl.text,
                 "description": descCtrl.text,
                 "lieu": lieuCtrl.text,
@@ -331,7 +323,7 @@ class PageAccueil extends StatelessWidget {
               });
 
               Navigator.pop(ctx);
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => PageAccueil(user: currentUser)));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => HomePage(user: currentUser)));
             },
             child: const Text("Publier"),
           ),

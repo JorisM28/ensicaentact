@@ -3,35 +3,35 @@ import '../colors.dart';
 import 'widget/custom_app_bar.dart';
 import '../database_service.dart';
 
-class PageActualites extends StatefulWidget {
+class NewsPage extends StatefulWidget {
   final Map<String, dynamic> user;
-  const PageActualites({super.key, required this.user});
+  const NewsPage({super.key, required this.user});
 
   @override
-  State<PageActualites> createState() => _PageActualitesState();
+  State<NewsPage> createState() => _NewsPageState();
 }
 
-class _PageActualitesState extends State<PageActualites> {
-  List<Map<String, dynamic>> _actus = [];
+class _NewsPageState extends State<NewsPage> {
+  List<Map<String, dynamic>> _news = [];
   bool _isLoading = true;
-  String _recherche = "";
+  String _search = "";
   final TextEditingController _searchCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _chargerDonnees();
+    _loadData();
   }
 
-  void _chargerDonnees() async {
+  void _loadData() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
 
-    var dataActus = await DatabaseService().getActualites();
+    var dataNews = await DatabaseService().getActualites();
 
     if (mounted) {
       setState(() {
-        _actus = dataActus;
+        _news = dataNews;
         _isLoading = false;
       });
     }
@@ -70,7 +70,7 @@ class _PageActualitesState extends State<PageActualites> {
     );
   }
 
-  void _confirmerSuppression(BuildContext context, Map<String, dynamic> item) {
+  void _confirmDeletion(BuildContext context, Map<String, dynamic> item) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -88,7 +88,7 @@ class _PageActualitesState extends State<PageActualites> {
               bool success = await DatabaseService().supprimerActualite(idToDelete);
 
               if (success) {
-                _chargerDonnees();
+                _loadData();
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Article supprimé."))
@@ -103,9 +103,9 @@ class _PageActualitesState extends State<PageActualites> {
     );
   }
 
-  void _afficherDialogAjout(BuildContext context) {
+  void _showAddDialog(BuildContext context) {
     final titleCtrl = TextEditingController();
-    final contentCtrl = TextEditingController(); // Renommé pour plus de clarté
+    final contentCtrl = TextEditingController();
     final imgCtrl = TextEditingController();
 
     showDialog(
@@ -138,7 +138,7 @@ class _PageActualitesState extends State<PageActualites> {
             onPressed: () async {
               if (titleCtrl.text.isEmpty) return;
 
-              // Debug : Vérifier l'ID utilisateur
+
               print("👤 Auteur ID envoyé : ${widget.user['id_user']}");
 
               await DatabaseService().ajouterActualite({
@@ -146,13 +146,13 @@ class _PageActualitesState extends State<PageActualites> {
                 "contenu": contentCtrl.text,
                 "description": contentCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": widget.user['id_user'] ?? "1", // Mettre "1" par défaut plutôt que "0" si "0" n'existe pas en DB
-                "tag": "NEWS", // Ajout d'un tag par défaut si nécessaire
-                "date_publi": DateTime.now().toIso8601String(), // Parfois le PHP attend la date venant du client
+                "auteur_id": widget.user['id_user'] ?? "1",
+                "tag": "NEWS",
+                "date_publi": DateTime.now().toIso8601String(),
               });
 
               Navigator.pop(ctx);
-              _chargerDonnees();
+              _loadData();
             },
             child: const Text("Publier"),
           ),
@@ -163,23 +163,23 @@ class _PageActualitesState extends State<PageActualites> {
 
   @override
   Widget build(BuildContext context) {
-    final actusFiltrees = _actus.where((a) =>
-        (a['titre'] ?? '').toLowerCase().contains(_recherche.toLowerCase())).toList();
-    bool estAdmin = widget.user['role'] == 'admin';
+    final actusFiltrees = _news.where((a) =>
+        (a['titre'] ?? '').toLowerCase().contains(_search.toLowerCase())).toList();
+    bool isAdmin = widget.user['role'] == 'admin';
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppBar(),
-      floatingActionButton: estAdmin
+      floatingActionButton: isAdmin
           ? FloatingActionButton(
         backgroundColor: const Color(0xFF1A1A1A),
         child: const Icon(Icons.edit_note, color: Colors.white),
-        onPressed: () => _afficherDialogAjout(context),
+        onPressed: () => _showAddDialog(context),
       )
           : null,
       body: Column(
         children: [
-          if (_recherche.isNotEmpty || actusFiltrees.length != _actus.length)
+          if (_search.isNotEmpty || actusFiltrees.length != _news.length)
             _buildSearchBar(),
           Expanded(
             child: _isLoading
@@ -202,7 +202,7 @@ class _PageActualitesState extends State<PageActualites> {
         border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black12)),
         focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
       ),
-      onChanged: (v) => setState(() => _recherche = v),
+      onChanged: (v) => setState(() => _search = v),
     ),
   );
 
@@ -237,7 +237,7 @@ class _PageActualitesState extends State<PageActualites> {
     Widget imagePart = _buildImage(imageUrl, height: isMobile ? 250 : 350);
 
     return InkWell(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailsPageNewspaper(item: item))),
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => NewspaperDetailsPage(item: item))),
       child: isMobile
           ? Column(children: [textPart, const SizedBox(height: 20), imagePart])
           : Row(
@@ -301,7 +301,7 @@ class _PageActualitesState extends State<PageActualites> {
     );
 
     return InkWell(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailsPageNewspaper(item: item))),
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => NewspaperDetailsPage(item: item))),
       child: content,
     );
   }
@@ -323,33 +323,33 @@ class _PageActualitesState extends State<PageActualites> {
           child: Divider(color: Colors.black26, thickness: 1),
         ));
 
-        List<Map<String, dynamic>> restants = liste.sublist(1);
+        List<Map<String, dynamic>> remaining = liste.sublist(1);
 
-        for (int i = 0; i < restants.length; i += 2) {
+        for (int i = 0; i < remaining.length; i += 2) {
           if (isMobile) {
-            feedWidgets.add(_buildSecondaryArticle(restants[i], isFullWidth: true, isMobile: true));
-            if (i + 1 < restants.length) {
+            feedWidgets.add(_buildSecondaryArticle(remaining[i], isFullWidth: true, isMobile: true));
+            if (i + 1 < remaining.length) {
               feedWidgets.add(const Padding(padding: EdgeInsets.symmetric(vertical: 15), child: Divider(color: Colors.black12)));
-              feedWidgets.add(_buildSecondaryArticle(restants[i + 1], isFullWidth: true, isMobile: true));
+              feedWidgets.add(_buildSecondaryArticle(remaining[i + 1], isFullWidth: true, isMobile: true));
             }
           } else {
-            if (i + 1 < restants.length) {
+            if (i + 1 < remaining.length) {
               feedWidgets.add(
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _buildSecondaryArticle(restants[i])),
+                      Expanded(child: _buildSecondaryArticle(remaining[i])),
                       const SizedBox(width: 30),
-                      Expanded(child: _buildSecondaryArticle(restants[i + 1])),
+                      Expanded(child: _buildSecondaryArticle(remaining[i + 1])),
                     ],
                   )
               );
             } else {
-              feedWidgets.add(_buildSecondaryArticle(restants[i], isFullWidth: true));
+              feedWidgets.add(_buildSecondaryArticle(remaining[i], isFullWidth: true));
             }
           }
 
-          if (i + 2 < restants.length || (i + 1 < restants.length && isMobile)) {
+          if (i + 2 < remaining.length || (i + 1 < remaining.length && isMobile)) {
             feedWidgets.add(const Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
               child: Divider(color: Colors.black12, thickness: 1),
@@ -376,9 +376,9 @@ class _PageActualitesState extends State<PageActualites> {
   }
 }
 
-class DetailsPageNewspaper extends StatelessWidget {
+class NewspaperDetailsPage extends StatelessWidget {
   final Map<String, dynamic> item;
-  const DetailsPageNewspaper({super.key, required this.item});
+  const NewspaperDetailsPage({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../database_service.dart';
-import '../page_emploi.dart';
+import '../job_page.dart';
 
 class JobOfferWidget extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -49,7 +49,7 @@ class JobOfferWidget extends StatelessWidget {
 
           OutlinedButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (c) => PageEmploi(user: user)));
+              Navigator.push(context, MaterialPageRoute(builder: (c) => JobPage(user: user)));
             },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFFE30613)),

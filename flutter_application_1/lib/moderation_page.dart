@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'AdminValidatePage.dart'; 
+import 'admin_validate_page.dart';
 import 'colors.dart';
 
 class PageModeration extends StatelessWidget {

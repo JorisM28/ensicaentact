@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'add_alumni.dart'; 
 import 'colors.dart';
 
-class PageRejoindre extends StatelessWidget {
+class JoinPage extends StatelessWidget {
   final Map<String, dynamic> user;
 
-  const PageRejoindre({super.key, required this.user});
+  const JoinPage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {

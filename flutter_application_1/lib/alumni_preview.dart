@@ -53,7 +53,7 @@ class AlumniPreview extends StatelessWidget {
             const SizedBox(height: 30),
 
             Text(
-              alumni.nomComplet,
+              alumni.fullName,
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
