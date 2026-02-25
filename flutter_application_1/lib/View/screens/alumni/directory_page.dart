@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../common/profile_badge.dart';
-import '../../../Model/core/theme/colors.dart';
-import '../../../Model/alumnis.dart';
-import '../../common/filtre_widget.dart';
+import '/View/widget/filtre_widget.dart';
+import '/Model/core/theme/colors.dart';
+import '/Model/alumnis.dart';
+import '/View/widget/profil_badge.dart';
 import 'add_alumni.dart';
 import 'alumni_detail_page.dart';
-import '../admin/admin_validate_page.dart';
+import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
-import '../../../service_locator.dart';
-import '../../../ViewModel/alumni/directory_view_model.dart';
+import '/service_locator.dart';
+import '/ViewModel/alumni/directory_view_model.dart';
 
 class DirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;

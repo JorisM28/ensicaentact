@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
-import '../../common/carte_entreprise_widget.dart';
+import '../../widget/carte_entreprise_widget.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
 
 class CompaniesDirectoryPage extends StatefulWidget {
