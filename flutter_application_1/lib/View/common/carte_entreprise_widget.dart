@@ -3,16 +3,16 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class CarteEntrepriseWidget extends StatelessWidget {
-  final List<Map<String, dynamic>> entreprises;
+  final List<Map<String, dynamic>> companies;
 
   const CarteEntrepriseWidget({
     super.key,
-    required this.entreprises,
+    required this.companies,
   });
 
   @override
   Widget build(BuildContext context) {
-    final validEntreprises = entreprises.where((e) {
+    final validEntreprises = companies.where((e) {
       return e['latitude'] != null &&
           e['longitude'] != null &&
           double.tryParse(e['latitude'].toString()) != null &&

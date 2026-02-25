@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'colors.dart';
-import 'login_check.dart';
+import '../../../Model/core/theme/colors.dart';
+import '../../../ViewModel/admin/login_check.dart';
+import '../alumni/directory_page.dart';
 
 
 class Login extends StatefulWidget {
@@ -17,13 +18,33 @@ class _LoginState extends State<Login> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool _isPresentationMode = true;
   bool _isLoading = false;
   bool _isObscure = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.grey[100],),
+      appBar: AppBar(
+        backgroundColor: Colors.grey[100],
+        elevation: 0,
+        actions: [
+          Row(
+            children: [
+              Switch(
+                value: _isPresentationMode,
+                activeThumbColor: AppColors.ensiCyan,
+                onChanged: (value) {
+                  setState(() {
+                    _isPresentationMode = value;
+                  });
+                },
+              ),
+              const SizedBox(width: 10),
+            ],
+          )
+        ],
+      ),
       backgroundColor: Colors.grey[100],
       body: Center(
         child: Container(
@@ -128,32 +149,34 @@ class _LoginState extends State<Login> {
           ),
         ),
 
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Row(
-            children: [
-              Expanded(child: Divider()),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text("OR", style: TextStyle(color: Colors.grey))),
-              Expanded(child: Divider()),
-            ],
-          ),
-        ),
-
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: OutlinedButton.icon(
-            onPressed: _isLoading ? null : () => _submitLogin(isMicrosoftConnection: true),
-            icon: const Icon(Icons.window, color: Colors.white),
-            label: const Text("Connect with Microsoft 365", style: TextStyle(color:  Colors.white)),
-            style: OutlinedButton.styleFrom(
-              backgroundColor: AppColors.microsoftCyan,
-              foregroundColor: Colors.white,
-              side: BorderSide(color: const Color.fromARGB(0, 224, 224, 224)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        if (!_isPresentationMode) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            child: Row(
+              children: [
+                Expanded(child: Divider()),
+                Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text("OR", style: TextStyle(color: Colors.grey))),
+                Expanded(child: Divider()),
+              ],
             ),
           ),
-        ),
+
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: OutlinedButton.icon(
+              onPressed: _isLoading ? null : () => _submitLogin(isMicrosoftConnection: true),
+              icon: const Icon(Icons.window, color: Colors.white),
+              label: const Text("Connect with Microsoft 365", style: TextStyle(color:  Colors.white)),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: AppColors.microsoftCyan,
+                foregroundColor: Colors.white,
+                side: BorderSide(color: const Color.fromARGB(0, 224, 224, 224)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -260,7 +283,7 @@ class _LoginState extends State<Login> {
       String role = userData['role'];
 
       if (role == 'admin' || role == 'student' || role == 'alumni') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage(user: userData!)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PageAnnuaire(user: userData!)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connexion Impossible !"), backgroundColor: Colors.red));
       }

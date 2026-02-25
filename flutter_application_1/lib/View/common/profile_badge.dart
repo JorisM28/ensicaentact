@@ -20,7 +20,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
     final String role = widget.user?['role'] ?? 'guest';
     final bool isGuest = widget.user == null || role == 'guest';
 
-   if (isGuest) {
+    if (isGuest) {
       return MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
