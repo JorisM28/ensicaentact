@@ -3,12 +3,12 @@ import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/Model/core/theme/colors.dart';
 import '/View/screens/event/event_page.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 class EventWidget extends StatefulWidget {
-  final Map<String, dynamic> user;
   final VoidCallback? onAddPress;
 
-  const EventWidget({super.key, required this.user, this.onAddPress});
+  const EventWidget({super.key, this.onAddPress});
 
   @override
   State<EventWidget> createState() => _EventWidgetState();
@@ -73,10 +73,12 @@ class _EventWidgetState extends State<EventWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
+
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     final displayList = _events.take(3).toList();
-    bool isAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = currentUser?['role'] == 'admin';
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,7 +121,7 @@ class _EventWidgetState extends State<EventWidget> {
         const SizedBox(height: 20),
 
         OutlinedButton(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage(user: widget.user))),
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage())),
           style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFFE30613)),
               backgroundColor: Colors.white

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/Model/core/theme/colors.dart';
 import '/service_locator.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 class ProposeEventPage extends StatefulWidget {
-  final Map<String, dynamic> user;
-  const ProposeEventPage({super.key, required this.user});
+  const ProposeEventPage({super.key});
 
   @override
   State<ProposeEventPage> createState() => _ProposeEventPageState();
@@ -13,7 +13,7 @@ class ProposeEventPage extends StatefulWidget {
 
 class _ProposeEventPageState extends State<ProposeEventPage> {
   final _formKey = GlobalKey<FormState>();
-  
+    final currentUser = sl<AuthService>().currentUser;
   final _titleControlelr = TextEditingController();
   final _placecontroller = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -28,10 +28,10 @@ if (_formKey.currentState!.validate()) {
       "date_event": _selectedDate.toString(),
       "lieu": _placecontroller.text,
       "description": _descriptionController.text,
-      "id_auteur": widget.user['id_user'],
-      "nom_auteur": widget.user['nom'], 
-      "prenom_auteur": widget.user['prenom'],
-      "email_auteur": widget.user['email'],
+      "id_auteur": currentUser?['id_user'],
+      "nom_auteur": currentUser?['nom'], 
+      "prenom_auteur": currentUser?['prenom'],
+      "email_auteur": currentUser?['email'],
     };
 
   

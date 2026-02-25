@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
 
 import '/View/widget/custom_app_bar.dart';
 class EmploymentPage extends StatefulWidget {
-  final Map<String, dynamic> user;
-  const EmploymentPage({super.key, required this.user});
+  const EmploymentPage({super.key});
 
   @override
   State<EmploymentPage> createState() => _EmploymentPageState();
@@ -18,7 +16,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
   @override
   void initState() {
     super.initState();
-    viewModel = CareerViewModel(user: widget.user);
+    viewModel = CareerViewModel();
     viewModel.loadOffers();
     viewModel.addListener(() => setState(() {}));
   }

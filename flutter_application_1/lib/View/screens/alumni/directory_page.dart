@@ -12,10 +12,11 @@ import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
 import '/service_locator.dart';
 import '/ViewModel/alumni/directory_view_model.dart';
+import 'package:flutter_application_ensicaentact/View/widget/error_pages.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 class DirectoryPage extends StatefulWidget {
-  final Map<String, dynamic> user;
-  const DirectoryPage({super.key, required this.user});
+  const DirectoryPage({super.key});
 
   @override
   State<DirectoryPage> createState() => _DirectoryPageState();
@@ -28,8 +29,9 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   bool _openFilters = false;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final currentUser = sl<AuthService>().currentUser;
 
-  bool get isAdmin => widget.user['role'] == 'admin';
+  bool get isAdmin => currentUser!['role'] == 'admin';
 
   @override
   void initState() {
@@ -109,7 +111,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                         flex: 2,
                         child: _selectedStudent == null
                             ? _defaultView()
-                            : AlumniPreview(alumni: _selectedStudent!, user: widget.user),
+                            : AlumniPreview(alumni: _selectedStudent!),
                       ),
                     ]
                   ],
@@ -208,7 +210,6 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
           MaterialPageRoute(
             builder: (context) => AlumniDetailPage(
               alumni: student, 
-              user: widget.user,
               onSave: () {
                 viewModel.loadAlumnis();
               }, 
@@ -288,7 +289,6 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                         MaterialPageRoute(
                           builder: (context) => AlumniDetailPage(
                             alumni: student, 
-                            user: widget.user, 
                             onSave: () => viewModel.loadAlumnis(),
                           ),
                         ),

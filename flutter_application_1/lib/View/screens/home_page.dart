@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '/View/screens/alumni/add_alumni.dart';
 import 'employment/job_page.dart';
 import '/View/screens/alumni/directory_page.dart';
@@ -15,12 +14,11 @@ import '/View/widget/key_figures_widget.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 class HomePage extends StatelessWidget {
-  final Map<String, dynamic>? user;
 
-
-  const HomePage({super.key, this.user});
+  const HomePage({super.key});
 
   final Color contentColor = const Color(0xFFF8F9FA);
 
@@ -37,15 +35,15 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     bool isDesktop = MediaQuery.of(context).size.width > 900;
-    final Map<String, dynamic> currentUser = user ?? {};
     
-    final String role = currentUser['role'] ?? 'guest';
+    final String role = currentUser?['role'] ?? 'guest';
 
     return Scaffold(
       backgroundColor: contentColor,
 
-      appBar: CustomAppBar(user: currentUser),
+      appBar: CustomAppBar(),
 
       endDrawer: !isDesktop ? _buildMobileDrawer(context) : null,
 
@@ -59,13 +57,13 @@ class HomePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: isDesktop
-                  ? _buildDesktopLayout(context, currentUser)
-                  : _buildMobileLayout(context, currentUser),
+                  ? _buildDesktopLayout(context)
+                  : _buildMobileLayout(context),
             ),
 
             const Divider(height: 1, thickness: 1),
 
-            JobOfferWidget(user: currentUser),
+            JobOfferWidget(),
 
             _buildFooter(),
           ],
@@ -75,7 +73,8 @@ class HomePage extends StatelessWidget {
   }
 
 
-  Widget _buildDesktopLayout(BuildContext context, Map<String, dynamic> user) {
+  Widget _buildDesktopLayout(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(30),
@@ -93,7 +92,6 @@ class HomePage extends StatelessWidget {
             Expanded(
               flex: 2,
               child: ActualityWidget(
-                user: user,
                 onAddPress: () => _showAddNewsDialog(context),
               ),
             ),
@@ -103,8 +101,7 @@ class HomePage extends StatelessWidget {
             Expanded(
               flex: 1,
               child: EventWidget(
-                user: user,
-                onAddPress: () => _showAddEventDialog(context, user),
+                onAddPress: () => _showAddEventDialog(context),
               ),
             ),
           ],
@@ -113,7 +110,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context, Map<String, dynamic> user) {
+  Widget _buildMobileLayout(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     return Column(
       children: [
         Container(
@@ -126,7 +124,6 @@ class HomePage extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(15),
           child: ActualityWidget(
-            user: user,
             onAddPress: () => _showAddNewsDialog(context),
           ),
         ),
@@ -143,8 +140,7 @@ class HomePage extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(15),
           child: EventWidget(
-            user: user,
-            onAddPress: () => _showAddEventDialog(context, user)
+            onAddPress: () => _showAddEventDialog(context)
           ),
         ),
       ],
@@ -153,6 +149,7 @@ class HomePage extends StatelessWidget {
 
 
   Widget _buildMobileDrawer(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -171,22 +168,22 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-          ListTile(leading: const Icon(Icons.newspaper), title: const Text("Actualités"), onTap: () => _naviguer(context, NewsPage(user: user ?? {}))),
-          ListTile(leading: const Icon(Icons.people), title: const Text("Annuaire"), onTap: () => _naviguer(context, DirectoryPage(user: user ?? {}))),
-          ListTile(leading: const Icon(Icons.work), title: const Text("Offres"), onTap: () => _naviguer(context, JobPage(user: user ?? {}))),
+          ListTile(leading: const Icon(Icons.newspaper), title: const Text("Actualités"), onTap: () => _naviguer(context, NewsPage())),
+          ListTile(leading: const Icon(Icons.people), title: const Text("Annuaire"), onTap: () => _naviguer(context, DirectoryPage())),
+          ListTile(leading: const Icon(Icons.work), title: const Text("Offres"), onTap: () => _naviguer(context, JobPage())),
           ListTile(leading: const Icon(Icons.school), title: const Text("Site École"), onTap: _ouvrirSiteEcole),
 
-          if (user != null && (user!['role'] == 'student' || user!['role'] == 'alumni')) ...[
+          if ( currentUser != null && (currentUser['role'] == 'student' || currentUser['role'] == 'alumni')) ...[
             const Divider(),
-            ListTile(leading: const Icon(Icons.event), title: const Text("Proposer un évènement"), onTap: () => _naviguer(context, ProposeEventPage(user: user ?? {}))),
-            if (user!['role'] == 'alumni') ...[
+            ListTile(leading: const Icon(Icons.event), title: const Text("Proposer un évènement"), onTap: () => _naviguer(context, ProposeEventPage())),
+            if (currentUser['role'] == 'alumni') ...[
               ListTile(leading: const Icon(Icons.thumb_up), title: const Text("Rejoindre"), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => Scaffold(appBar: AppBar(title: const Text("Rejoindre"), backgroundColor: AppColors.ensiCyan), body: AddAlumniForm(onSuccess: () => Navigator.pop(c)))))),
             ],
           ],
 
-          if (user != null && user!['role'] == 'admin') ...[
+          if (currentUser != null && currentUser['role'] == 'admin') ...[
             const Divider(),
-            ListTile(leading: const Icon(Icons.security), title: const Text("Modération"), onTap: () => _naviguer(context, PageModeration(user: user ?? {}))),
+            ListTile(leading: const Icon(Icons.security), title: const Text("Modération"), onTap: () => _naviguer(context, PageModeration())),
           ],
         ],
       ),
@@ -204,7 +201,8 @@ class HomePage extends StatelessWidget {
 
 
   void _showAddNewsDialog(BuildContext context) {
-    if (user == null) {
+    final currentUser = sl<AuthService>().currentUser;
+    if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez vous connecter pour publier une actualité.")),
       );
@@ -237,12 +235,12 @@ class HomePage extends StatelessWidget {
                 "titre": titleCtrl.text,
                 "description": descCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": user!['id_user'] ?? "0",
+                "auteur_id": currentUser['id_user'] ?? "0",
               });
 
               Navigator.pop(ctx);
 
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => HomePage(user: user)));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const HomePage()));
             },
             child: const Text("Publier"),
           ),
@@ -251,11 +249,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _showAddEventDialog(BuildContext context, Map<String, dynamic> currentUser) {
+  void _showAddEventDialog(BuildContext context) {
     final titreCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final lieuCtrl = TextEditingController();
     final dateCtrl = TextEditingController();
+    final currentUser = sl<AuthService>().currentUser;
 
     showDialog(
       context: context,
@@ -319,12 +318,12 @@ class HomePage extends StatelessWidget {
                 "description": descCtrl.text,
                 "lieu": lieuCtrl.text,
                 "date_event": dateCtrl.text,
-                "auteur_id": currentUser['id_user'] ?? "1",
+                "auteur_id": currentUser?['id_user'] ?? "1",
                 "valide": 1
               });
 
               Navigator.pop(ctx);
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => HomePage(user: currentUser)));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const HomePage()));
             },
             child: const Text("Publier"),
           ),

@@ -7,7 +7,8 @@ import 'package:flutter_application_ensicaentact/service_locator.dart';
 class DirectoryViewModel extends ChangeNotifier {
   final AlumniRepository _repository;
 
-  final Map<String, dynamic> user = sl<AuthService>().currentUser!;
+  Map<String, dynamic>? get currentUser => sl<AuthService>().currentUser;
+  bool get isAdmin => sl<AuthService>().isAdmin;
   DirectoryViewModel({required AlumniRepository repository}) : _repository = repository;
 
   List<Alumnis> _allAlumnis = [];

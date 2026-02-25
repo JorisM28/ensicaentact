@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
-
-import '../../widget/company_card_widget.dart';
-import '../../widget/error_pages.dart';
 import '/View/widget/custom_app_bar.dart';
-
+import 'package:flutter_application_ensicaentact/View/widget/error_pages.dart';
+import 'package:flutter_application_ensicaentact/View/widget/company_card_widget.dart';
 
 class CompaniesDirectoryPage extends StatefulWidget {
-  final Map<String, dynamic> user;
-  const CompaniesDirectoryPage({super.key, required this.user});
+  const CompaniesDirectoryPage({super.key});
 
   @override
   State<CompaniesDirectoryPage> createState() => _CompaniesDirectoryPageState();
@@ -24,7 +21,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
   @override
   void initState() {
     super.initState();
-    viewModel = CareerViewModel(user: widget.user);
+    viewModel = CareerViewModel();
     viewModel.loadCompanies();
     viewModel.addListener(() => setState(() {}));
   }

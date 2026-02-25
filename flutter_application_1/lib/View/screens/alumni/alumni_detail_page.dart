@@ -4,13 +4,14 @@ import '../../../Model/core/theme/colors.dart';
 import '../../../Model/alumnis.dart';
 import '../../../ViewModel/alumni/alumni_viewmodel.dart';
 import '/View/widget/custom_app_bar.dart';
+import 'package:flutter_application_ensicaentact/service_locator.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 class AlumniDetailPage extends StatefulWidget {
   final Alumnis alumni;
-  final Map<String, dynamic> user;
   final VoidCallback? onSave;
 
-  const AlumniDetailPage({super.key, required this.alumni, required this.user, this.onSave});
+  const AlumniDetailPage({super.key, required this.alumni, this.onSave});
 
   @override
   State<AlumniDetailPage> createState() => _AlumniDetailPageState();
@@ -48,7 +49,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isAdmin = widget.user['role'] == 'admin';
+    final currentUser = sl<AuthService>().currentUser;
+    final bool isAdmin = currentUser!['role'] == 'admin';
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isBig = screenWidth > 800;
 

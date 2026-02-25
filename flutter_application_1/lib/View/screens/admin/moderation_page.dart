@@ -4,9 +4,8 @@ import '/View/screens/admin/admin_validate_page.dart';
 import '/Model/core/theme/colors.dart';
 
 class PageModeration extends StatelessWidget {
-  final Map<String, dynamic> user;
 
-  const PageModeration({super.key, required this.user});
+  const PageModeration({super.key});
 
   @override
   Widget build(BuildContext context) {

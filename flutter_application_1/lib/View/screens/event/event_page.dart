@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '/Model/core/theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
-
 import '/View/widget/custom_app_bar.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
+
 class EventPage extends StatefulWidget {
-  final Map<String, dynamic> user;
-  const EventPage({super.key, required this.user});
+  const EventPage({super.key});
 
   @override
   State<EventPage> createState() => _EventPageState();
@@ -78,6 +78,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   void _openFormEvent([Map<String, dynamic>? ev]) {
+    final currentUser = sl<AuthService>().currentUser;
     final bool isEdit = ev != null;
     final titleCtrl = TextEditingController(text: isEdit ? ev['titre'] : "");
     final lieuCtrl = TextEditingController(text: isEdit ? ev['lieu'] : "");
@@ -110,7 +111,7 @@ class _EventPageState extends State<EventPage> {
                 "lieu": lieuCtrl.text,
                 "description": descCtrl.text,
                 "date_event": dateCtrl.text,
-                "id_auteur": widget.user['id_user'] ?? "0",
+                "id_auteur": currentUser?['id_user'] ?? "0",
               };
 
               bool success;
@@ -135,7 +136,8 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool isAdmin = widget.user['role'] == 'admin';
+    final currentUser = sl<AuthService>().currentUser;
+    bool isAdmin = currentUser?['role'] == 'admin';
     final evFiltres = _event.where((e) => 
       (e['titre'] ?? '').toLowerCase().contains(_search.toLowerCase()) ||
       (e['lieu'] ?? '').toLowerCase().contains(_search.toLowerCase())

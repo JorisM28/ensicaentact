@@ -6,8 +6,8 @@ import '../../../ViewModel/alumni/alumni_preview_viewmodel.dart';
 class AlumniPreview extends StatelessWidget {
   final AlumniPreviewViewModel viewModel;
 
-  AlumniPreview({super.key, required Alumnis alumni, required Map<String, dynamic> user})
-      : viewModel = AlumniPreviewViewModel(alumni: alumni, user: user);
+  AlumniPreview({super.key, required Alumnis alumni})
+      : viewModel = AlumniPreviewViewModel(alumni: alumni);
 
   @override
   Widget build(BuildContext context) {

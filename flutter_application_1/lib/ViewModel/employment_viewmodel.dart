@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../../service_locator.dart';
 import '../Model/data/services/alumni_repository.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 class CareerViewModel extends ChangeNotifier {
-  final Map<String, dynamic> user;
-
   List<Map<String, dynamic>> allOffers = [];
   List<Map<String, dynamic>> allCompanies = [];
 
   bool isLoadingOffers = true;
   bool isLoadingCompanies = true;
   String offerSearch = "";
+  final currentUser = sl<AuthService>().currentUser;
 
-  CareerViewModel({required this.user});
-
-  String get myId => user['id'].toString();
-  String get role => user['role'] ?? 'guest';
+  String get myId => currentUser?['id'];
+  String get role => currentUser?['role'] ?? 'guest';
   bool get isAdmin => role == 'admin';
   bool get canAddOffer => isAdmin || role == 'alumni';
 

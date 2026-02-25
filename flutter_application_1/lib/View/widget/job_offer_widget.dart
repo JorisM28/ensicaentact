@@ -4,12 +4,11 @@ import '/service_locator.dart';
 import '/View/screens/employment/job_page.dart';
 
 class JobOfferWidget extends StatelessWidget {
-  final Map<String, dynamic> user;
-
-  const JobOfferWidget({super.key, required this.user});
+  const JobOfferWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
@@ -50,7 +49,7 @@ class JobOfferWidget extends StatelessWidget {
 
           OutlinedButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (c) => JobPage(user: user)));
+              Navigator.push(context, MaterialPageRoute(builder: (c) => JobPage()));
             },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Color(0xFFE30613)),

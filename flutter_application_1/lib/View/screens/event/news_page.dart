@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 
 class NewsPage extends StatefulWidget {
-  final Map<String, dynamic> user;
-  const NewsPage({super.key, required this.user});
+  const NewsPage({super.key});
 
   @override
   State<NewsPage> createState() => _NewsPageState();
@@ -108,6 +108,7 @@ class _NewsPageState extends State<NewsPage> {
     final titleCtrl = TextEditingController();
     final contentCtrl = TextEditingController();
     final imgCtrl = TextEditingController();
+    final currentUser = sl<AuthService>().currentUser;
 
     showDialog(
       context: context,
@@ -140,14 +141,14 @@ class _NewsPageState extends State<NewsPage> {
               if (titleCtrl.text.isEmpty) return;
 
 
-              print("👤 Auteur ID envoyé : ${widget.user['id_user']}");
+              print("👤 Auteur ID envoyé : ${currentUser?['id_user']}");
 
               await await sl<AlumniRepository>().addNews({
                 "titre": titleCtrl.text,
                 "contenu": contentCtrl.text,
                 "description": contentCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": widget.user['id_user'] ?? "1",
+                "auteur_id": currentUser?['id_user'] ?? "1",
                 "tag": "NEWS",
                 "date_publi": DateTime.now().toIso8601String(),
               });
@@ -164,9 +165,10 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     final actusFiltrees = _news.where((a) =>
         (a['titre'] ?? '').toLowerCase().contains(_search.toLowerCase())).toList();
-    bool isAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = currentUser?['role'] == 'admin';
 
     return Scaffold(
       backgroundColor: Colors.white,

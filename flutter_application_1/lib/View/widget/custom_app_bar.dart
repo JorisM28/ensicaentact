@@ -11,11 +11,13 @@ import '/View/screens/admin/moderation_page.dart';
 import '/View/screens/alumni/join_page.dart';
 import '/View/widget/profil_badge.dart';
 import 'event_proposition_widget.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
+import 'package:flutter_application_ensicaentact/service_locator.dart';
+import 'package:flutter_application_ensicaentact/View/screens/auth/login.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final Map<String, dynamic>? user;
 
-  const CustomAppBar({super.key, this.user});
+  const CustomAppBar({super.key});
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
@@ -33,9 +35,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     bool isDesktop = MediaQuery.of(context).size.width > 900;
-    final String role = user?['role'] ?? 'visiteur';
-    final Map<String, dynamic> currentUser = user ?? {};
+    final String role = currentUser?['role'] ?? 'visiteur';
+    final bool isConnected = sl<AuthService>().isLoggedIn;
 
     return Container(
       color: AppColors.ensiCyan,
@@ -47,7 +50,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               onTap: () {
                 Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => HomePage(user: currentUser,))
+                    MaterialPageRoute(builder: (context) => HomePage())
                 );
               },
               child: Row(
@@ -61,38 +64,42 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             if (isDesktop) ...[
               const Spacer(),
-              _buildMenuLink(context, "Accueil", () => _navigate(context, HomePage(user: currentUser))),
-              _buildMenuLink(context, "Actualités", () => _navigate(context, NewsPage(user: currentUser))),
-              _buildMenuLink(context, "Annuaire", () => _navigate(context, DirectoryPage(user: currentUser))),
-              _buildMenuLink(context, "Evènements", () => _navigate(context, EventPage(user: currentUser))),
-              _buildMenuLink(context, "Cartes des entreprises", () => _navigate(context, CompaniesDirectoryPage(user: currentUser))),
-              _buildMenuLink(context, "Offres", () => _navigate(context, JobPage(user: currentUser))),
+
+              _buildMenuLink(context, "Accueil", () => _navigate(context, HomePage())),
+              _buildMenuLink(context, "Actualités", () => _navigate(context, NewsPage())),
+              _buildMenuLink(context, "Annuaire", () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? DirectoryPage(): const Login(),),);}),
+              _buildMenuLink(context, "Evènements", () => _navigate(context, EventPage())),
+              _buildMenuLink(context, "Cartes des entreprises", () => _navigate(context, CompaniesDirectoryPage())),
+              _buildMenuLink(context, "Offres", () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? JobPage(): const Login(),),);}),
               _buildMenuLink(context, "ENSICAEN", _openSchoolWebsite),
+
+
+
               const Spacer(),
 
               if (role == 'admin') ...[
                 _buildHeaderButton(Icons.admin_panel_settings, "Modération",
-                        () => _navigate(context, PageModeration(user: user!))),
+                        () => _navigate(context, PageModeration())),
               ],
 
               if (role == 'alumni' || role == 'student') ...[
                 _buildHeaderButton(
                     Icons.event_available,
                     "Proposer évènement",
-                        () => _navigate(context, ProposeEventPage(user: user!))
+                        () => _navigate(context, ProposeEventPage())
                 ),
                 if (role == 'alumni') ...[
                   const SizedBox(width: 10),
                   _buildHeaderButton(
                       Icons.thumb_up_alt_outlined,
                       "Rejoindre",
-                          () => _navigate(context, JoinPage(user: user!))
+                          () => _navigate(context, JoinPage())
                   ),
                 ],
               ],
 
               const SizedBox(width: 5),
-              ProfileBadge(user: user)
+              ProfileBadge()
             ],
             if (!isDesktop) ...[
               const Spacer(),

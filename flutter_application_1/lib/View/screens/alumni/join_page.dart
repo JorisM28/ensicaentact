@@ -4,9 +4,8 @@ import '/Model/core/theme/colors.dart';
 
 import '/View/widget/custom_app_bar.dart';
 class JoinPage extends StatelessWidget {
-  final Map<String, dynamic> user;
 
-  const JoinPage({super.key, required this.user});
+  const JoinPage({super.key});
 
   @override
   Widget build(BuildContext context) {

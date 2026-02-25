@@ -6,6 +6,9 @@ import 'View/screens/home_page.dart';
 import '/service_locator.dart';
 import '/View/navigation.dart';
 import '/ViewModel/alumni/directory_view_model.dart';
+import 'ViewModel/alumni/directory_view_model.dart';
+import 'Model/data/services/auth_service.dart';
+
 
 
 void main() async {
@@ -29,7 +32,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isConnected = sl<AuthService>().isLoggedIn;
     return MaterialApp(
       navigatorKey: navigatorKey,
       navigatorObservers: [routeObserver],

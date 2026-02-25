@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '/Model/core/theme/colors.dart';
 import '/View/screens/auth/login.dart';
 import '/View/screens/alumni/profile.dart';
+import 'package:flutter_application_ensicaentact/service_locator.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 class ProfileBadge extends StatefulWidget {
   final Map<String, dynamic>? user;
@@ -14,11 +16,12 @@ class ProfileBadge extends StatefulWidget {
 
 class _ProfileBadgeState extends State<ProfileBadge> {
   bool _isHovered = false;
+  final currentUser = sl<AuthService>().currentUser;
 
   @override
   Widget build(BuildContext context) {
-    final String role = widget.user?['role'] ?? 'guest';
-    final bool isGuest = widget.user == null || role == 'guest';
+    final String role = currentUser?['role'] ?? 'guest';
+    final bool isGuest = currentUser == null || role == 'guest';
 
    if (isGuest) {
       return MouseRegion(
@@ -78,9 +81,9 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
 
 
-    final String lastName = widget.user?['family_name'] ?? "";
-    final String firstName = widget.user?['name'] ?? "";
-    final String email = widget.user?['email'] ?? "";
+    final String lastName = currentUser?['family_name'] ?? "";
+    final String firstName = currentUser?['name'] ?? "";
+    final String email = currentUser?['email'] ?? "";
     final String initial = firstName.isNotEmpty ? firstName[0].toUpperCase() : "?";
 
     return Theme(
@@ -143,7 +146,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user!)),
+                            MaterialPageRoute(builder: (_) => ProfilePage(user: currentUser!)),
                           );
                         },
                         child: const Padding(
@@ -160,13 +163,16 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                       ),
 
                       InkWell(
-                        onTap: () {
+                        onTap: () async {
                           Navigator.pop(context);
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (_) => const Login()),
-                                (route) => false,
-                          );
+                          await sl<AuthService>().logout();
+                          if (mounted) {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => const Login()),
+                                  (route) => false,
+                            );
+                          }
                         },
                         child: const Padding(
                           padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
@@ -220,7 +226,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                         Navigator.pop(context);
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user!)),
+                          MaterialPageRoute(builder: (_) => ProfilePage(user: currentUser!)),
                         );
                       },
                       style: OutlinedButton.styleFrom(

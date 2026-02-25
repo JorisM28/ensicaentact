@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/Model/core/theme/colors.dart';
-
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 import '/View/widget/custom_app_bar.dart';
 class JobPage extends StatefulWidget {
-  final Map<String, dynamic> user;
 
-  const JobPage({super.key, required this.user});
+  const JobPage({super.key});
 
   @override
   State<JobPage> createState() => _JobPageState();
@@ -64,6 +63,7 @@ class _JobPageState extends State<JobPage> {
 
   void _ouvrirFormulaire({Map<String, dynamic>? existingOffer, required bool isInternship, required Color color}) {
     final bool isEditing = existingOffer != null;
+    final currentUser = sl<AuthService>().currentUser;
 
     final titreCtrl = TextEditingController(text: isEditing ? existingOffer['titre'] : "");
     final entCtrl = TextEditingController(text: isEditing ? existingOffer['entreprise'] : "");
@@ -117,7 +117,7 @@ class _JobPageState extends State<JobPage> {
                 onPressed: () async { 
                   if (titreCtrl.text.isNotEmpty && entCtrl.text.isNotEmpty) {
                     
-                    String monId = (widget.user['id_user'] ?? widget.user['id']).toString();
+                    String monId = (currentUser?['id_user'] ?? currentUser?['id']).toString();
 
                     final Map<String, dynamic> dataToSend = {
                       "titre": titreCtrl.text,
@@ -161,10 +161,10 @@ class _JobPageState extends State<JobPage> {
 
   @override
   Widget build(BuildContext context) {
-    String role = widget.user['role'] ?? 'guest';
-    
+    final currentUser = sl<AuthService>().currentUser;
+    String role = currentUser?['role'] ?? 'guest';
 
-    String myId = (widget.user['id_user'] ?? widget.user['id'] ?? '0').toString();
+    String myId = (currentUser?['id_user'] ?? currentUser?['id'] ?? '0').toString();
     
     bool isAdmin = (role == 'admin');
     bool isAlumni = (role == 'alumni');
