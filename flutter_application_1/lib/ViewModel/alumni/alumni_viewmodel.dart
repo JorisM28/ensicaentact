@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../Model/alumnis.dart';
-import '../../Model/data/services/database_service.dart';
+import '../../../service_locator.dart';
+import '../../Model/data/services/alumni_repository.dart';
 
 class InternshipEditor {
   final TextEditingController entilted = TextEditingController();
@@ -26,7 +27,6 @@ class AlumniViewModel extends ChangeNotifier {
   bool modified = false;
   bool seeDescription = false;
 
-  // Controllers principaux
   late TextEditingController lastNameController;
   late TextEditingController firstNameController;
   late TextEditingController dateOfBirthController;
@@ -63,7 +63,7 @@ class AlumniViewModel extends ChangeNotifier {
     promotionController = TextEditingController(text: currentAlumni.promotion.toString());
     positionController = TextEditingController(text: currentAlumni.job);
     positionDescController = TextEditingController(text: currentAlumni.jobDescription);
-    startPosDateController = TextEditingController(text: currentAlumni.jobStart ?? "");
+    startPosDateController = TextEditingController(text: currentAlumni.jobStart);
     companyController = TextEditingController(text: currentAlumni.company);
     cityController = TextEditingController(text: currentAlumni.city);
     emailController = TextEditingController(text: currentAlumni.email);
@@ -184,7 +184,7 @@ class AlumniViewModel extends ChangeNotifier {
     };
 
 
-    await DatabaseService().modifyStudent(updateData);
+    await sl<AlumniRepository>().updateAlumni(updateData);
     if (onSaveCallback != null) onSaveCallback();
 
     internshipDisplay = internshipEditors.map((e) => Internship(
