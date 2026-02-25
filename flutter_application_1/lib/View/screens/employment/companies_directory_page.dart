@@ -46,13 +46,13 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
           'entreprises_list': <String>{},
         };
       }
-      
+
       cityGroups[key]!['nombre_alumni'] += (int.tryParse(c['nombre_alumni'].toString()) ?? 0);
       if (c['nom_entreprise'] != null && c['nom_entreprise'].toString().isNotEmpty) {
         cityGroups[key]!['entreprises_list'].add(c['nom_entreprise']);
       }
     }
-    
+
     return cityGroups.values.map((group) {
       group['entreprises_list'] = group['entreprises_list'].toList();
       return group;
@@ -61,18 +61,18 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
 
   List<Map<String, dynamic>> _getMapData() {
     if (_selectedItem == null) {
-      return viewModel.allCompanies; 
+      return viewModel.allCompanies;
     }
 
     if (_groupBy == 'Entreprise') {
-      return viewModel.allCompanies.where((c) => 
-        c['nom_entreprise'] == _selectedItem!['nom_entreprise'] && 
+      return viewModel.allCompanies.where((c) =>
+        c['nom_entreprise'] == _selectedItem!['nom_entreprise'] &&
         c['ville'] == _selectedItem!['ville']
       ).toList();
-    } 
+    }
     else {
-      return viewModel.allCompanies.where((c) => 
-        c['ville'] == _selectedItem!['ville'] && 
+      return viewModel.allCompanies.where((c) =>
+        c['ville'] == _selectedItem!['ville'] &&
         c['pays'] == _selectedItem!['pays']
       ).toList();
     }
@@ -106,15 +106,15 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
                   child: isWideScreen
                       ? Row(
                           children: [
-                            Expanded(flex: 2, child: _buildList(displaydata)), 
-                            const VerticalDivider(width: 1), 
+                            Expanded(flex: 2, child: _buildList(displaydata)),
+                            const VerticalDivider(width: 1),
                             Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem !=null))
                           ],
                         )
                       : Column(
                           children: [
-                            Expanded(flex: 2, child: _buildList(displaydata)), 
-                            const Divider(height: 1), 
+                            Expanded(flex: 2, child: _buildList(displaydata)),
+                            const Divider(height: 1),
                             Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem !=null))
                           ],
                         ),
@@ -155,18 +155,18 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
       itemBuilder: (context, index) {
         final item = data[index];
         final isCityMode = _groupBy == 'Ville';
-        
+
         bool isSelected = false;
         if (_selectedItem != null) {
           if (isCityMode) {
-            isSelected = _selectedItem!['ville'] == item['ville'] && 
+            isSelected = _selectedItem!['ville'] == item['ville'] &&
                          _selectedItem!['pays'] == item['pays'];
           } else {
-            isSelected = _selectedItem!['nom_entreprise'] == item['nom_entreprise'] && 
+            isSelected = _selectedItem!['nom_entreprise'] == item['nom_entreprise'] &&
                          _selectedItem!['ville'] == item['ville'];
           }
         }
-        
+
         return InkWell(
           onTap: () {
             setState(() {
@@ -180,7 +180,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
               color: isSelected ? AppColors.ensiCyan.withOpacity(0.1) : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: isSelected ? AppColors.ensiCyan : Colors.grey.shade300, 
+                color: isSelected ? AppColors.ensiCyan : Colors.grey.shade300,
                 width: 1
               ),
             ),

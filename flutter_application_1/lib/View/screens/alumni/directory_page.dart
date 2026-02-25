@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../common/profile_badge.dart';
-import '../../../Model/core/theme/colors.dart';
-import '../../../Model/alumnis.dart';
-import '../../common/filtre_widget.dart';
+import '/View/widget/filtre_widget.dart';
+import '/Model/core/theme/colors.dart';
+import '/Model/alumnis.dart';
+import '/View/widget/profil_badge.dart';
 import 'add_alumni.dart';
 import 'alumni_detail_page.dart';
-import '../admin/admin_validate_page.dart';
+import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
-import '../../../service_locator.dart';
-import '../../../ViewModel/alumni/directory_view_model.dart';
+import '/service_locator.dart';
+import '/ViewModel/alumni/directory_view_model.dart';
 import '../../common/error_pages.dart';
 
 class DirectoryPage extends StatefulWidget {
@@ -400,13 +400,13 @@ void _displayHistory(BuildContext context) async {
                     final String desc = log['description'] ?? '';
                     final bool isDelete = action == 'SUPPRESSION';
                     final bool isAdd = action == 'AJOUT';
-                    
+
                     // Noms générés depuis la base de données
                     String alumniName = "${log['prenom_alumni'] ?? ''} ${log['nom_alumni'] ?? ''}".trim();
                     String editorName = "${log['prenom_editeur'] ?? ''} ${log['nom_editeur'] ?? ''}".trim();
-                    
+
                     if (editorName.isEmpty) editorName = "Admin";
-                    
+
                     // Si l'élève a été supprimé, la jointure renvoie vide. On utilise la description.
                     if (alumniName.isEmpty && isDelete) {
                        alumniName = desc.replaceAll("Suppression de ", "");
@@ -425,19 +425,19 @@ void _displayHistory(BuildContext context) async {
                         child: Icon(iconType, color: iconColor, size: 20),
                       ),
                       title: Text(
-                        alumniName, 
+                        alumniName,
                         style: const TextStyle(fontWeight: FontWeight.bold)
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "$action by $editorName on ${log['date_action']}", 
+                            "$action by $editorName on ${log['date_action']}",
                             style: const TextStyle(fontSize: 12, color: Colors.black87)
                           ),
                           if (desc.isNotEmpty && !isDelete && !isAdd)
                             Text(
-                              desc, 
+                              desc,
                               style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey)
                             ),
                         ],
