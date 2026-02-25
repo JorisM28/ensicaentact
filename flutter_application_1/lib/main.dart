@@ -45,7 +45,8 @@ class MyApp extends StatelessWidget {
       ],
       title: 'Réseau Alumni',
       navigatorObservers: [routeObserver],
-      home: isConnected ?  const PageAccueil() : const Login(),
+      //home: isConnected ?  const PageAccueil() : const Login(),
+      home: const PageAccueil(),
     );
   }
 }
