@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/admin/login_check.dart';
@@ -6,6 +7,8 @@ import '../alumni/directory_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../l10n/app_localizations.dart';
 
+import 'package:flutter_application_ensicaentact/service_locator.dart';
+import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 
 
 class Login extends StatefulWidget {
@@ -284,14 +287,11 @@ class _LoginState extends State<Login> {
     if (userData == null) return;
 
     if (userData['status'] == 'success') {
-      if (userData.containsKey('token') && userData['token'] != null) {
-        const storage = FlutterSecureStorage();
-        await storage.write(key: 'jwt_token', value: userData['token']);
-        print("Token sauvegardé avec succès !");
-      }
-      String role = userData['role'];
+      String role = userData['role'] ?? 'guest';
 
       if (role == 'admin' || role == 'student' || role == 'alumni') {
+        String token = userData['token'] ?? 'microsoft_session_token';
+        await sl<AuthService>().saveSession(userData, token);
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage(user: userData!)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.loginErrorConnection), backgroundColor: Colors.red));

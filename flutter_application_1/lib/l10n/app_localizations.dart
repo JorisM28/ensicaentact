@@ -98,23 +98,11 @@ abstract class AppLocalizations {
     Locale('fr'),
   ];
 
-  /// No description provided for @sectionRecherchesStages.
+  /// No description provided for @sectionCommun.
   ///
   /// In fr, this message translates to:
   /// **''**
-  String get sectionRecherchesStages;
-
-  /// No description provided for @deleteOfferTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Supprimer l\'offre ?'**
-  String get deleteOfferTitle;
-
-  /// No description provided for @deleteOfferContent.
-  ///
-  /// In fr, this message translates to:
-  /// **'Cette action est irréversible.'**
-  String get deleteOfferContent;
+  String get sectionCommun;
 
   /// No description provided for @cancel.
   ///
@@ -122,23 +110,137 @@ abstract class AppLocalizations {
   /// **'Annuler'**
   String get cancel;
 
-  /// No description provided for @offerDeletedSuccess.
+  /// No description provided for @close.
   ///
   /// In fr, this message translates to:
-  /// **'Offre supprimée'**
-  String get offerDeletedSuccess;
-
-  /// No description provided for @offerDeletedError.
-  ///
-  /// In fr, this message translates to:
-  /// **'Erreur lors de la suppression'**
-  String get offerDeletedError;
+  /// **'Fermer'**
+  String get close;
 
   /// No description provided for @deleteBtn.
   ///
   /// In fr, this message translates to:
   /// **'Supprimer'**
   String get deleteBtn;
+
+  /// No description provided for @publish.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier'**
+  String get publish;
+
+  /// No description provided for @yes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non'**
+  String get no;
+
+  /// No description provided for @required.
+  ///
+  /// In fr, this message translates to:
+  /// **'Requis'**
+  String get required;
+
+  /// No description provided for @validate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get validate;
+
+  /// No description provided for @backBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour'**
+  String get backBtn;
+
+  /// No description provided for @reloadBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharger'**
+  String get reloadBtn;
+
+  /// No description provided for @untitled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans titre'**
+  String get untitled;
+
+  /// No description provided for @sectionNavigation.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get sectionNavigation;
+
+  /// No description provided for @homeTab.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil'**
+  String get homeTab;
+
+  /// No description provided for @eventsTab.
+  ///
+  /// In fr, this message translates to:
+  /// **'Évènements'**
+  String get eventsTab;
+
+  /// No description provided for @drawerMenu.
+  ///
+  /// In fr, this message translates to:
+  /// **'Menu'**
+  String get drawerMenu;
+
+  /// No description provided for @drawerNews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actualités'**
+  String get drawerNews;
+
+  /// No description provided for @drawerDirectory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuaire'**
+  String get drawerDirectory;
+
+  /// No description provided for @drawerOffers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Offres'**
+  String get drawerOffers;
+
+  /// No description provided for @drawerSchoolSite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Site École'**
+  String get drawerSchoolSite;
+
+  /// No description provided for @drawerProposeEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer un évènement'**
+  String get drawerProposeEvent;
+
+  /// No description provided for @drawerJoin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rejoindre'**
+  String get drawerJoin;
+
+  /// No description provided for @drawerModeration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modération'**
+  String get drawerModeration;
+
+  /// No description provided for @sectionRecherchesStages.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get sectionRecherchesStages;
 
   /// No description provided for @careersStagesTitle.
   ///
@@ -224,12 +326,6 @@ abstract class AppLocalizations {
   /// **'Contact :'**
   String get contactLabel;
 
-  /// No description provided for @close.
-  ///
-  /// In fr, this message translates to:
-  /// **'Fermer'**
-  String get close;
-
   /// No description provided for @newInternship.
   ///
   /// In fr, this message translates to:
@@ -272,11 +368,35 @@ abstract class AppLocalizations {
   /// **'Email contact'**
   String get contactEmailLabel;
 
-  /// No description provided for @publish.
+  /// No description provided for @deleteOfferTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Publier'**
-  String get publish;
+  /// **'Supprimer l\'offre ?'**
+  String get deleteOfferTitle;
+
+  /// No description provided for @deleteOfferContent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette action est irréversible.'**
+  String get deleteOfferContent;
+
+  /// No description provided for @offerDeletedSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Offre supprimée'**
+  String get offerDeletedSuccess;
+
+  /// No description provided for @offerDeletedError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur lors de la suppression'**
+  String get offerDeletedError;
+
+  /// No description provided for @seeAllOffers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir toutes les offres'**
+  String get seeAllOffers;
 
   /// No description provided for @sectionAnnuaireEntreprises.
   ///
@@ -301,6 +421,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'alumni'**
   String get alumniLabel;
+
+  /// No description provided for @companiesFilterCompany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par Entreprise'**
+  String get companiesFilterCompany;
+
+  /// No description provided for @companiesFilterCity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par Ville'**
+  String get companiesFilterCity;
 
   /// No description provided for @sectionLogin.
   ///
@@ -446,12 +578,6 @@ abstract class AppLocalizations {
   /// **'Confirmer le nouveau mot de passe'**
   String get confirmNewPassword;
 
-  /// No description provided for @required.
-  ///
-  /// In fr, this message translates to:
-  /// **'Requis'**
-  String get required;
-
   /// No description provided for @minCharacters.
   ///
   /// In fr, this message translates to:
@@ -481,12 +607,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Utilisateur'**
   String get unknownUser;
-
-  /// No description provided for @validate.
-  ///
-  /// In fr, this message translates to:
-  /// **'Valider'**
-  String get validate;
 
   /// No description provided for @sectionDirectory.
   ///
@@ -529,18 +649,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Voulez-vous supprimer {name} ?'**
   String directoryDeleteConfirmContent(Object name);
-
-  /// No description provided for @yes.
-  ///
-  /// In fr, this message translates to:
-  /// **'Oui'**
-  String get yes;
-
-  /// No description provided for @no.
-  ///
-  /// In fr, this message translates to:
-  /// **'Non'**
-  String get no;
 
   /// No description provided for @directoryHistoryTitle.
   ///
@@ -991,6 +1099,264 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur : {error}'**
   String formMsgError(String error);
+
+  /// No description provided for @sectionWidgetsAndDialogs.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get sectionWidgetsAndDialogs;
+
+  /// No description provided for @dialogLoginRequiredNews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez vous connecter pour publier une actualité.'**
+  String get dialogLoginRequiredNews;
+
+  /// No description provided for @dialogNewNews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle Actualité'**
+  String get dialogNewNews;
+
+  /// No description provided for @dialogTitleLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre'**
+  String get dialogTitleLabel;
+
+  /// No description provided for @dialogImageUrlLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'URL Image (optionnel)'**
+  String get dialogImageUrlLabel;
+
+  /// No description provided for @dialogNewEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel Évènement'**
+  String get dialogNewEvent;
+
+  /// No description provided for @dialogLocationLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lieu'**
+  String get dialogLocationLabel;
+
+  /// No description provided for @dialogDateTimeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date et heure'**
+  String get dialogDateTimeLabel;
+
+  /// No description provided for @addNewsTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une actualité'**
+  String get addNewsTooltip;
+
+  /// No description provided for @noNewsAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune actualité.'**
+  String get noNewsAvailable;
+
+  /// No description provided for @seeAllNews.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir toutes les actualités'**
+  String get seeAllNews;
+
+  /// No description provided for @newsDeletedSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actualité supprimée !'**
+  String get newsDeletedSuccess;
+
+  /// No description provided for @addEventTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un évènement'**
+  String get addEventTooltip;
+
+  /// No description provided for @noUpcomingEvents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun événement à venir.'**
+  String get noUpcomingEvents;
+
+  /// No description provided for @seeAllEvents.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir tous les évènements'**
+  String get seeAllEvents;
+
+  /// No description provided for @locationNotSpecified.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lieu non précisé'**
+  String get locationNotSpecified;
+
+  /// No description provided for @eventDeletedSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événement supprimé !'**
+  String get eventDeletedSuccess;
+
+  /// No description provided for @eventTitleLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre de l\'évènement'**
+  String get eventTitleLabel;
+
+  /// No description provided for @eventTypeMeeting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rencontre'**
+  String get eventTypeMeeting;
+
+  /// No description provided for @eventTypeConference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conférence'**
+  String get eventTypeConference;
+
+  /// No description provided for @eventTypeAfterwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afterwork'**
+  String get eventTypeAfterwork;
+
+  /// No description provided for @eventTypeWebinar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Webinaire'**
+  String get eventTypeWebinar;
+
+  /// No description provided for @dateLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date : '**
+  String get dateLabel;
+
+  /// No description provided for @sendProposalBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la proposition'**
+  String get sendProposalBtn;
+
+  /// No description provided for @proposalSentSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposition envoyée à l\'administrateur !'**
+  String get proposalSentSuccess;
+
+  /// No description provided for @sectionErrors.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get sectionErrors;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue'**
+  String get errorOccurred;
+
+  /// No description provided for @errorSomethingWentWrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelque chose s\'est mal passé. Veuillez réessayer plus tard.'**
+  String get errorSomethingWentWrong;
+
+  /// No description provided for @errorAccessDenied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès refusé (403)'**
+  String get errorAccessDenied;
+
+  /// No description provided for @errorNoPermission.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous n\'avez pas les permissions requises pour voir cette page.'**
+  String get errorNoPermission;
+
+  /// No description provided for @errorPageNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page introuvable (404)'**
+  String get errorPageNotFound;
+
+  /// No description provided for @errorDataNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'La page ou les données que vous cherchez n\'existent pas.'**
+  String get errorDataNotFound;
+
+  /// No description provided for @errorNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur réseau'**
+  String get errorNetwork;
+
+  /// No description provided for @errorNoConnection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de se connecter au serveur. Vérifiez votre connexion.'**
+  String get errorNoConnection;
+
+  /// No description provided for @errorTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur'**
+  String get errorTitle;
+
+  /// No description provided for @sectionKeyFigures.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get sectionKeyFigures;
+
+  /// No description provided for @updateSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mise à jour réussie !'**
+  String get updateSuccess;
+
+  /// No description provided for @numberLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chiffre'**
+  String get numberLabel;
+
+  /// No description provided for @suffixLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suffixe'**
+  String get suffixLabel;
+
+  /// No description provided for @titleLabelAdmin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre (Label)'**
+  String get titleLabelAdmin;
+
+  /// No description provided for @iconLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Icône'**
+  String get iconLabel;
+
+  /// No description provided for @blockLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bloc'**
+  String get blockLabel;
+
+  /// No description provided for @livePreview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu en direct'**
+  String get livePreview;
 }
 
 class _AppLocalizationsDelegate

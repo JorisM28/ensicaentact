@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../Model/core/theme/colors.dart';
-import '../screens/auth/login.dart';
-import '../screens/alumni/profile.dart';
+import '/Model/core/theme/colors.dart';
+import '/View/screens/auth/login.dart';
+import '/View/screens/alumni/profile.dart';
 
 class ProfileBadge extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final Map<String, dynamic>? user;
 
-  const ProfileBadge({super.key, required this.user});
+  const ProfileBadge({super.key, this.user});
 
   @override
   State<ProfileBadge> createState() => _ProfileBadgeState();
@@ -17,11 +17,10 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
   @override
   Widget build(BuildContext context) {
-    final String role = widget.user['role'] ?? 'guest';
-    final bool isGuest = role == 'guest';
+    final String role = widget.user?['role'] ?? 'guest';
+    final bool isGuest = widget.user == null || role == 'guest';
 
-
-    if (isGuest) {
+   if (isGuest) {
       return MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
@@ -78,9 +77,10 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
 
 
-    final String lastName = widget.user['family_name'] ?? "";
-    final String firstName = widget.user['name'] ?? "";
-    final String email = widget.user['email'] ?? "";
+
+    final String lastName = widget.user?['family_name'] ?? "";
+    final String firstName = widget.user?['name'] ?? "";
+    final String email = widget.user?['email'] ?? "";
     final String initial = firstName.isNotEmpty ? firstName[0].toUpperCase() : "?";
 
     return Theme(
@@ -143,7 +143,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user)),
+                            MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user!)),
                           );
                         },
                         child: const Padding(
@@ -220,7 +220,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                         Navigator.pop(context);
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user)),
+                          MaterialPageRoute(builder: (_) => ProfilePage(user: widget.user!)),
                         );
                       },
                       style: OutlinedButton.styleFrom(

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../common/profile_badge.dart';
-import '../../../Model/core/theme/colors.dart';
-import '../../../Model/alumnis.dart';
-import '../../common/filtre_widget.dart';
+import '/View/widget/filtre_widget.dart';
+import '/Model/core/theme/colors.dart';
+import '/Model/alumnis.dart';
+import '/View/widget/profil_badge.dart';
 import 'add_alumni.dart';
 import 'alumni_detail_page.dart';
-import '../admin/admin_validate_page.dart';
+import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
 import '../../../service_locator.dart';
 import '../../../ViewModel/alumni/directory_view_model.dart';
 import '../../../l10n/app_localizations.dart'; 
+import '/service_locator.dart';
+import '/ViewModel/alumni/directory_view_model.dart';
+import '../../widget/error_pages.dart';
 
 class DirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -29,6 +32,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   final ScrollController _scrollController = ScrollController();
 
   bool get isAdmin => widget.user['role'] == 'admin';
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +67,15 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     final traductions = AppLocalizations.of(context)!;
     double screenWidth = MediaQuery.of(context).size.width;
     bool isWideScreen = screenWidth > 800;
+
+    if (viewModel.hasAccessError) {
+      return ErrorPage.forbidden(
+        onRetry: () {
+          viewModel.loadAlumnis();
+          if (isAdmin) viewModel.loadPendingRequestsCount();
+        },
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -367,20 +380,20 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     if (confirm) viewModel.deleteAlumni(student);
   }
 
-  void _displayHistory(BuildContext context) async {
+void _displayHistory(BuildContext context) async {
     final traductions = AppLocalizations.of(context)!; 
     await viewModel.loadHistory();
     final logs = viewModel.historyLogs;
 
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.history, color: AppColors.ensiCyan), 
-            SizedBox(width: 10), 
+            const Icon(Icons.history, color: AppColors.ensiCyan), 
+            const SizedBox(width: 10), 
             Text(traductions.directoryHistoryTitle)
           ]
         ),
@@ -393,22 +406,55 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                   itemCount: logs.length,
                   itemBuilder: (context, index) {
                     final log = logs[index];
-                    final bool isDelete = log['action'] == traductions.directoryActionDelete;
                     
+                    final String rawAction = log['action'] ?? 'ACTION';
+                    final String desc = log['description'] ?? '';
+                    
+                    final bool isDelete = rawAction == 'SUPPRESSION';
+                    final bool isAdd = rawAction == 'AJOUT';
+
+                    String displayAction = rawAction;
+                    if (isDelete) displayAction = traductions.directoryActionDelete;
+                    if (isAdd) displayAction = traductions.directoryActionAdd;
+
+                    String alumniName = "${log['prenom_alumni'] ?? ''} ${log['nom_alumni'] ?? ''}".trim();
+                    String editorName = "${log['prenom_editeur'] ?? ''} ${log['nom_editeur'] ?? ''}".trim();
+
+                    if (editorName.isEmpty) editorName = "Admin";
+
+                    if (alumniName.isEmpty && isDelete) {
+                       alumniName = desc.replaceAll("Suppression de ", "");
+                    } else if (alumniName.isEmpty) {
+                       alumniName = traductions.unknownUser; 
+                    }
+
+                    Color iconColor = isDelete ? Colors.red : (isAdd ? Colors.green : Colors.blue);
+                    Color bgColor = isDelete ? Colors.red[50]! : (isAdd ? Colors.green[50]! : Colors.blue[50]!);
+                    IconData iconType = isDelete ? Icons.delete_forever : (isAdd ? Icons.person_add : Icons.edit);
+
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
-                        child: Icon(
-                          isDelete ? Icons.delete_forever : Icons.person_add, 
-                          color: isDelete ? Colors.red : Colors.green, 
-                          size: 20
-                        ),
+                        backgroundColor: bgColor,
+                        child: Icon(iconType, color: iconColor, size: 20),
                       ),
                       title: Text(
-                        "${log['prenom_alumni']} ${log['nom_alumni']}", 
+                        alumniName,
                         style: const TextStyle(fontWeight: FontWeight.bold)
                       ),
-                      subtitle: Text("${log['action']} on ${log['date_action']}"),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "$displayAction ${traductions.byPrefix}$editorName ${traductions.directoryOnDate} ${log['date_action']}",
+                            style: const TextStyle(fontSize: 12, color: Colors.black87)
+                          ),
+                          if (desc.isNotEmpty && !isDelete && !isAdd)
+                            Text(
+                              desc,
+                              style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey)
+                            ),
+                        ],
+                      ),
                     );
                   },
                 ),

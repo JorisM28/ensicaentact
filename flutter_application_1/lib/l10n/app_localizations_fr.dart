@@ -9,25 +9,76 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get sectionRecherchesStages => '';
-
-  @override
-  String get deleteOfferTitle => 'Supprimer l\'offre ?';
-
-  @override
-  String get deleteOfferContent => 'Cette action est irréversible.';
+  String get sectionCommun => '';
 
   @override
   String get cancel => 'Annuler';
 
   @override
-  String get offerDeletedSuccess => 'Offre supprimée';
-
-  @override
-  String get offerDeletedError => 'Erreur lors de la suppression';
+  String get close => 'Fermer';
 
   @override
   String get deleteBtn => 'Supprimer';
+
+  @override
+  String get publish => 'Publier';
+
+  @override
+  String get yes => 'Oui';
+
+  @override
+  String get no => 'Non';
+
+  @override
+  String get required => 'Requis';
+
+  @override
+  String get validate => 'Valider';
+
+  @override
+  String get backBtn => 'Retour';
+
+  @override
+  String get reloadBtn => 'Recharger';
+
+  @override
+  String get untitled => 'Sans titre';
+
+  @override
+  String get sectionNavigation => '';
+
+  @override
+  String get homeTab => 'Accueil';
+
+  @override
+  String get eventsTab => 'Évènements';
+
+  @override
+  String get drawerMenu => 'Menu';
+
+  @override
+  String get drawerNews => 'Actualités';
+
+  @override
+  String get drawerDirectory => 'Annuaire';
+
+  @override
+  String get drawerOffers => 'Offres';
+
+  @override
+  String get drawerSchoolSite => 'Site École';
+
+  @override
+  String get drawerProposeEvent => 'Proposer un évènement';
+
+  @override
+  String get drawerJoin => 'Rejoindre';
+
+  @override
+  String get drawerModeration => 'Modération';
+
+  @override
+  String get sectionRecherchesStages => '';
 
   @override
   String get careersStagesTitle => 'Carrières & Stages';
@@ -72,9 +123,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get contactLabel => 'Contact :';
 
   @override
-  String get close => 'Fermer';
-
-  @override
   String get newInternship => 'Nouveau Stage';
 
   @override
@@ -96,7 +144,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get contactEmailLabel => 'Email contact';
 
   @override
-  String get publish => 'Publier';
+  String get deleteOfferTitle => 'Supprimer l\'offre ?';
+
+  @override
+  String get deleteOfferContent => 'Cette action est irréversible.';
+
+  @override
+  String get offerDeletedSuccess => 'Offre supprimée';
+
+  @override
+  String get offerDeletedError => 'Erreur lors de la suppression';
+
+  @override
+  String get seeAllOffers => 'Voir toutes les offres';
 
   @override
   String get sectionAnnuaireEntreprises => '';
@@ -109,6 +169,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get alumniLabel => 'alumni';
+
+  @override
+  String get companiesFilterCompany => 'Par Entreprise';
+
+  @override
+  String get companiesFilterCity => 'Par Ville';
 
   @override
   String get sectionLogin => '';
@@ -183,9 +249,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get confirmNewPassword => 'Confirmer le nouveau mot de passe';
 
   @override
-  String get required => 'Requis';
-
-  @override
   String get minCharacters => 'Minimum 6 caractères';
 
   @override
@@ -200,9 +263,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get unknownUser => 'Utilisateur';
-
-  @override
-  String get validate => 'Valider';
 
   @override
   String get sectionDirectory => '';
@@ -226,12 +286,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String directoryDeleteConfirmContent(Object name) {
     return 'Voulez-vous supprimer $name ?';
   }
-
-  @override
-  String get yes => 'Oui';
-
-  @override
-  String get no => 'Non';
 
   @override
   String get directoryHistoryTitle => 'Historique';
@@ -462,4 +516,138 @@ class AppLocalizationsFr extends AppLocalizations {
   String formMsgError(String error) {
     return 'Erreur : $error';
   }
+
+  @override
+  String get sectionWidgetsAndDialogs => '';
+
+  @override
+  String get dialogLoginRequiredNews =>
+      'Veuillez vous connecter pour publier une actualité.';
+
+  @override
+  String get dialogNewNews => 'Nouvelle Actualité';
+
+  @override
+  String get dialogTitleLabel => 'Titre';
+
+  @override
+  String get dialogImageUrlLabel => 'URL Image (optionnel)';
+
+  @override
+  String get dialogNewEvent => 'Nouvel Évènement';
+
+  @override
+  String get dialogLocationLabel => 'Lieu';
+
+  @override
+  String get dialogDateTimeLabel => 'Date et heure';
+
+  @override
+  String get addNewsTooltip => 'Ajouter une actualité';
+
+  @override
+  String get noNewsAvailable => 'Aucune actualité.';
+
+  @override
+  String get seeAllNews => 'Voir toutes les actualités';
+
+  @override
+  String get newsDeletedSuccess => 'Actualité supprimée !';
+
+  @override
+  String get addEventTooltip => 'Ajouter un évènement';
+
+  @override
+  String get noUpcomingEvents => 'Aucun événement à venir.';
+
+  @override
+  String get seeAllEvents => 'Voir tous les évènements';
+
+  @override
+  String get locationNotSpecified => 'Lieu non précisé';
+
+  @override
+  String get eventDeletedSuccess => 'Événement supprimé !';
+
+  @override
+  String get eventTitleLabel => 'Titre de l\'évènement';
+
+  @override
+  String get eventTypeMeeting => 'Rencontre';
+
+  @override
+  String get eventTypeConference => 'Conférence';
+
+  @override
+  String get eventTypeAfterwork => 'Afterwork';
+
+  @override
+  String get eventTypeWebinar => 'Webinaire';
+
+  @override
+  String get dateLabel => 'Date : ';
+
+  @override
+  String get sendProposalBtn => 'Envoyer la proposition';
+
+  @override
+  String get proposalSentSuccess => 'Proposition envoyée à l\'administrateur !';
+
+  @override
+  String get sectionErrors => '';
+
+  @override
+  String get errorOccurred => 'Une erreur est survenue';
+
+  @override
+  String get errorSomethingWentWrong =>
+      'Quelque chose s\'est mal passé. Veuillez réessayer plus tard.';
+
+  @override
+  String get errorAccessDenied => 'Accès refusé (403)';
+
+  @override
+  String get errorNoPermission =>
+      'Vous n\'avez pas les permissions requises pour voir cette page.';
+
+  @override
+  String get errorPageNotFound => 'Page introuvable (404)';
+
+  @override
+  String get errorDataNotFound =>
+      'La page ou les données que vous cherchez n\'existent pas.';
+
+  @override
+  String get errorNetwork => 'Erreur réseau';
+
+  @override
+  String get errorNoConnection =>
+      'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+
+  @override
+  String get errorTitle => 'Erreur';
+
+  @override
+  String get sectionKeyFigures => '';
+
+  @override
+  String get updateSuccess => 'Mise à jour réussie !';
+
+  @override
+  String get numberLabel => 'Chiffre';
+
+  @override
+  String get suffixLabel => 'Suffixe';
+
+  @override
+  String get titleLabelAdmin => 'Titre (Label)';
+
+  @override
+  String get iconLabel => 'Icône';
+
+  @override
+  String get blockLabel => 'Bloc';
+
+  @override
+  String get livePreview => 'Aperçu en direct';
 }

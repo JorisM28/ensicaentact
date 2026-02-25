@@ -9,25 +9,76 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get sectionRecherchesStages => '';
-
-  @override
-  String get deleteOfferTitle => 'Delete offer?';
-
-  @override
-  String get deleteOfferContent => 'This action cannot be undone.';
+  String get sectionCommun => '';
 
   @override
   String get cancel => 'Cancel';
 
   @override
-  String get offerDeletedSuccess => 'Offer deleted';
-
-  @override
-  String get offerDeletedError => 'Error deleting offer';
+  String get close => 'Close';
 
   @override
   String get deleteBtn => 'Delete';
+
+  @override
+  String get publish => 'Publish';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get required => 'Required';
+
+  @override
+  String get validate => 'Validate';
+
+  @override
+  String get backBtn => 'Back';
+
+  @override
+  String get reloadBtn => 'Reload';
+
+  @override
+  String get untitled => 'Untitled';
+
+  @override
+  String get sectionNavigation => '';
+
+  @override
+  String get homeTab => 'Home';
+
+  @override
+  String get eventsTab => 'Events';
+
+  @override
+  String get drawerMenu => 'Menu';
+
+  @override
+  String get drawerNews => 'News';
+
+  @override
+  String get drawerDirectory => 'Directory';
+
+  @override
+  String get drawerOffers => 'Offers';
+
+  @override
+  String get drawerSchoolSite => 'School Website';
+
+  @override
+  String get drawerProposeEvent => 'Propose an Event';
+
+  @override
+  String get drawerJoin => 'Join';
+
+  @override
+  String get drawerModeration => 'Moderation';
+
+  @override
+  String get sectionRecherchesStages => '';
 
   @override
   String get careersStagesTitle => 'Careers & Internships';
@@ -72,9 +123,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contactLabel => 'Contact:';
 
   @override
-  String get close => 'Close';
-
-  @override
   String get newInternship => 'New Internship';
 
   @override
@@ -96,7 +144,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contactEmailLabel => 'Contact Email';
 
   @override
-  String get publish => 'Publish';
+  String get deleteOfferTitle => 'Delete offer?';
+
+  @override
+  String get deleteOfferContent => 'This action cannot be undone.';
+
+  @override
+  String get offerDeletedSuccess => 'Offer deleted';
+
+  @override
+  String get offerDeletedError => 'Error deleting offer';
+
+  @override
+  String get seeAllOffers => 'See all offers';
 
   @override
   String get sectionAnnuaireEntreprises => '';
@@ -109,6 +169,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alumniLabel => 'alumni';
+
+  @override
+  String get companiesFilterCompany => 'By Company';
+
+  @override
+  String get companiesFilterCity => 'By City';
 
   @override
   String get sectionLogin => '';
@@ -183,9 +249,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmNewPassword => 'Confirm new password';
 
   @override
-  String get required => 'Required';
-
-  @override
   String get minCharacters => 'Minimum 6 characters';
 
   @override
@@ -199,9 +262,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknownUser => 'User';
-
-  @override
-  String get validate => 'Validate';
 
   @override
   String get sectionDirectory => '';
@@ -225,12 +285,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String directoryDeleteConfirmContent(Object name) {
     return 'Do you want to delete $name?';
   }
-
-  @override
-  String get yes => 'Yes';
-
-  @override
-  String get no => 'No';
 
   @override
   String get directoryHistoryTitle => 'History';
@@ -460,4 +514,137 @@ class AppLocalizationsEn extends AppLocalizations {
   String formMsgError(String error) {
     return 'Error: $error';
   }
+
+  @override
+  String get sectionWidgetsAndDialogs => '';
+
+  @override
+  String get dialogLoginRequiredNews => 'Please log in to publish news.';
+
+  @override
+  String get dialogNewNews => 'New News';
+
+  @override
+  String get dialogTitleLabel => 'Title';
+
+  @override
+  String get dialogImageUrlLabel => 'Image URL (optional)';
+
+  @override
+  String get dialogNewEvent => 'New Event';
+
+  @override
+  String get dialogLocationLabel => 'Location';
+
+  @override
+  String get dialogDateTimeLabel => 'Date and Time';
+
+  @override
+  String get addNewsTooltip => 'Add news';
+
+  @override
+  String get noNewsAvailable => 'No news available.';
+
+  @override
+  String get seeAllNews => 'See all news';
+
+  @override
+  String get newsDeletedSuccess => 'News deleted!';
+
+  @override
+  String get addEventTooltip => 'Add event';
+
+  @override
+  String get noUpcomingEvents => 'No upcoming events.';
+
+  @override
+  String get seeAllEvents => 'See all events';
+
+  @override
+  String get locationNotSpecified => 'Location not specified';
+
+  @override
+  String get eventDeletedSuccess => 'Event deleted!';
+
+  @override
+  String get eventTitleLabel => 'Event Title';
+
+  @override
+  String get eventTypeMeeting => 'Meeting';
+
+  @override
+  String get eventTypeConference => 'Conference';
+
+  @override
+  String get eventTypeAfterwork => 'Afterwork';
+
+  @override
+  String get eventTypeWebinar => 'Webinar';
+
+  @override
+  String get dateLabel => 'Date: ';
+
+  @override
+  String get sendProposalBtn => 'Send Proposal';
+
+  @override
+  String get proposalSentSuccess => 'Proposal sent to the administrator!';
+
+  @override
+  String get sectionErrors => '';
+
+  @override
+  String get errorOccurred => 'An Error Occurred';
+
+  @override
+  String get errorSomethingWentWrong =>
+      'Something went wrong. Please try again later.';
+
+  @override
+  String get errorAccessDenied => 'Access Denied (403)';
+
+  @override
+  String get errorNoPermission =>
+      'You do not have the required permissions to view this page.';
+
+  @override
+  String get errorPageNotFound => 'Page Not Found (404)';
+
+  @override
+  String get errorDataNotFound =>
+      'The page or data you are looking for does not exist.';
+
+  @override
+  String get errorNetwork => 'Network Error';
+
+  @override
+  String get errorNoConnection =>
+      'Unable to connect to the server. Please check your connection.';
+
+  @override
+  String get errorTitle => 'Error';
+
+  @override
+  String get sectionKeyFigures => '';
+
+  @override
+  String get updateSuccess => 'Update successful!';
+
+  @override
+  String get numberLabel => 'Number';
+
+  @override
+  String get suffixLabel => 'Suffix';
+
+  @override
+  String get titleLabelAdmin => 'Title (Label)';
+
+  @override
+  String get iconLabel => 'Icon';
+
+  @override
+  String get blockLabel => 'Block';
+
+  @override
+  String get livePreview => 'Live Preview';
 }
