@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../database_service.dart';
-import '../colors.dart';
-import '../news_page.dart';
+import '/Model/core/theme/colors.dart';
+import '/View/screens/event/news_page.dart';
 
 class ActualityWidget extends StatefulWidget {
   final Map<String, dynamic> user;

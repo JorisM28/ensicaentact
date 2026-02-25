@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../colors.dart';
-import '../database_service.dart';
+import '/Model/core/theme/colors.dart';
 
 class ProposeEventPage extends StatefulWidget {
   final Map<String, dynamic> user;

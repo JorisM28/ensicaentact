@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/home_page.dart';
+import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/admin/login_check.dart';
@@ -290,7 +290,7 @@ class _LoginState extends State<Login> {
       String role = userData['role'];
 
       if (role == 'admin' || role == 'student' || role == 'alumni') {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => PageAnnuaire(user: userData!)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage(user: userData!)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connexion Impossible !"), backgroundColor: Colors.red));
       }

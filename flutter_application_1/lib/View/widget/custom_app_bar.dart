@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/page_%C3%A9v%C3%A8nements.dart';
-import 'package:flutter_application_ensicaentact/home_page.dart';
+import 'package:flutter_application_ensicaentact/View/screens/event/event_page.dart';
+import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../colors.dart';
-import '../news_page.dart';
-import '../directory_page.dart';
-import '../job_page.dart';
-import '../moderation_page.dart';
-import '../join_page.dart';
-import '../profil_badge.dart';
-import '../widget/event_proposition_widget.dart';
+import '/Model/core/theme/colors.dart';
+import '/View/screens/event/news_page.dart';
+import '/View/screens/alumni/directory_page.dart';
+import '/View/screens/employment/job_page.dart';
+import '/View/screens/admin/moderation_page.dart';
+import '/View/screens/alumni/join_page.dart';
+import '/View/widget/profil_badge.dart';
+import 'event_proposition_widget.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Map<String, dynamic>? user;
@@ -63,7 +63,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               _buildMenuLink(context, "Acceuil", () => _naviguer(context, HomePage(user: currentUser))),
               _buildMenuLink(context, "Actualités", () => _naviguer(context, NewsPage(user: currentUser))),
               _buildMenuLink(context, "Annuaire", () => _naviguer(context, DirectoryPage(user: currentUser))),
-              _buildMenuLink(context, "Evènements", () => _naviguer(context, PageEvenements(user: currentUser))),
+              _buildMenuLink(context, "Evènements", () => _naviguer(context, EventPage(user: currentUser))),
               _buildMenuLink(context, "Offres", () => _naviguer(context, JobPage(user: currentUser))),
               _buildMenuLink(context, "ENSICAEN", _ouvrirSiteEcole),
               const Spacer(),

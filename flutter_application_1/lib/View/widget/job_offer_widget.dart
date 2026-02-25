@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../database_service.dart';
-import '../job_page.dart';
+import '/View/screens/employment/job_page.dart';
 
 class JobOfferWidget extends StatelessWidget {
   final Map<String, dynamic> user;

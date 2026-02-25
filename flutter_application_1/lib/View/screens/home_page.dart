@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'job_page.dart';
-import 'directory_page.dart';
-import 'news_page.dart';
-import 'moderation_page.dart';
-import 'add_alumni.dart';
-import 'colors.dart';
-import 'database_service.dart';
-import 'widget/actuality_widget.dart';
-import 'widget/event_widget.dart';
-import 'widget/joboffert_widget.dart';
-import 'widget/event_proposition_widget.dart';
-import 'widget/key_figures_widget.dart';
-import 'widget/custom_app_bar.dart';
+import '/View/screens/alumni/add_alumni.dart';
+import 'employment/job_page.dart';
+import '/View/screens/alumni/directory_page.dart';
+import 'event/news_page.dart';
+import 'admin/moderation_page.dart';
+import '/Model/core/theme/colors.dart';
+import '/View/widget/actuality_widget.dart';
+import '/View/widget/event_widget.dart';
+import '/View/widget/job_offer_widget.dart';
+import '/View/widget/event_proposition_widget.dart';
+import '/View/widget/key_figures_widget.dart';
+import '/View/widget/custom_app_bar.dart';
 
 class HomePage extends StatelessWidget {
   final Map<String, dynamic>? user;

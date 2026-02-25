@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../colors.dart';
-import '../database_service.dart';
+import '/Model/core/theme/colors.dart';
+import '/service_locator.dart';
+import '/Model/data/services/alumni_repository.dart';
 
 class EventPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -25,7 +26,7 @@ class _EventPageState extends State<EventPage> {
   void _loadData() async {
     if (!mounted) return;
     setState(() => _isLoading = true);
-    var data = await DatabaseService().getEvenements();    
+    var data = await sl<AlumniRepository>().getEvents();
     if (mounted) {
       setState(() {
         _event = data;

@@ -10,6 +10,11 @@ class AlumniRepository {
     return jsonList.map((e) => Alumnis.fromMap(e)).toList();
   }
 
+  Future<List<dynamic>> getEvents() async {
+    final List<dynamic> jsonList = await _api.get(ApiConstants.getEvents);
+    return jsonList.map((e) => Alumnis.fromMap(e)).toList();
+  }
+
   Future<void> addAlumni(Map<String, dynamic> data, {bool isAdmin = false}) async {
     final url = isAdmin ? ApiConstants.addAlumni : ApiConstants.requestAlumni;
     await _api.post(url, data); 

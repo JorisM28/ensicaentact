@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../Model/core/theme/colors.dart';
-import '../screens/auth/login.dart';
-import '../screens/alumni/profile.dart';
+import '/Model/core/theme/colors.dart';
+import '/View/screens/auth/login.dart';
+import '/View/screens/alumni/profile.dart';
 
 class ProfileBadge extends StatefulWidget {
   final Map<String, dynamic>? user;
@@ -78,9 +78,9 @@ class _ProfileBadgeState extends State<ProfileBadge> {
 
 
 
-    final String lastName = widget.user['family_name'] ?? "";
-    final String firstName = widget.user['name'] ?? "";
-    final String email = widget.user['email'] ?? "";
+    final String lastName = widget.user?['family_name'] ?? "";
+    final String firstName = widget.user?['name'] ?? "";
+    final String email = widget.user?['email'] ?? "";
     final String initial = firstName.isNotEmpty ? firstName[0].toUpperCase() : "?";
 
     return Theme(

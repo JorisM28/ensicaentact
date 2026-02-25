@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'add_alumni.dart'; 
-import 'colors.dart';
+import '/View/screens/alumni/add_alumni.dart';
+import '/Model/core/theme/colors.dart';
 
 class JoinPage extends StatelessWidget {
   final Map<String, dynamic> user;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'admin_validate_page.dart';
-import 'colors.dart';
+import '/View/screens/admin/admin_validate_page.dart';
+import '/Model/core/theme/colors.dart';
 
 class PageModeration extends StatelessWidget {
   final Map<String, dynamic> user;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../database_service.dart';
-import '../colors.dart';
-import '../event_page.dart';
+import '/Model/core/theme/colors.dart';
+import '/View/screens/event/event_page.dart';
 
 class EventWidget extends StatefulWidget {
   final Map<String, dynamic> user;

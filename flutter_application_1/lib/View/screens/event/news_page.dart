@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../colors.dart';
-import 'widget/custom_app_bar.dart';
-import '../database_service.dart';
+import '/View/widget/custom_app_bar.dart';
 
 class NewsPage extends StatefulWidget {
   final Map<String, dynamic> user;

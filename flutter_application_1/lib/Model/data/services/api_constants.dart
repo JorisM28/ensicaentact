@@ -7,6 +7,7 @@ class ApiConstants {
   static const String requestAlumni = '$baseUrl/request_alumni.php';
 
   static const String getHistory = '$baseUrl/get_history.php';
+  static const String getEvents = '$baseUrl/events/get_events.php';
   static const String getCompany = '$baseUrl/get_company.php';
   static const String updatePassword = '$baseUrl/update_password.php';
 
