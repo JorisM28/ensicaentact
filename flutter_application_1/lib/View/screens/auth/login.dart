@@ -4,6 +4,7 @@ import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/admin/login_check.dart';
 import '../alumni/directory_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../../l10n/app_localizations.dart';
 
 
 
@@ -72,6 +73,7 @@ class _LoginState extends State<Login> {
   }
 
   Widget _buildLoginForm() {
+    final traductions = AppLocalizations.of(context)!;
     return Column(
       key: const ValueKey(1),
       mainAxisSize: MainAxisSize.min,
@@ -90,8 +92,8 @@ class _LoginState extends State<Login> {
                 controller: _emailController,
                 textColor: AppColors.ensiCyan,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return "Email required";
-                  if (!value.contains('@')) return "Invalid email";
+                  if (value == null || value.isEmpty) return traductions.loginEmailRequired;
+                  if (!value.contains('@')) return traductions.loginInvalidEmail;
                   return null;
                 },
                 textInputAction: TextInputAction.next,
@@ -100,15 +102,15 @@ class _LoginState extends State<Login> {
 
               _buildTextField(
                 Icons.key,
-                "Password",
+                traductions.loginPasswordLabel,
                 isPassword: true,
                 controller: _passwordController,
                 textColor: AppColors.ensiCyan,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Enter a password";
+                    return traductions.loginPasswordRequired;
                   } else if (value.length < 6) {
-                    return "Password too short";
+                    return traductions.loginPasswordTooShort;
                   }
                   return null;
                 },
@@ -127,7 +129,7 @@ class _LoginState extends State<Login> {
                         throw Exception('Impossible de lancer $url');
                       }
                     },
-                    child: const Text("Forget Password ?", style : TextStyle(color: AppColors.ensiCyan,),),
+                    child: Text(traductions.loginForgetPassword, style : TextStyle(color: AppColors.ensiCyan,),),
                   ),
                 ),
               ),
@@ -143,7 +145,7 @@ class _LoginState extends State<Login> {
                     backgroundColor: AppColors.ensiCyan,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text("LOGIN", style: TextStyle(color: Colors.white, fontSize: 16)),
+                  child: Text(traductions.loginSubmitButton, style: TextStyle(color: Colors.white, fontSize: 16)),
                 ),
               ),
             ],
@@ -151,12 +153,12 @@ class _LoginState extends State<Login> {
         ),
 
         if (!_isPresentationMode) ...[
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 20),
             child: Row(
               children: [
                 Expanded(child: Divider()),
-                Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text("OR", style: TextStyle(color: Colors.grey))),
+                Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text(traductions.loginOrDivider, style: TextStyle(color: Colors.grey))),
                 Expanded(child: Divider()),
               ],
             ),
@@ -168,7 +170,7 @@ class _LoginState extends State<Login> {
             child: OutlinedButton.icon(
               onPressed: _isLoading ? null : () => _submitLogin(isMicrosoftConnection: true),
               icon: const Icon(Icons.window, color: Colors.white),
-              label: const Text("Connect with Microsoft 365", style: TextStyle(color:  Colors.white)),
+              label: Text(traductions.loginMicrosoftButton, style: TextStyle(color:  Colors.white)),
               style: OutlinedButton.styleFrom(
                 backgroundColor: AppColors.microsoftCyan,
                 foregroundColor: Colors.white,
@@ -257,6 +259,7 @@ class _LoginState extends State<Login> {
   }
 
   void _submitLogin({bool isMicrosoftConnection = false}) async {
+    final traductions = AppLocalizations.of(context)!;
     if (_isLoading) return;
 
     Map<String, dynamic>? userData;
@@ -291,11 +294,11 @@ class _LoginState extends State<Login> {
       if (role == 'admin' || role == 'student' || role == 'alumni') {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage(user: userData!)));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Connexion Impossible !"), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.loginErrorConnection), backgroundColor: Colors.red));
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userData['message'] ?? "Erreur inconnue"), backgroundColor: Colors.red),
+        SnackBar(content: Text(userData['message'] ?? traductions.loginErrorUnknown), backgroundColor: Colors.red),
       );
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../common/carte_entreprise_widget.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
+import '../../../l10n/app_localizations.dart'; 
 
 class CompaniesDirectoryPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -24,11 +25,12 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     final isWideScreen = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Annuaire des Entreprises", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(traductions.companiesDirectory, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.ensiCyan,
       ),
       body: viewModel.isLoadingCompanies
@@ -40,6 +42,8 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
   }
 
   Widget _buildList() {
+    final traductions = AppLocalizations.of(context)!; 
+
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: viewModel.allCompanies.length,
@@ -53,11 +57,11 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
               children: [
                 const Icon(Icons.business, color: AppColors.ensiCyan),
                 const SizedBox(width: 10),
-                Expanded(child: Text(item['nom_entreprise'] ?? "Inconnu", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.ensiCyan))),
+                Expanded(child: Text(item['nom_entreprise'] ?? traductions.unknownCompany, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.ensiCyan))),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(color: AppColors.ensiCyan.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                  child: Text("${item['nombre_alumni'] ?? 0} alumni", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  child: Text("${item['nombre_alumni'] ?? 0} ${traductions.alumniLabel}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),

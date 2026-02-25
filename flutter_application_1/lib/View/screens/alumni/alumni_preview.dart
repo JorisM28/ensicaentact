@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../Model/alumnis.dart';
 import '../../../ViewModel/alumni/alumni_preview_viewmodel.dart';
+import '../../../l10n/app_localizations.dart'; 
 
 class AlumniPreview extends StatelessWidget {
   final AlumniPreviewViewModel viewModel;
@@ -11,6 +12,7 @@ class AlumniPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     final alumni = viewModel.alumni;
 
     return GestureDetector(
@@ -51,7 +53,7 @@ class AlumniPreview extends StatelessWidget {
             const SizedBox(height: 40),
             const Divider(height: 1),
             const SizedBox(height: 40),
-            if (alumni.internships.isNotEmpty) _buildInternshipsList(alumni),
+            if (alumni.internships.isNotEmpty) _buildInternshipsList(alumni, traductions),
             const Spacer(),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -62,7 +64,7 @@ class AlumniPreview extends StatelessWidget {
               ),
               onPressed: () => viewModel.ouvrirPageComplete(context),
               icon: const Icon(Icons.visibility),
-              label: const Text("Voir la fiche complète"),
+              label: Text(traductions.previewSeeFullProfile),
             ),
             const SizedBox(height: 20),
           ],
@@ -87,11 +89,11 @@ class AlumniPreview extends StatelessWidget {
     );
   }
 
-  Widget _buildInternshipsList(Alumnis alumni) {
+  Widget _buildInternshipsList(Alumnis alumni, AppLocalizations traductions) {
     return Column(
       children: [
-        const Text(
-          "Stages :",
+        Text(
+          traductions.previewInternships,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),

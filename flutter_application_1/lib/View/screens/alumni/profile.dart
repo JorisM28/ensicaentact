@@ -3,6 +3,7 @@ import '../../../Model/core/theme/colors.dart';
 import '../auth/login.dart';
 import '../../../service_locator.dart';
 import '../../../Model/data/services/alumni_repository.dart';
+import '../../../l10n/app_localizations.dart'; 
 
 class ProfilePage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -16,6 +17,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
 
   void _showChangePasswordDialog(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     final TextEditingController _oldPassController = TextEditingController();
     final TextEditingController _newPassController = TextEditingController();
     final TextEditingController _confirmPassController = TextEditingController();
@@ -28,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text("Modifier le mot de passe"),
+              title: Text(traductions.modifyPassword),
               content: Form(
                 key: _formKey,
                 child: Column(
@@ -37,23 +39,23 @@ class _ProfilePageState extends State<ProfilePage> {
                     TextFormField(
                       controller: _oldPassController,
                       obscureText: true,
-                      decoration: const InputDecoration(labelText: "Ancien mot de passe"),
-                      validator: (val) => val!.isEmpty ? "Requis" : null,
+                      decoration: InputDecoration(labelText: traductions.lastPassword),
+                      validator: (val) => val!.isEmpty ? traductions.required : null,
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: _newPassController,
                       obscureText: true,
-                      decoration: const InputDecoration(labelText: "Nouveau mot de passe"),
-                      validator: (val) => val!.length < 6 ? "Minimum 6 caractères" : null,
+                      decoration: InputDecoration(labelText: traductions.newPassword),
+                      validator: (val) => val!.length < 6 ? traductions.minCharacters : null,
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
                       controller: _confirmPassController,
                       obscureText: true,
-                      decoration: const InputDecoration(labelText: "Confirmer nouveau"),
+                      decoration: InputDecoration(labelText: traductions.confirmNewPassword),
                       validator: (val) {
-                        if (val != _newPassController.text) return "Les mots de passe ne correspondent pas";
+                        if (val != _newPassController.text) return traductions.passwordsDoNotMatch;
                         return null;
                       },
                     ),
@@ -63,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Annuler"),
+                  child: Text(traductions.cancel),
                 ),
                 ElevatedButton(
                   onPressed: _isLoading ? null : () async {
@@ -82,8 +84,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Mot de passe modifié avec succès"),
+                              SnackBar(
+                                content: Text(traductions.passwordChangedSuccess),
                                 backgroundColor: Colors.green,
                               ),
                             );
@@ -93,7 +95,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text("Erreur : Impossible de modifier le mot de passe"),
+                              content: Text(traductions.passwordChangedError),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -103,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   },
                   child: _isLoading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text("Valider"),
+                      : Text(traductions.validate),
                 ),
               ],
             );
@@ -115,6 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     String firstName = widget.user['prenom'] ?? widget.user['name'] ?? "Utilisateur";
     String lastName = widget.user['nom'] ?? widget.user['family_name'] ?? "";
     String email = widget.user['email'] ?? "";
@@ -124,7 +127,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Mon Profil"),
+        title: Text(traductions.profileTitle),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
       ),
@@ -166,7 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               ListTile(
                 leading: const Icon(Icons.email, color: AppColors.ensiCyan),
-                title: const Text("Email"),
+                title: Text(traductions.profileEmail),
                 subtitle: Text(email, style: const TextStyle(fontSize: 16)),
               ),
 
@@ -174,7 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 const Divider(indent: 20, endIndent: 20),
                 ListTile(
                   leading: const Icon(Icons.phone, color: AppColors.ensiCyan),
-                  title: const Text("Téléphone"),
+                  title: Text(traductions.profilePhone),
                   subtitle: Text(phone, style: const TextStyle(fontSize: 16)),
                 ),
               ],
@@ -182,8 +185,8 @@ class _ProfilePageState extends State<ProfilePage> {
               const Divider(indent: 20, endIndent: 20),
               ListTile(
                 leading: const Icon(Icons.lock_reset, color: AppColors.ensiCyan),
-                title: const Text("Sécurité"),
-                subtitle: const Text("Modifier mon mot de passe"),
+                title: Text(traductions.profileSecurity),
+                subtitle: Text(traductions.modifyPassword),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () => _showChangePasswordDialog(context),
               ),
@@ -202,7 +205,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                   },
                   icon: const Icon(Icons.logout, color: Colors.white),
-                  label: const Text("Se déconnecter", style: TextStyle(fontSize: 18, color: Colors.white)),
+                  label: Text(traductions.profileLogout, style: TextStyle(fontSize: 18, color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red[400],
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

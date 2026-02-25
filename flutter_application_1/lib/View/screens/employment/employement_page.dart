@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
+import '../../../l10n/app_localizations.dart'; 
 
 class EmploymentPage extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -23,24 +24,26 @@ class _EmploymentPageState extends State<EmploymentPage> {
   }
 
   void _confirmDelete(String id) {
+    final traductions = AppLocalizations.of(context)!; 
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Supprimer l'offre ?"),
-        content: const Text("Cette action est irréversible."),
+        title: Text(traductions.deleteOfferTitle),
+        content: Text(traductions.deleteOfferContent),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
               bool ok = await viewModel.deleteOffer(id);
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ok ? "Offre supprimée" : "Erreur lors de la suppression"))
+                    SnackBar(content: Text(ok ? traductions.offerDeletedSuccess : traductions.offerDeletedError))
                 );
               }
             },
-            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+            child: Text(traductions.deleteBtn, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -49,9 +52,11 @@ class _EmploymentPageState extends State<EmploymentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Carrières & Stages"),
+        title: Text(traductions.careersStagesTitle),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: viewModel.loadOffers)],
@@ -63,7 +68,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                labelText: "Rechercher (Poste, Entreprise...)",
+                labelText: traductions.searchOfferHint,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 suffixIcon: viewModel.offerSearch.isNotEmpty
@@ -83,9 +88,9 @@ class _EmploymentPageState extends State<EmploymentPage> {
                 ? const Center(child: CircularProgressIndicator())
                 : Row(
               children: [
-                Expanded(child: _buildColumn("Offres d'Emploi", Colors.blue[800]!, viewModel.employmentOffers, false)),
+                Expanded(child: _buildColumn(traductions.jobOffersTitle, Colors.blue[800]!, viewModel.employmentOffers, false)),
                 Container(width: 1, color: Colors.grey[300]),
-                Expanded(child: _buildColumn("Offres de Stage", Colors.orange[800]!, viewModel.internshipOffers, true)),
+                Expanded(child: _buildColumn(traductions.internshipOffersTitle, Colors.orange[800]!, viewModel.internshipOffers, true)),
               ],
             ),
           ),
@@ -95,6 +100,8 @@ class _EmploymentPageState extends State<EmploymentPage> {
   }
 
   Widget _buildColumn(String title, Color color, List<Map<String, dynamic>> list, bool isInternship) {
+    final traductions = AppLocalizations.of(context)!; 
+
     return Column(
       children: [
         Container(
@@ -109,7 +116,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
         ),
         Expanded(
           child: list.isEmpty
-              ? const Center(child: Text("Aucune offre trouvée", style: TextStyle(color: Colors.grey)))
+              ? Center(child: Text(traductions.noOfferFound, style: const TextStyle(color: Colors.grey)))
               : ListView.builder(
             padding: const EdgeInsets.all(10),
             itemCount: list.length,
@@ -119,14 +126,14 @@ class _EmploymentPageState extends State<EmploymentPage> {
                 margin: const EdgeInsets.only(bottom: 10),
                 elevation: 2,
                 child: ListTile(
-                  title: Text(offre['titre'] ?? 'Poste', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  title: Text(offre['titre'] ?? traductions.defaultJobTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("${offre['entreprise']} - ${offre['ville']}"),
                       if (offre['nom_auteur'] != null)
                         Text(
-                            "Par: ${offre['prenom_auteur']} ${offre['nom_auteur']}",
+                            "${traductions.byPrefix}${offre['prenom_auteur']} ${offre['nom_auteur']}",
                             style: TextStyle(fontSize: 10, color: Colors.grey[600], fontStyle: FontStyle.italic)
                         ),
                     ],
@@ -172,7 +179,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
                     padding: const EdgeInsets.all(15)
                 ),
                 icon: const Icon(Icons.add),
-                label: Text(isInternship ? "Ajouter un Stage" : "Ajouter un Emploi"),
+                label: Text(isInternship ? traductions.addInternship : traductions.addJob),
                 onPressed: () => _addPopUp(isInternship, color),
               ),
             ),
@@ -182,6 +189,8 @@ class _EmploymentPageState extends State<EmploymentPage> {
   }
 
   void _seeDetail(Map<String, dynamic> o) {
+    final traductions = AppLocalizations.of(context)!; 
+
     showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -191,22 +200,24 @@ class _EmploymentPageState extends State<EmploymentPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("🏢 ${o['entreprise']} à ${o['ville']}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text("🏢 ${o['entreprise']}${traductions.atLocation}${o['ville']}", style: const TextStyle(fontWeight: FontWeight.bold)),
                 const Divider(height: 30),
-                const Text("Description :", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-                Text(o['description'] ?? "Aucune description"),
+                Text(traductions.descriptionLabel, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                Text(o['description'] ?? traductions.noDescription),
                 const SizedBox(height: 20),
-                const Text("Contact :", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                Text(traductions.contactLabel, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                 SelectableText(o['contact_email'] ?? "", style: const TextStyle(color: Colors.blue)),
               ],
             ),
           ),
-          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Fermer"))],
+          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.close))],
         )
     );
   }
 
   void _addPopUp(bool isStage, Color couleur) {
+    final traductions = AppLocalizations.of(context)!; // Appel de la traduction
+
     final tCtrl = TextEditingController();
     final cCtrl = TextEditingController();
     final vCtrl = TextEditingController();
@@ -218,32 +229,33 @@ class _EmploymentPageState extends State<EmploymentPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setStateDialog) => AlertDialog(
-          title: Text(isStage ? "Nouveau Stage" : "Nouvel Emploi"),
+          title: Text(isStage ? traductions.newInternship : traductions.newJob),
           content: SizedBox(
             width: 400,
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(controller: tCtrl, decoration: const InputDecoration(labelText: "Intitulé du poste")),
-                  TextField(controller: cCtrl, decoration: const InputDecoration(labelText: "Entreprise")),
-                  TextField(controller: vCtrl, decoration: const InputDecoration(labelText: "Ville")),
+                  TextField(controller: tCtrl, decoration: InputDecoration(labelText: traductions.jobTitleLabel)),
+                  TextField(controller: cCtrl, decoration: InputDecoration(labelText: traductions.companyLabel)),
+                  TextField(controller: vCtrl, decoration: InputDecoration(labelText: traductions.cityLabel)),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
                     value: typeSelect,
+                    // Note: On laisse CDI, CDD, Alternance tels quels car ce sont des données liées à ta BDD.
                     items: (isStage ? ['Stage'] : ['CDI', 'CDD', 'Alternance', 'Freelance'])
                         .map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                     onChanged: (v) => setStateDialog(() => typeSelect = v!),
-                    decoration: const InputDecoration(labelText: "Type"),
+                    decoration: InputDecoration(labelText: traductions.typeLabel),
                   ),
-                  TextField(controller: eCtrl, decoration: const InputDecoration(labelText: "Email contact")),
-                  TextField(controller: dCtrl, decoration: const InputDecoration(labelText: "Description"), maxLines: 3),
+                  TextField(controller: eCtrl, decoration: InputDecoration(labelText: traductions.contactEmailLabel)),
+                  TextField(controller: dCtrl, decoration: InputDecoration(labelText: traductions.descriptionField), maxLines: 3),
                 ],
               ),
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: couleur, foregroundColor: Colors.white),
               onPressed: () async {
@@ -259,7 +271,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
                   if (ok && mounted) Navigator.pop(ctx);
                 }
               },
-              child: const Text("Publier"),
+              child: Text(traductions.publish),
             ),
           ],
         ),

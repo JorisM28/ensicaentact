@@ -9,6 +9,9 @@ import 'View/screens/employment/employement_page.dart';
 import 'service_locator.dart';
 import 'ViewModel/alumni/directory_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,14 +35,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
+
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('fr', 'FR'),
-        Locale('en', 'US'),
+        Locale('fr'),
+        Locale('en'),
       ],
       title: 'Réseau Alumni',
       navigatorObservers: [routeObserver],
