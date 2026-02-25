@@ -287,7 +287,7 @@ class _LoginState extends State<Login> {
       if (role == 'admin' || role == 'student' || role == 'alumni') {
         String token = userData['token'] ?? 'microsoft_session_token';
         await sl<AuthService>().saveSession(userData, token);
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage(user: userData!)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage(user: userData!)));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Connexion Impossible !"), backgroundColor: Colors.red));
       }
