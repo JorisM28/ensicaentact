@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-<<<<<<< flutter_application_1/lib/View/screens/employment/companies_directory_page.dart
 import '../../../Model/user_model.dart';
 import '../../../View/theme/colors.dart';
 import '../../common/carte_entreprise_widget.dart';
@@ -33,14 +32,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     final isWideScreen = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
-<<<<<<< flutter_application_1/lib/View/screens/employment/companies_directory_page.dart
-      appBar: AppBar(
-        title: const Text("Annuaire des Entreprises", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: AppColors.ensiCyan,
-      ),
-=======
-        appBar: CustomAppBar(),
->>>>>>> flutter_application_1/lib/View/screens/employment/companies_directory_page.dart
+      appBar: CustomAppBar(user: widget.user),
       body: viewModel.isLoadingCompanies
           ? const Center(child: CircularProgressIndicator())
           : isWideScreen

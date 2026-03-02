@@ -52,7 +52,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: CustomAppBar(),
+        appBar: CustomAppBar(user: widget.user,),
       body: Column(
         children: [
           Padding(

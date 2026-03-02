@@ -182,7 +182,7 @@ class _JobPageState extends State<JobPage> {
     final jobList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
 
     return Scaffold(
-        appBar: CustomAppBar(),
+        appBar: CustomAppBar(user: widget.user),
       body: Column(
         children: [
           Padding(

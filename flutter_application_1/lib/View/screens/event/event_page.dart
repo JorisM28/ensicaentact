@@ -143,7 +143,7 @@ class _EventPageState extends State<EventPage> {
     ).toList();
 
     return Scaffold(
-        appBar: CustomAppBar(),
+        appBar: CustomAppBar(user: widget.user,),
       body: Column(
         children: [
           

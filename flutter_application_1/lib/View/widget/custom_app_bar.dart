@@ -65,7 +65,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               _buildMenuLink(context, "Actualités", () => _navigate(context, NewsPage(user: user))),
               _buildMenuLink(context, "Annuaire", () => _navigate(context, DirectoryPage(user: user))),
               _buildMenuLink(context, "Evènements", () => _navigate(context, EventPage(user: user))),
-              _buildMenuLink(context, "Cartes des entreprises", () => _navigate(context, CompaniesDirectoryPage(user: currentUser))),
+              _buildMenuLink(context, "Cartes des entreprises", () => _navigate(context, CompaniesDirectoryPage(user: user))),
               _buildMenuLink(context, "Offres", () => _navigate(context, JobPage(user: user))),
               _buildMenuLink(context, "ENSICAEN", _openSchoolWebsite),
 

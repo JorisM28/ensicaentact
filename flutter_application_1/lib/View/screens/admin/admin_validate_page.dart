@@ -1,12 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../../Model/user_model.dart';
 import '../../../View/theme/colors.dart';
+import '../../widget/custom_app_bar.dart';
 import '../alumni/add_alumni.dart';
 import 'package:flutter_application_ensicaentact/service_locator.dart';
 import 'package:flutter_application_ensicaentact/Model/data/services/alumni_repository.dart';
 
 class AdminValidationPage extends StatefulWidget {
-  const AdminValidationPage({super.key});
+  const AdminValidationPage({super.key, required this.user});
+  final User user;
 
   @override
   State<AdminValidationPage> createState() => _AdminValidationPageState();
@@ -21,7 +24,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(user: widget.user),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: sl<AlumniRepository>().getPendingRequests().then((list) => list.cast<Map<String, dynamic>>()),
         builder: (context, snapshot) {

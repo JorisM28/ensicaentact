@@ -12,7 +12,7 @@ class JoinPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: CustomAppBar(),
+        appBar: CustomAppBar(user: user),
       body: AddAlumniForm(
         isAdmin: false, 
         onSuccess: () {
