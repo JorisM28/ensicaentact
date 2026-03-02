@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../Model/user_model.dart';
 import '/View/widget/filtre_widget.dart';
-import '/Model/core/theme/colors.dart';
+import '../../theme/colors.dart';
 import '/Model/alumnis.dart';
 import '/View/widget/profil_badge.dart';
 import 'add_alumni.dart';
@@ -10,10 +11,9 @@ import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
 import '/service_locator.dart';
 import '/ViewModel/alumni/directory_view_model.dart';
-import '../../common/error_pages.dart';
 
 class DirectoryPage extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
   const DirectoryPage({super.key, required this.user});
 
   @override
@@ -28,7 +28,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  bool get isAdmin => widget.user['role'] == 'admin';
+  bool get isAdmin => widget.user.isAdmin;
 
   @override
   void initState() {
@@ -64,18 +64,9 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isWideScreen = screenWidth > 800;
 
-    if (viewModel.hasAccessError) {
-      return ErrorPage.forbidden(
-        onRetry: () {
-          viewModel.loadAlumnis();
-          if (isAdmin) viewModel.loadPendingRequestsCount();
-        },
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text("ENSIcaentact (${widget.user['role']})"),
+        title: Text("ENSIcaentact (${widget.user.role})"),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
         actions: [
@@ -370,7 +361,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     if (confirm) viewModel.deleteAlumni(student);
   }
 
-void _displayHistory(BuildContext context) async {
+  void _displayHistory(BuildContext context) async {
     await viewModel.loadHistory();
     final logs = viewModel.historyLogs;
 
@@ -395,53 +386,22 @@ void _displayHistory(BuildContext context) async {
                   itemCount: logs.length,
                   itemBuilder: (context, index) {
                     final log = logs[index];
+                    final bool isDelete = log['action'] == 'SUPPRESSION';
                     
-                    final String action = log['action'] ?? 'ACTION';
-                    final String desc = log['description'] ?? '';
-                    final bool isDelete = action == 'SUPPRESSION';
-                    final bool isAdd = action == 'AJOUT';
-
-                    // Noms générés depuis la base de données
-                    String alumniName = "${log['prenom_alumni'] ?? ''} ${log['nom_alumni'] ?? ''}".trim();
-                    String editorName = "${log['prenom_editeur'] ?? ''} ${log['nom_editeur'] ?? ''}".trim();
-
-                    if (editorName.isEmpty) editorName = "Admin";
-
-                    // Si l'élève a été supprimé, la jointure renvoie vide. On utilise la description.
-                    if (alumniName.isEmpty && isDelete) {
-                       alumniName = desc.replaceAll("Suppression de ", "");
-                    } else if (alumniName.isEmpty) {
-                       alumniName = "Unknown Alumni";
-                    }
-
-                    // Détermination des couleurs selon l'action
-                    Color iconColor = isDelete ? Colors.red : (isAdd ? Colors.green : Colors.blue);
-                    Color bgColor = isDelete ? Colors.red[50]! : (isAdd ? Colors.green[50]! : Colors.blue[50]!);
-                    IconData iconType = isDelete ? Icons.delete_forever : (isAdd ? Icons.person_add : Icons.edit);
-
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: bgColor,
-                        child: Icon(iconType, color: iconColor, size: 20),
+                        backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
+                        child: Icon(
+                          isDelete ? Icons.delete_forever : Icons.person_add, 
+                          color: isDelete ? Colors.red : Colors.green, 
+                          size: 20
+                        ),
                       ),
                       title: Text(
-                        alumniName,
+                        "${log['prenom_alumni']} ${log['nom_alumni']}", 
                         style: const TextStyle(fontWeight: FontWeight.bold)
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "$action by $editorName on ${log['date_action']}",
-                            style: const TextStyle(fontSize: 12, color: Colors.black87)
-                          ),
-                          if (desc.isNotEmpty && !isDelete && !isAdd)
-                            Text(
-                              desc,
-                              style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey)
-                            ),
-                        ],
-                      ),
+                      subtitle: Text("${log['action']} on ${log['date_action']}"),
                     );
                   },
                 ),

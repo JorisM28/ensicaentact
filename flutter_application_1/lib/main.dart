@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/service_locator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'Model/data/services/auth_service.dart';
+import 'Model/user_model.dart';
+import 'View/navigation.dart';
 import 'View/screens/home_page.dart';
-import '/service_locator.dart';
-import '/View/navigation.dart';
 import 'ViewModel/alumni/directory_view_model.dart';
 
-
 void main() async {
-  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   setupLocator();
   await sl<AuthService>().loadSession();
+
   runApp(
     MultiProvider(
       providers: [
@@ -20,7 +22,6 @@ void main() async {
       child: const MyApp(),
     ),
   );
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -28,14 +29,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isConnected = sl<AuthService>().isLoggedIn;
+    final authService = sl<AuthService>();
+    final bool isConnected = authService.isLoggedIn;
+    final User homeUser = isConnected && authService.currentUser != null
+        ? authService.currentUser!
+        : GuestUser();
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       navigatorObservers: [routeObserver],
-
       debugShowCheckedModeBanner: false,
       title: 'Alumni EnsiCaen',
-      home: HomePage(),
+      home: HomePage(user: homeUser),
     );
   }
 }

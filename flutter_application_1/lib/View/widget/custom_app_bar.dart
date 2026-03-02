@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/View/screens/event/event_page.dart';
 import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '/Model/core/theme/colors.dart';
+import '../../Model/user_model.dart';
+import '/View/theme/colors.dart';
 import '/View/screens/event/news_page.dart';
 import '/View/screens/alumni/directory_page.dart';
 import '/View/screens/employment/job_page.dart';
@@ -12,9 +13,9 @@ import '/View/widget/profil_badge.dart';
 import 'event_proposition_widget.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final Map<String, dynamic>? user;
+  final User user;
 
-  const CustomAppBar({super.key, this.user});
+  const CustomAppBar({super.key, required this.user});
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
@@ -33,8 +34,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     bool isDesktop = MediaQuery.of(context).size.width > 900;
-    final String role = user?['role'] ?? 'visiteur';
-    final Map<String, dynamic> currentUser = user ?? {};
+    final String role = user.role;
 
     return Container(
       color: AppColors.ensiCyan,
@@ -46,7 +46,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               onTap: () {
                 Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => HomePage(user: currentUser,))
+                    MaterialPageRoute(builder: (context) => HomePage(user: user))
                 );
               },
               child: Row(
@@ -60,31 +60,31 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             if (isDesktop) ...[
               const Spacer(),
-              _buildMenuLink(context, "Accueil", () => _naviguer(context, HomePage(user: currentUser))),
-              _buildMenuLink(context, "Actualités", () => _naviguer(context, NewsPage(user: currentUser))),
-              _buildMenuLink(context, "Annuaire", () => _naviguer(context, DirectoryPage(user: currentUser))),
-              _buildMenuLink(context, "Evènements", () => _naviguer(context, EventPage(user: currentUser))),
-              _buildMenuLink(context, "Offres", () => _naviguer(context, JobPage(user: currentUser))),
+              _buildMenuLink(context, "Accueil", () => _naviguer(context, HomePage(user: user))),
+              _buildMenuLink(context, "Actualités", () => _naviguer(context, NewsPage(user: user))),
+              _buildMenuLink(context, "Annuaire", () => _naviguer(context, DirectoryPage(user: user))),
+              _buildMenuLink(context, "Evènements", () => _naviguer(context, EventPage(user: user))),
+              _buildMenuLink(context, "Offres", () => _naviguer(context, JobPage(user: user))),
               _buildMenuLink(context, "ENSICAEN", _ouvrirSiteEcole),
               const Spacer(),
 
-              if (role == 'admin') ...[
+              if (user.isAdmin) ...[
                 _buildHeaderButton(Icons.admin_panel_settings, "Modération",
-                        () => _naviguer(context, PageModeration(user: user!))),
+                        () => _naviguer(context, PageModeration(user: user))),
               ],
 
               if (role == 'alumni' || role == 'student') ...[
                 _buildHeaderButton(
                     Icons.event_available,
                     "Proposer évènement",
-                        () => _naviguer(context, ProposeEventPage(user: user!))
+                        () => _naviguer(context, ProposeEventPage(user: user))
                 ),
                 if (role == 'alumni') ...[
                   const SizedBox(width: 10),
                   _buildHeaderButton(
                       Icons.thumb_up_alt_outlined,
                       "Rejoindre",
-                          () => _naviguer(context, JoinPage(user: user!))
+                          () => _naviguer(context, JoinPage(user: user))
                   ),
                 ],
               ],

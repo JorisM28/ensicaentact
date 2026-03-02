@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/Model/user_model.dart';
 import '/Model/data/services/alumni_repository.dart';
-import '/Model/core/theme/colors.dart';
+import '../theme/colors.dart';
 import '/service_locator.dart';
 
 class ProposeEventPage extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
   const ProposeEventPage({super.key, required this.user});
 
   @override
@@ -28,16 +29,16 @@ if (_formKey.currentState!.validate()) {
       "date_event": _selectedDate.toString(),
       "lieu": _placecontroller.text,
       "description": _descriptionController.text,
-      "id_auteur": widget.user['id_user'],
-      "nom_auteur": widget.user['nom'], 
-      "prenom_auteur": widget.user['prenom'],
-      "email_auteur": widget.user['email'],
+      "id_auteur": widget.user.id,
+      "nom_auteur": widget.user.nom,
+      "prenom_auteur": widget.user.prenom,
+      "email_auteur": widget.user.email,
     };
 
   
-      bool succes = await sl<AlumniRepository>().requestEvent(proposition);
+      bool success = await sl<AlumniRepository>().requestEvent(proposition);
 
-      if (succes && mounted) {
+      if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Proposition envoyée à l'administrateur !"))
         );

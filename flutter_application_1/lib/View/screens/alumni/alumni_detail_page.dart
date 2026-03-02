@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../Model/core/theme/colors.dart';
+import 'package:flutter_application_ensicaentact/Model/user_model.dart';
+import '../../../View/theme/colors.dart';
 import '../../../Model/alumnis.dart';
 import '../../../ViewModel/alumni/alumni_viewmodel.dart';
 
 class AlumniDetailPage extends StatefulWidget {
   final Alumnis alumni;
-  final Map<String, dynamic> user;
+  final User user;
   final VoidCallback? onSave;
 
   const AlumniDetailPage({super.key, required this.alumni, required this.user, this.onSave});
@@ -47,7 +48,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isAdmin = widget.user['role'] == 'admin';
+    final bool isAdmin = widget.user.isAdmin;
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isBig = screenWidth > 800;
 

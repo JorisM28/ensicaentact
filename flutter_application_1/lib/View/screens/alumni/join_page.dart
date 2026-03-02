@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../Model/user_model.dart';
 import '/View/screens/alumni/add_alumni.dart';
-import '/Model/core/theme/colors.dart';
+import '../../theme/colors.dart';
 
 class JoinPage extends StatelessWidget {
-  final Map<String, dynamic> user;
+  final User user;
 
   const JoinPage({super.key, required this.user});
 

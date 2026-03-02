@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../Model/core/theme/colors.dart';
+import '../../View/theme/colors.dart';
 
 class ZoneFiltres extends StatelessWidget {
   final List<String> promotionAvailable;

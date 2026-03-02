@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '/Model/core/theme/colors.dart';
+import '../../../Model/user_model.dart';
+import '../../theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
 
 class EventPage extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
   const EventPage({super.key, required this.user});
 
   @override
@@ -109,7 +110,7 @@ class _EventPageState extends State<EventPage> {
                 "lieu": lieuCtrl.text,
                 "description": descCtrl.text,
                 "date_event": dateCtrl.text,
-                "id_auteur": widget.user['id_user'] ?? "0",
+                "id_auteur": widget.user.id,
               };
 
               bool success;
@@ -134,7 +135,7 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool isAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = widget.user.isAdmin;
     final evFiltres = _event.where((e) => 
       (e['titre'] ?? '').toLowerCase().contains(_search.toLowerCase()) ||
       (e['lieu'] ?? '').toLowerCase().contains(_search.toLowerCase())

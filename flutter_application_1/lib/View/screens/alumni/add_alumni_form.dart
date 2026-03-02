@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
+import '../../../View/theme/colors.dart';
 import 'add_alumni.dart';
 
 void main() {

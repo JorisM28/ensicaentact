@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../View/screens/auth/login.dart';
-import '../../Model/core/theme/colors.dart';
+import '../theme/colors.dart';
 
 class ErrorPage extends StatelessWidget {
   final String title;

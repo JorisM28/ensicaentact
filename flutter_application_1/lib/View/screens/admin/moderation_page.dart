@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../Model/user_model.dart';
 import '/View/screens/admin/admin_validate_page.dart';
-import '/Model/core/theme/colors.dart';
+import '../../theme/colors.dart';
 
 class PageModeration extends StatelessWidget {
-  final Map<String, dynamic> user;
+  final User user;
 
   const PageModeration({super.key, required this.user});
 

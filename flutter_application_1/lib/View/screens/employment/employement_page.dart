@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
+import '../../../View/theme/colors.dart';
 import '../../../ViewModel/employment_viewmodel.dart';
+import '../../../Model/user_model.dart';
 
 class EmploymentPage extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
   const EmploymentPage({super.key, required this.user});
 
   @override

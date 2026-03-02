@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../Model/user_model.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/View/screens/employment/job_page.dart';
 
 class JobOfferWidget extends StatelessWidget {
-  final Map<String, dynamic> user;
+  final User user;
 
   const JobOfferWidget({super.key, required this.user});
 

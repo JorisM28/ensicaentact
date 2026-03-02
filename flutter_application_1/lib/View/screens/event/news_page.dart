@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../Model/user_model.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 
 
 class NewsPage extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
   const NewsPage({super.key, required this.user});
 
   @override
@@ -140,14 +141,14 @@ class _NewsPageState extends State<NewsPage> {
               if (titleCtrl.text.isEmpty) return;
 
 
-              print("👤 Auteur ID envoyé : ${widget.user['id_user']}");
+              print("👤 Auteur ID envoyé : ${widget.user.id}");
 
-              await await sl<AlumniRepository>().addNews({
+              await sl<AlumniRepository>().addNews({
                 "titre": titleCtrl.text,
                 "contenu": contentCtrl.text,
                 "description": contentCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": widget.user['id_user'] ?? "1",
+                "auteur_id": widget.user.id,
                 "tag": "NEWS",
                 "date_publi": DateTime.now().toIso8601String(),
               });
@@ -166,11 +167,11 @@ class _NewsPageState extends State<NewsPage> {
   Widget build(BuildContext context) {
     final actusFiltrees = _news.where((a) =>
         (a['titre'] ?? '').toLowerCase().contains(_search.toLowerCase())).toList();
-    bool isAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = widget.user.isAdmin;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(user: widget.user,),
       floatingActionButton: isAdmin
           ? FloatingActionButton(
         backgroundColor: const Color(0xFF1A1A1A),
