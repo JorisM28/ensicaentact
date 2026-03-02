@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../Model/user_model.dart';
-import '/View/widget/error_pages.dart';
 import '/View/widget/filtre_widget.dart';
 import '../../theme/colors.dart';
 import '/Model/alumnis.dart';
-import '/View/widget/profil_badge.dart';
 import 'add_alumni.dart';
 import '/View/widget/custom_app_bar.dart';
 import 'alumni_detail_page.dart';
@@ -67,23 +65,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     bool isWideScreen = screenWidth > 800;
 
     return Scaffold(
-<<<<<<< flutter_application_1/lib/View/screens/alumni/directory_page.dart
-      appBar: AppBar(
-        title: Text("ENSIcaentact (${widget.user.role})"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-        actions: [
-          if (isAdmin)
-            IconButton(
-              icon: const Icon(Icons.history),
-              onPressed: () => _displayHistory(context),
-            ),
-          ProfileBadge(user: widget.user),
-        ],
-      ),
-=======
-        appBar: CustomAppBar(),
->>>>>>> flutter_application_1/lib/View/screens/alumni/directory_page.dart
+      appBar: CustomAppBar(user: widget.user,),
       floatingActionButton: isAdmin ? _buildFabStack() : null,
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -324,7 +306,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
         FloatingActionButton(
           backgroundColor: Colors.orange,
           heroTag: 'btn_pending_requests',
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminValidationPage())).then((_) {
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AdminValidationPage(user: widget.user,))).then((_) {
             viewModel.loadPendingRequestsCount();
             viewModel.loadAlumnis();
           }),

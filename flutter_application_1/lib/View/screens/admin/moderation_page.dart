@@ -13,9 +13,8 @@ class PageModeration extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: CustomAppBar(),
-     
-      body: const AdminValidationPage(),
+      appBar: CustomAppBar(user: user),
+      body: AdminValidationPage(user: user),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/Model/user_model.dart';
 import '../../../View/theme/colors.dart';
 import '/View/widget/custom_app_bar.dart';
 import 'add_alumni.dart';
@@ -30,7 +31,7 @@ class AddAlumniPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(user: GuestUser(),),
       body: AddAlumniForm(),
     );
   }

@@ -54,7 +54,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     final bool isBig = screenWidth > 800;
 
     return Scaffold(
-        appBar: CustomAppBar(),
+        appBar: CustomAppBar(user: widget.user),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
