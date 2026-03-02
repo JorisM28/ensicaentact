@@ -6,8 +6,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 class CompaniesMapWidget extends StatefulWidget {
   final List<Map<String, dynamic>> companies;
   
-  // NOUVEAU : On informe la carte si on a cliqué sur un élément
-  final bool isFiltered; 
+  final bool isFiltered;
 
   const CompaniesMapWidget({
     super.key, 

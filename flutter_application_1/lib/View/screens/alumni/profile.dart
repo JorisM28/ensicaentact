@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
+import '../../../Model/user_model.dart';
+import '../../../View/theme/colors.dart';
 import '../auth/login.dart';
 import '../../../service_locator.dart';
 import '../../../Model/data/services/alumni_repository.dart';
 
 class ProfilePage extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
 
   const ProfilePage({super.key, required this.user});
 
@@ -16,11 +17,11 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
 
   void _showChangePasswordDialog(BuildContext context) {
-    final TextEditingController _oldPassController = TextEditingController();
-    final TextEditingController _newPassController = TextEditingController();
-    final TextEditingController _confirmPassController = TextEditingController();
-    final _formKey = GlobalKey<FormState>();
-    bool _isLoading = false;
+    final TextEditingController oldPassController = TextEditingController();
+    final TextEditingController newPassController = TextEditingController();
+    final TextEditingController confirmPassController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool isLoading = false;
 
     showDialog(
       context: context,
@@ -30,30 +31,30 @@ class _ProfilePageState extends State<ProfilePage> {
             return AlertDialog(
               title: const Text("Modifier le mot de passe"),
               content: Form(
-                key: _formKey,
+                key: formKey,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextFormField(
-                      controller: _oldPassController,
+                      controller: oldPassController,
                       obscureText: true,
                       decoration: const InputDecoration(labelText: "Ancien mot de passe"),
                       validator: (val) => val!.isEmpty ? "Requis" : null,
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
-                      controller: _newPassController,
+                      controller: newPassController,
                       obscureText: true,
                       decoration: const InputDecoration(labelText: "Nouveau mot de passe"),
                       validator: (val) => val!.length < 6 ? "Minimum 6 caractères" : null,
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
-                      controller: _confirmPassController,
+                      controller: confirmPassController,
                       obscureText: true,
                       decoration: const InputDecoration(labelText: "Confirmer nouveau"),
                       validator: (val) {
-                        if (val != _newPassController.text) return "Les mots de passe ne correspondent pas";
+                        if (val != newPassController.text) return "Les mots de passe ne correspondent pas";
                         return null;
                       },
                     ),
@@ -66,18 +67,18 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: const Text("Annuler"),
                 ),
                 ElevatedButton(
-                  onPressed: _isLoading ? null : () async {
-                    if (_formKey.currentState!.validate()) {
-                      setState(() => _isLoading = true);
+                  onPressed: isLoading ? null : () async {
+                    if (formKey.currentState!.validate()) {
+                      setState(() => isLoading = true);
 
                       try {
                           await sl<AlumniRepository>().updatePassword({
-                            'email': widget.user['email'],
-                            'old_password': _oldPassController.text,
-                            'new_password': _newPassController.text
+                            'email': widget.user.email,
+                            'old_password': oldPassController.text,
+                            'new_password': newPassController.text
                           });
 
-                          setState(() => _isLoading = false);
+                          setState(() => isLoading = false);
                           Navigator.pop(context);
 
                           if (mounted) {
@@ -89,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             );
                           }
                       } catch (e) {
-                        setState(() => _isLoading = false);
+                        setState(() => isLoading = false);
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -101,7 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       }
                     }
                   },
-                  child: _isLoading
+                  child: isLoading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text("Valider"),
                 ),
@@ -115,11 +116,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    String firstName = widget.user['prenom'] ?? widget.user['name'] ?? "Utilisateur";
-    String lastName = widget.user['nom'] ?? widget.user['family_name'] ?? "";
-    String email = widget.user['email'] ?? "";
-    String role = widget.user['role'] ?? "";
-    String phone = widget.user['phone'] ?? "";
+    String firstName = widget.user.nom;
+    String lastName = widget.user.prenom;
+    String email = widget.user.email;
+    String role = widget.user.role;
+    String phone = widget.user.phone;
 
 
     return Scaffold(

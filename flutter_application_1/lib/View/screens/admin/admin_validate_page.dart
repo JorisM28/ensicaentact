@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '/View/widget/custom_app_bar.dart';
-import '/Model/core/theme/colors.dart';
-import '/View/screens/alumni/add_alumni.dart';
+import '../../../View/theme/colors.dart';
+import '../alumni/add_alumni.dart';
 import 'package:flutter_application_ensicaentact/service_locator.dart';
 import 'package:flutter_application_ensicaentact/Model/data/services/alumni_repository.dart';
 

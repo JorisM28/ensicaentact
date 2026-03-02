@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
+import '../../../Model/user_model.dart';
+import '../../../View/theme/colors.dart';
 import '../../../Model/alumnis.dart';
 import '../../../ViewModel/alumni/alumni_preview_viewmodel.dart';
 
 class AlumniPreview extends StatelessWidget {
   final AlumniPreviewViewModel viewModel;
 
-  AlumniPreview({super.key, required Alumnis alumni, required Map<String, dynamic> user})
+  AlumniPreview({super.key, required Alumnis alumni, required User user})
       : viewModel = AlumniPreviewViewModel(alumni: alumni, user: user);
 
   @override

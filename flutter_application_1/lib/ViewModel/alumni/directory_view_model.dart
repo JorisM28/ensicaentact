@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
+import 'package:flutter_application_ensicaentact/Model/user_model.dart';
 import '../../Model/alumnis.dart';
 import '../../Model/data/services/alumni_repository.dart';
 import 'package:flutter_application_ensicaentact/service_locator.dart';
@@ -7,7 +8,7 @@ import 'package:flutter_application_ensicaentact/service_locator.dart';
 class DirectoryViewModel extends ChangeNotifier {
   final AlumniRepository _repository;
 
-  final Map<String, dynamic> user = sl<AuthService>().currentUser!;
+  final User user = sl<AuthService>().currentUser!;
   DirectoryViewModel({required AlumniRepository repository}) : _repository = repository;
 
   List<Alumnis> _allAlumnis = [];
@@ -27,9 +28,9 @@ class DirectoryViewModel extends ChangeNotifier {
 
   String _searchQuery = "";
   
-  Set<String> _selectedPromotion = {};
-  Set<String> _selectedSectors = {};
-  Set<String> _selectedCountries = {};
+  final Set<String> _selectedPromotion = {};
+  final Set<String> _selectedSectors = {};
+  final Set<String> _selectedCountries = {};
   List<String> get promosAvailable => _allAlumnis.map((e) => e.promotion  .toString()).toSet().toList()..sort();
   List<String> get sectorAvailable => _allAlumnis.map((e) => e.sector).where((e) => e.isNotEmpty).toSet().toList()..sort();
   

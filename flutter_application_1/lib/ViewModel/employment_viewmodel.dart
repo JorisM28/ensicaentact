@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/Model/user_model.dart';
 import '../../../service_locator.dart';
 import '../Model/data/services/alumni_repository.dart';
 
 class CareerViewModel extends ChangeNotifier {
-  final Map<String, dynamic> user;
+  final User user;
 
   List<Map<String, dynamic>> allOffers = [];
   List<Map<String, dynamic>> allCompanies = [];
@@ -14,10 +15,10 @@ class CareerViewModel extends ChangeNotifier {
 
   CareerViewModel({required this.user});
 
-  String get myId => user['id'].toString();
-  String get role => user['role'] ?? 'guest';
-  bool get isAdmin => role == 'admin';
-  bool get canAddOffer => isAdmin || role == 'alumni';
+  String get myId => user.id;
+  String get role => user.role;
+  bool get isAdmin => user.isAdmin;
+  bool get canAddOffer => user.canEdit;
 
   bool _hasAccessError = false;
   bool get hasAccessError => _hasAccessError;

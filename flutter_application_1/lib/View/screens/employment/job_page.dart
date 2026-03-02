@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/Model/user_model.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
-import '/Model/core/theme/colors.dart';
+import '../../theme/colors.dart';
 
 import '/View/widget/custom_app_bar.dart';
 class JobPage extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
 
   const JobPage({super.key, required this.user});
 
@@ -117,7 +118,7 @@ class _JobPageState extends State<JobPage> {
                 onPressed: () async { 
                   if (titreCtrl.text.isNotEmpty && entCtrl.text.isNotEmpty) {
                     
-                    String monId = (widget.user['id_user'] ?? widget.user['id']).toString();
+                    String monId = (widget.user.id).toString();
 
                     final Map<String, dynamic> dataToSend = {
                       "titre": titreCtrl.text,
@@ -132,7 +133,7 @@ class _JobPageState extends State<JobPage> {
                     bool success;
                     if (isEditing) {
                       dataToSend["id_offre"] = existingOffer['id_offre'].toString();
-                      success = await sl<AlumniRepository>().addOffer(dataToSend);;
+                      success = await sl<AlumniRepository>().addOffer(dataToSend);
                     } else {
                       success = await sl<AlumniRepository>().updateOffer(dataToSend);
                     }
@@ -161,10 +162,10 @@ class _JobPageState extends State<JobPage> {
 
   @override
   Widget build(BuildContext context) {
-    String role = widget.user['role'] ?? 'guest';
+    String role = widget.user.role;
     
 
-    String myId = (widget.user['id_user'] ?? widget.user['id'] ?? '0').toString();
+    String myId = (widget.user.id).toString();
     
     bool isAdmin = (role == 'admin');
     bool isAlumni = (role == 'alumni');

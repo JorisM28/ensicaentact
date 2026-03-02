@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/Model/core/theme/colors.dart';
+import '../../../View/theme/colors.dart';
 import '/View/widget/custom_app_bar.dart';
 import 'add_alumni.dart';
 

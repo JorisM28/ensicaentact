@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../Model/user_model.dart'; // <-- NOUVEL IMPORT À AJOUTER
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
-import '/Model/core/theme/colors.dart';
+import '/View/theme/colors.dart';
 import '/View/screens/event/news_page.dart';
 
 class ActualityWidget extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user; // <-- TYPAGE FORT ICI
   final VoidCallback? onAddPress;
 
   const ActualityWidget({super.key, required this.user, this.onAddPress});
@@ -51,19 +52,16 @@ class _ActualityWidgetState extends State<ActualityWidget> {
             onPressed: () async {
               Navigator.pop(ctx);
 
-
               var rawId = item['id_actu'];
               if (rawId == null) {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur: ID introuvable")));
                 return;
               }
 
-
               bool success = await sl<AlumniRepository>().deleteNews(rawId);
 
               if (success && mounted) {
                 setState(() {
-
                   _news.removeWhere((element) => element['id_actu'].toString() == rawId.toString());
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -94,12 +92,13 @@ class _ActualityWidgetState extends State<ActualityWidget> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     final displayList = _news.take(2).toList();
-    bool isAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = widget.user.isAdmin;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

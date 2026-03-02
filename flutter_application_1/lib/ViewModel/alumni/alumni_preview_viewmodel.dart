@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/Model/user_model.dart';
 import '../../../Model/alumnis.dart';
 import '../../../View/screens/alumni/alumni_detail_page.dart';
 
 class AlumniPreviewViewModel {
   final Alumnis alumni;
-  final Map<String, dynamic> user;
+  final User user;
 
   AlumniPreviewViewModel({required this.alumni, required this.user});
 
-  bool get isAdmin => user['role'] == 'admin';
+  bool get isAdmin => user.isAdmin;
 
   String get jobAndCompany {
     if (alumni.job.isEmpty && alumni.company.isEmpty) return "";

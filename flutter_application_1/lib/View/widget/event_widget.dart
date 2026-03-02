@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/Model/user_model.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
-import '/Model/core/theme/colors.dart';
+import '../theme/colors.dart';
 import '/View/screens/event/event_page.dart';
 
 class EventWidget extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user;
   final VoidCallback? onAddPress;
 
   const EventWidget({super.key, required this.user, this.onAddPress});
@@ -76,7 +77,7 @@ class _EventWidgetState extends State<EventWidget> {
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     final displayList = _events.take(3).toList();
-    bool isAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = widget.user.isAdmin;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
