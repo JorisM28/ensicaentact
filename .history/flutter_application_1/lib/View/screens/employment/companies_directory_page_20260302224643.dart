@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import '/View/widget/company_card_widget.dart';
 import '/View/widget/error_pages.dart';
 import '/View/widget/custom_app_bar.dart';
-import '/View/theme/colors.dart';
-import '/ViewModel/employment_viewmodel.dart';
 
 
 class CompaniesDirectoryPage extends StatefulWidget {
-  const CompaniesDirectoryPage({super.key});
+  final Map<String, dynamic> user;
+  const CompaniesDirectoryPage({super.key, required this.user});
 
   @override
   State<CompaniesDirectoryPage> createState() => _CompaniesDirectoryPageState();
@@ -22,7 +21,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
   @override
   void initState() {
     super.initState();
-    viewModel = CareerViewModel();
+    viewModel = CareerViewModel(user: widget.user);
     viewModel.loadCompanies();
     viewModel.addListener(() => setState(() {}));
   }
@@ -92,7 +91,12 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     final mapData = _getMapData();
 
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: AppBar(
+        title: const Text("Annuaire des Entreprises", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.ensiCyan,
+        foregroundColor: Colors.white,
+      ),
+        appBar: CustomAppBar(),
       body: viewModel.isLoadingCompanies
           ? const Center(child: CircularProgressIndicator())
           : Column(

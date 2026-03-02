@@ -75,7 +75,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
               const Spacer(),
 
-              if (currentUser != null && currentUser.isAdmin) ...[
+              if (currentUser!.isAdmin) ...[
                 _buildHeaderButton(Icons.admin_panel_settings, "Modération",
                         () => _navigate(context, PageModeration())),
               ],

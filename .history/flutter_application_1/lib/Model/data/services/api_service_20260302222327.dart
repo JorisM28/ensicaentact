@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/material.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -27,11 +28,14 @@ class ApiService {
         requestHeaders['Authorization'] = 'Bearer $token';
         requestHeaders['X-Authorization'] = 'Bearer $token';
       }
+      debugPrint("🚀 [GET] Vers : $url");
+      debugPrint("🔑 [TOKEN ENVOYÉ] : $token");
 
       final response = await http.get(Uri.parse(url), headers: requestHeaders);
       return _processResponse(response);
     } catch (e) {
-      throw Exception("Erreur réseau (GET): $e");
+      debugPrint("⚠️ Erreur interceptée (GET): $e");
+      return [];
       
     }
   }
@@ -45,6 +49,8 @@ class ApiService {
         requestHeaders['Authorization'] = 'Bearer $token';
         requestHeaders['X-Authorization'] = 'Bearer $token';
       }
+      debugPrint("🚀 [POST] Vers : $url");
+      debugPrint("🔑 [TOKEN ENVOYÉ] : $token");
 
       final response = await http.post(
         Uri.parse(url),
@@ -53,18 +59,19 @@ class ApiService {
       );
       return _processResponse(response);
     } catch (e) {
-      throw Exception("Erreur réseau (POST): $e");
+      debugPrint("⚠️ Erreur interceptée (POST): $e");
+      return [];
     }
   }
 
   dynamic _processResponse(http.Response response) {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) return {};
-      return jsonDecode(response.body);
-    } else if (response.statusCode == 401 || response.statusCode == 403) {
-      throw Exception("Non autorisé (Token invalide ou expiré)");
-    } else {
-      throw Exception("Erreur Serveur ${response.statusCode}: ${response.body}");
-    }
+  if (response.statusCode >= 200 && response.statusCode < 300) {
+    if (response.body.isEmpty) return null;
+    return jsonDecode(response.body);
+  } else if (response.statusCode == 401 || response.statusCode == 403) {
+    throw Exception("Visiteur non autorisé : C'est normal !");
+  } else {
+    throw Exception("Erreur Serveur ${response.statusCode}");
   }
+}
 }

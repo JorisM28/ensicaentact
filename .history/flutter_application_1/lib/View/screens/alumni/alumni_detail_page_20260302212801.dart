@@ -55,7 +55,44 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     final bool isBig = screenWidth > 800;
 
     return Scaffold(
-      appBar: CustomAppBar(),
+        appBar: CustomAppBar(),
+        floatingActionButton: isAdmin ? FloatingActionButton.extended(
+        onPressed: () async {
+          if (viewModel.isEdited) {
+            try {
+              await viewModel.save(context, widget.onSave);
+              
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Profil mis à jour avec succès !"), 
+                    backgroundColor: Colors.green
+                  ),
+                );
+              }
+            } catch (e) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Erreur lors de la sauvegarde : $e"), 
+                    backgroundColor: Colors.red
+                  ),
+                );
+              }
+            }
+          } else {
+            setState(() {
+              viewModel.isEdited = true;
+            });
+          }
+        },
+        backgroundColor: viewModel.isEdited ? Colors.green : AppColors.ensiCyan,
+        icon: Icon(viewModel.isEdited ? Icons.save : Icons.edit, color: Colors.white),
+        label: Text(
+          viewModel.isEdited ? "Enregistrer" : "Modifier",
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ) : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Stack(
         children: [

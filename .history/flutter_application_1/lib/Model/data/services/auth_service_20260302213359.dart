@@ -11,13 +11,7 @@ class AuthService {
   Future<void> saveSession(User user, String token) async {
     currentUser = user;
     await _storage.write(key: 'jwt_token', value: token);
-    Map<String, dynamic> userDataMap = {
-        'role': user.role,
-        'email': user.email,
-        'prenom': user.firstname,
-        'nom': user.lastname,
-      };
-    await _storage.write(key: 'user_data', value: jsonEncode(userDataMap));
+    await _storage.write(key: 'user_data', value: jsonEncode(user));
   }
 
   Future<void> logout() async {

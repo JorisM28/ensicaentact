@@ -3,11 +3,12 @@ import '/View/widget/company_card_widget.dart';
 import '/View/widget/error_pages.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/View/theme/colors.dart';
-import '/ViewModel/employment_viewmodel.dart';
+import '/ViewModel/employement_viewmodel.dart';
 
 
 class CompaniesDirectoryPage extends StatefulWidget {
-  const CompaniesDirectoryPage({super.key});
+  final Map<String, dynamic> user;
+  const CompaniesDirectoryPage({super.key, required this.user});
 
   @override
   State<CompaniesDirectoryPage> createState() => _CompaniesDirectoryPageState();
@@ -22,7 +23,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
   @override
   void initState() {
     super.initState();
-    viewModel = CareerViewModel();
+    viewModel = CareerViewModel(user: widget.user);
     viewModel.loadCompanies();
     viewModel.addListener(() => setState(() {}));
   }

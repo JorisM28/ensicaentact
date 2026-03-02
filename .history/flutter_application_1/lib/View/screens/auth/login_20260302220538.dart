@@ -269,6 +269,7 @@ class _LoginState extends State<Login> {
 
   void _submitLogin({bool isMicrosoftConnection = false}) async {
     if (_isLoading) return;
+    final userdata;
     if (!isMicrosoftConnection && !_formkey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -312,6 +313,8 @@ class _LoginState extends State<Login> {
       final user = result.user!;
 
       if (user.role == 'admin' || user.role == 'student' || user.role == 'alumni') {
+        debugPrint("=== DEBUG TOKEN ===");
+        debugPrint("Token renvoyé par le PHP : ${result.token}");
         String tokenToSave = result.token ?? 'microsoft_session_token';
         await sl<AuthService>().saveSession(user, tokenToSave);
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage()));

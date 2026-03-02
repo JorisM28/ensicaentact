@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/material.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -27,6 +28,8 @@ class ApiService {
         requestHeaders['Authorization'] = 'Bearer $token';
         requestHeaders['X-Authorization'] = 'Bearer $token';
       }
+      debugPrint("🚀 [GET] Vers : $url");
+      debugPrint("🔑 [TOKEN ENVOYÉ] : $token");
 
       final response = await http.get(Uri.parse(url), headers: requestHeaders);
       return _processResponse(response);

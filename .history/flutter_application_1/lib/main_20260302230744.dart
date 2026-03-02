@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import '/service_locator.dart';
+import 'package:flutter_application_ensicaentact/service_locator.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'Model/data/services/auth_service.dart';
 import 'View/navigation.dart';
 import 'ViewModel/alumni/directory_view_model.dart';
 import 'View/screens/home_page.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 
 void main() async {
@@ -41,8 +40,8 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [
-        Locale('fr', 'FR'),
-        Locale('en', 'US'),
+        Locale('fr', 'FR'), // Ton application parlera français !
+        Locale('en', 'US'), // Anglais en solution de secours
       ],
       home: HomePage(),
     );

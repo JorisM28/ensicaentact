@@ -25,7 +25,7 @@ class ApiService {
       
       if (token != null) {
         requestHeaders['Authorization'] = 'Bearer $token';
-        requestHeaders['X-Authorization'] = 'Bearer $token';
+        requestHeaders['X-Authorization'] = 'Bearer $token'; // Le bypass pour Apache
       }
 
       final response = await http.get(Uri.parse(url), headers: requestHeaders);
@@ -43,7 +43,7 @@ class ApiService {
       
       if (token != null) {
         requestHeaders['Authorization'] = 'Bearer $token';
-        requestHeaders['X-Authorization'] = 'Bearer $token';
+        requestHeaders['X-Authorization'] = 'Bearer $token'; // Le bypass pour Apache
       }
 
       final response = await http.post(

@@ -14,7 +14,7 @@ class AuthService {
     Map<String, dynamic> userDataMap = {
         'role': user.role,
         'email': user.email,
-        'prenom': user.firstname,
+        'prenom': user.firstname, // Adapte les noms selon les propriétés de ton modèle User
         'nom': user.lastname,
       };
     await _storage.write(key: 'user_data', value: jsonEncode(userDataMap));

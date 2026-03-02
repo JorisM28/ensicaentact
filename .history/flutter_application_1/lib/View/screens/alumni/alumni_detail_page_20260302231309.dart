@@ -55,7 +55,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     final bool isBig = screenWidth > 800;
 
     return Scaffold(
-      appBar: CustomAppBar(),
+        appBar: CustomAppBar(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Stack(
         children: [
