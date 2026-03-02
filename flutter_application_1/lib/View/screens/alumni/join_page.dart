@@ -3,6 +3,7 @@ import '../../../Model/user_model.dart';
 import '/View/screens/alumni/add_alumni.dart';
 import '../../theme/colors.dart';
 
+import '/View/widget/custom_app_bar.dart';
 class JoinPage extends StatelessWidget {
   final User user;
 
@@ -11,11 +12,7 @@ class JoinPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Rejoindre le réseau"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-      ),
+        appBar: CustomAppBar(),
       body: AddAlumniForm(
         isAdmin: false, 
         onSuccess: () {

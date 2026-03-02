@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'Model/data/services/auth_service.dart';
 import 'Model/user_model.dart';
 import 'View/navigation.dart';
-import 'View/screens/home_page.dart';
 import 'ViewModel/alumni/directory_view_model.dart';
+import 'View/screens/home_page.dart';
+import '/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

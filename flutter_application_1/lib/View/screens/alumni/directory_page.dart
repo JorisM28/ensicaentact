@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../Model/user_model.dart';
+import '/View/widget/error_pages.dart';
 import '/View/widget/filtre_widget.dart';
 import '../../theme/colors.dart';
 import '/Model/alumnis.dart';
 import '/View/widget/profil_badge.dart';
 import 'add_alumni.dart';
+import '/View/widget/custom_app_bar.dart';
 import 'alumni_detail_page.dart';
 import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
@@ -65,6 +67,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     bool isWideScreen = screenWidth > 800;
 
     return Scaffold(
+<<<<<<< flutter_application_1/lib/View/screens/alumni/directory_page.dart
       appBar: AppBar(
         title: Text("ENSIcaentact (${widget.user.role})"),
         backgroundColor: AppColors.ensiCyan,
@@ -78,6 +81,9 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
           ProfileBadge(user: widget.user),
         ],
       ),
+=======
+        appBar: CustomAppBar(),
+>>>>>>> flutter_application_1/lib/View/screens/alumni/directory_page.dart
       floatingActionButton: isAdmin ? _buildFabStack() : null,
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../View/theme/colors.dart';
+import '/View/widget/custom_app_bar.dart';
 import 'add_alumni.dart';
 
 void main() {
@@ -29,11 +30,7 @@ class AddAlumniPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Ajouter un Alumni"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-      ),
+      appBar: CustomAppBar(),
       body: AddAlumniForm(),
     );
   }
