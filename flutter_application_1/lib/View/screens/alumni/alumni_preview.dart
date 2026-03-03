@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
 import '../../../Model/alumnis.dart';
 import '../../../ViewModel/alumni/alumni_preview_viewmodel.dart';
 import '../../../l10n/app_localizations.dart'; 
 
+import '/View/theme/colors.dart';
+import '/Model/alumnis.dart';
+import '/ViewModel/alumni/alumni_preview_viewmodel.dart';
 class AlumniPreview extends StatelessWidget {
   final AlumniPreviewViewModel viewModel;
 
-  AlumniPreview({super.key, required Alumnis alumni, required Map<String, dynamic> user})
-      : viewModel = AlumniPreviewViewModel(alumni: alumni, user: user);
+  AlumniPreview({super.key, required Alumnis alumni})
+      : viewModel = AlumniPreviewViewModel(alumni: alumni);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +18,7 @@ class AlumniPreview extends StatelessWidget {
     final alumni = viewModel.alumni;
 
     return GestureDetector(
-      onDoubleTap: () => viewModel.ouvrirPageComplete(context),
+      onDoubleTap: () => viewModel.openFullPage(context),
       child: Container(
         padding: const EdgeInsets.all(30),
         color: Colors.white,
@@ -27,15 +29,15 @@ class AlumniPreview extends StatelessWidget {
             Hero(
               tag: alumni.email,
               child: CircleAvatar(
-                radius: 70,
+                radius: 40,
                 backgroundColor: AppColors.ensiCyan,
                 child: Text(
                   alumni.firstname.isNotEmpty ? alumni.firstname[0] : "?",
-                  style: const TextStyle(fontSize: 60, color: Colors.white),
+                  style: const TextStyle(fontSize: 30, color: Colors.white),
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             Text(
               alumni.wholeName,
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -48,11 +50,11 @@ class AlumniPreview extends StatelessWidget {
                 style: TextStyle(fontSize: 18, color: Colors.grey[700]),
                 textAlign: TextAlign.center,
               ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             _buildQuickInfoGrid(alumni),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
             const Divider(height: 1),
-            const SizedBox(height: 40),
+            const SizedBox(height: 10),
             if (alumni.internships.isNotEmpty) _buildInternshipsList(alumni, traductions),
             const Spacer(),
             ElevatedButton.icon(
@@ -62,7 +64,7 @@ class AlumniPreview extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
               ),
-              onPressed: () => viewModel.ouvrirPageComplete(context),
+              onPressed: () => viewModel.openFullPage(context),
               icon: const Icon(Icons.visibility),
               label: Text(traductions.previewSeeFullProfile),
             ),

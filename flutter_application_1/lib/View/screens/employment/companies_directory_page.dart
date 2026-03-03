@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
 import '../../widget/company_card_widget.dart'; 
 import '../../../ViewModel/employment_viewmodel.dart';
 import '../../../l10n/app_localizations.dart'; 
 import '../../widget/error_pages.dart';
+import '/View/widget/company_card_widget.dart';
+import '/View/widget/error_pages.dart';
+import '/View/widget/custom_app_bar.dart';
+import '/View/theme/colors.dart';
+import '/ViewModel/employment_viewmodel.dart';
+
 
 class CompaniesDirectoryPage extends StatefulWidget {
-  final Map<String, dynamic> user;
-  const CompaniesDirectoryPage({super.key, required this.user});
+  const CompaniesDirectoryPage({super.key});
 
   @override
   State<CompaniesDirectoryPage> createState() => _CompaniesDirectoryPageState();
@@ -22,7 +26,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
   @override
   void initState() {
     super.initState();
-    viewModel = CareerViewModel(user: widget.user);
+    viewModel = CareerViewModel();
     viewModel.loadCompanies();
     viewModel.addListener(() => setState(() {}));
   }
@@ -47,7 +51,6 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
           'entreprises_list': <String>{},
         };
       }
-
       cityGroups[key]!['nombre_alumni'] += (int.tryParse(c['nombre_alumni'].toString()) ?? 0);
       if (c['nom_entreprise'] != null && c['nom_entreprise'].toString().isNotEmpty) {
         cityGroups[key]!['entreprises_list'].add(c['nom_entreprise']);
@@ -94,11 +97,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     final mapData = _getMapData();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(traductions.companiesDirectory, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-      ),
+      appBar: CustomAppBar(),
       body: viewModel.isLoadingCompanies
           ? const Center(child: CircularProgressIndicator())
           : Column(

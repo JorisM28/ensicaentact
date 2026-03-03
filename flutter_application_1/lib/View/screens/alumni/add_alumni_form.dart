@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../Model/core/theme/colors.dart';
+import '/View/widget/custom_app_bar.dart';
 import 'add_alumni.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -34,12 +34,28 @@ class AddAlumniPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(traductions.directoryNewAlumniTitle),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-      ),
-      body: AddAlumniForm(),
+      appBar: CustomAppBar(),
+      body: Column(
+        children: [
+          const SizedBox(height: 20),
+
+          Text(
+            traductions.directoryNewAlumniTitle,
+            style: TextStyle(
+              fontSize: 22, 
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          Expanded(
+            child: AddAlumniForm(),
+          ),
+        ]
+
+      )
     );
   }
 }

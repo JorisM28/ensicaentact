@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '/View/widget/filtre_widget.dart';
-import '/Model/core/theme/colors.dart';
 import '/Model/alumnis.dart';
-import '/View/widget/profil_badge.dart';
 import 'add_alumni.dart';
+import '/View/widget/custom_app_bar.dart';
 import 'alumni_detail_page.dart';
 import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
@@ -14,10 +13,11 @@ import '../../../l10n/app_localizations.dart';
 import '/service_locator.dart';
 import '/ViewModel/alumni/directory_view_model.dart';
 import '../../widget/error_pages.dart';
+import '/Model/data/services/auth_service.dart';
+import '/View/theme/colors.dart';
 
 class DirectoryPage extends StatefulWidget {
-  final Map<String, dynamic> user;
-  const DirectoryPage({super.key, required this.user});
+  const DirectoryPage({super.key});
 
   @override
   State<DirectoryPage> createState() => _DirectoryPageState();
@@ -30,8 +30,9 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   bool _openFilters = false;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final currentUser = sl<AuthService>().currentUser;
 
-  bool get isAdmin => widget.user['role'] == 'admin';
+  bool get isAdmin => currentUser!.role == 'admin';
 
   @override
   void initState() {
@@ -68,29 +69,8 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isWideScreen = screenWidth > 800;
 
-    if (viewModel.hasAccessError) {
-      return ErrorPage.forbidden(
-        onRetry: () {
-          viewModel.loadAlumnis();
-          if (isAdmin) viewModel.loadPendingRequestsCount();
-        },
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text("ENSIcaentact (${widget.user['role']})"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-        actions: [
-          if (isAdmin)
-            IconButton(
-              icon: const Icon(Icons.history),
-              onPressed: () => _displayHistory(context),
-            ),
-          ProfileBadge(user: widget.user),
-        ],
-      ),
+      appBar: CustomAppBar(),
       floatingActionButton: isAdmin ? _buildFabStack() : null,
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -124,7 +104,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                         flex: 2,
                         child: _selectedStudent == null
                             ? _defaultView()
-                            : AlumniPreview(alumni: _selectedStudent!, user: widget.user),
+                            : AlumniPreview(alumni: _selectedStudent!),
                       ),
                     ]
                   ],
@@ -225,7 +205,6 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
           MaterialPageRoute(
             builder: (context) => AlumniDetailPage(
               alumni: student, 
-              user: widget.user,
               onSave: () {
                 viewModel.loadAlumnis();
               }, 
@@ -305,7 +284,6 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                         MaterialPageRoute(
                           builder: (context) => AlumniDetailPage(
                             alumni: student, 
-                            user: widget.user, 
                             onSave: () => viewModel.loadAlumnis(),
                           ),
                         ),
@@ -332,9 +310,16 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         FloatingActionButton(
+          heroTag: 'btn_history',
+          backgroundColor: Colors.indigo,
+          onPressed: () => _displayHistory(context),
+          child: const Icon(Icons.history, color: Colors.white),
+        ),
+        const SizedBox(width: 15),
+        FloatingActionButton(
           backgroundColor: Colors.orange,
           heroTag: 'btn_pending_requests',
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminValidationPage())).then((_) {
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => AdminValidationPage())).then((_) {
             viewModel.loadPendingRequestsCount();
             viewModel.loadAlumnis();
           }),
@@ -406,16 +391,9 @@ void _displayHistory(BuildContext context) async {
                   itemCount: logs.length,
                   itemBuilder: (context, index) {
                     final log = logs[index];
-                    
-                    final String rawAction = log['action'] ?? 'ACTION';
                     final String desc = log['description'] ?? '';
-                    
-                    final bool isDelete = rawAction == 'SUPPRESSION';
-                    final bool isAdd = rawAction == 'AJOUT';
+                    final bool isDelete = log['action'] == 'SUPPRESSION';
 
-                    String displayAction = rawAction;
-                    if (isDelete) displayAction = traductions.directoryActionDelete;
-                    if (isAdd) displayAction = traductions.directoryActionAdd;
 
                     String alumniName = "${log['prenom_alumni'] ?? ''} ${log['nom_alumni'] ?? ''}".trim();
                     String editorName = "${log['prenom_editeur'] ?? ''} ${log['nom_editeur'] ?? ''}".trim();
@@ -428,33 +406,20 @@ void _displayHistory(BuildContext context) async {
                        alumniName = traductions.unknownUser; 
                     }
 
-                    Color iconColor = isDelete ? Colors.red : (isAdd ? Colors.green : Colors.blue);
-                    Color bgColor = isDelete ? Colors.red[50]! : (isAdd ? Colors.green[50]! : Colors.blue[50]!);
-                    IconData iconType = isDelete ? Icons.delete_forever : (isAdd ? Icons.person_add : Icons.edit);
-
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: bgColor,
-                        child: Icon(iconType, color: iconColor, size: 20),
+                        backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
+                        child: Icon(
+                          isDelete ? Icons.delete_forever : Icons.person_add, 
+                          color: isDelete ? Colors.red : Colors.green, 
+                          size: 20
+                        ),
                       ),
                       title: Text(
-                        alumniName,
+                        "${log['prenom_alumni']} ${log['nom_alumni']}", 
                         style: const TextStyle(fontWeight: FontWeight.bold)
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "$displayAction ${traductions.byPrefix}$editorName ${traductions.directoryOnDate} ${log['date_action']}",
-                            style: const TextStyle(fontSize: 12, color: Colors.black87)
-                          ),
-                          if (desc.isNotEmpty && !isDelete && !isAdd)
-                            Text(
-                              desc,
-                              style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey)
-                            ),
-                        ],
-                      ),
+                      subtitle: Text("${log['action']} on ${log['date_action']}"),
                     );
                   },
                 ),

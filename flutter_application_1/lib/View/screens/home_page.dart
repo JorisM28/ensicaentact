@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '/View/screens/alumni/add_alumni.dart';
 import 'employment/job_page.dart';
 import '/View/screens/alumni/directory_page.dart';
 import 'event/news_page.dart';
 import 'admin/moderation_page.dart';
-import '/Model/core/theme/colors.dart';
+import '/View/theme/colors.dart';
 import '/View/widget/actuality_widget.dart';
 import '/View/widget/event_widget.dart';
 import '/View/widget/job_offer_widget.dart';
@@ -16,11 +15,11 @@ import '/View/widget/custom_app_bar.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/l10n/app_localizations.dart'; 
+import '/Model/data/services/auth_service.dart';
 
 class HomePage extends StatelessWidget {
-  final Map<String, dynamic>? user;
 
-  const HomePage({super.key, this.user});
+  const HomePage({super.key});
 
   final Color contentColor = const Color(0xFFF8F9FA);
 
@@ -37,16 +36,15 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     bool isDesktop = MediaQuery.of(context).size.width > 900;
-    final Map<String, dynamic> currentUser = user ?? {};
-    final String role = currentUser['role'] ?? 'guest';
-    
     final traductions = AppLocalizations.of(context)!;
+    final String role = currentUser?.role ?? 'guest';
 
     return Scaffold(
       backgroundColor: contentColor,
 
-      appBar: CustomAppBar(user: currentUser),
+      appBar: CustomAppBar(),
 
       endDrawer: !isDesktop ? _buildMobileDrawer(context, traductions) : null,
 
@@ -60,13 +58,13 @@ class HomePage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: isDesktop
-                  ? _buildDesktopLayout(context, currentUser, traductions) 
-                  : _buildMobileLayout(context, currentUser, traductions), 
+                  ? _buildDesktopLayout(context)
+                  : _buildMobileLayout(context, traductions)
             ),
 
             const Divider(height: 1, thickness: 1),
 
-            JobOfferWidget(user: currentUser),
+            JobOfferWidget(),
 
             _buildFooter(), 
           ],
@@ -75,7 +73,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopLayout(BuildContext context, Map<String, dynamic> user, AppLocalizations traductions) {
+  Widget _buildDesktopLayout(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(30),
@@ -93,7 +92,6 @@ class HomePage extends StatelessWidget {
             Expanded(
               flex: 2,
               child: ActualityWidget(
-                user: user,
                 onAddPress: () => _showAddNewsDialog(context, traductions),
               ),
             ),
@@ -103,8 +101,7 @@ class HomePage extends StatelessWidget {
             Expanded(
               flex: 1,
               child: EventWidget(
-                user: user,
-                onAddPress: () => _showAddEventDialog(context, user, traductions),
+                onAddPress: () => _showAddEventDialog(context, traductions),
               ),
             ),
           ],
@@ -113,7 +110,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context, Map<String, dynamic> user, AppLocalizations traductions) {
+  Widget _buildMobileLayout(BuildContext context, traductions) {
     return Column(
       children: [
         Container(
@@ -126,7 +123,6 @@ class HomePage extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(15),
           child: ActualityWidget(
-            user: user,
             onAddPress: () => _showAddNewsDialog(context, traductions),
           ),
         ),
@@ -143,8 +139,7 @@ class HomePage extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(15),
           child: EventWidget(
-            user: user,
-            onAddPress: () => _showAddEventDialog(context, user, traductions)
+            onAddPress: () => _showAddEventDialog(context, traductions)
           ),
         ),
       ],
@@ -152,6 +147,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildMobileDrawer(BuildContext context, AppLocalizations traductions) {
+    final currentUser = sl<AuthService>().currentUser;
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -170,26 +166,22 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-          ListTile(leading: const Icon(Icons.newspaper), title: Text(traductions.drawerNews), onTap: () => _naviguer(context, NewsPage(user: user ?? {}))),
-          ListTile(leading: const Icon(Icons.people), title: Text(traductions.drawerDirectory), onTap: () => _naviguer(context, DirectoryPage(user: user ?? {}))),
-          ListTile(leading: const Icon(Icons.work), title: Text(traductions.drawerOffers), onTap: () => _naviguer(context, JobPage(user: user ?? {}))),
+          ListTile(leading: const Icon(Icons.newspaper), title: Text(traductions.drawerNews), onTap: () => _naviguer(context, NewsPage())),
+          ListTile(leading: const Icon(Icons.people), title: Text(traductions.drawerDirectory), onTap: () => _naviguer(context, DirectoryPage())),
+          ListTile(leading: const Icon(Icons.work), title: Text(traductions.drawerOffers), onTap: () => _naviguer(context, JobPage())),
           ListTile(leading: const Icon(Icons.school), title: Text(traductions.drawerSchoolSite), onTap: _ouvrirSiteEcole),
 
-          if (user != null && (user!['role'] == 'student' || user!['role'] == 'alumni')) ...[
+          if ( currentUser != null && (currentUser.role== 'student' || currentUser.role == 'alumni')) ...[
             const Divider(),
-            ListTile(leading: const Icon(Icons.event), title: Text(traductions.drawerProposeEvent), onTap: () => _naviguer(context, ProposeEventPage(user: user ?? {}))),
-            if (user!['role'] == 'alumni') ...[
-              ListTile(
-                leading: const Icon(Icons.thumb_up), 
-                title: Text(traductions.drawerJoin), 
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => Scaffold(appBar: AppBar(title: Text(traductions.drawerJoin), backgroundColor: AppColors.ensiCyan), body: AddAlumniForm(onSuccess: () => Navigator.pop(c)))))
-              ),
+            ListTile(leading: const Icon(Icons.event), title: Text(traductions.drawerProposeEvent), onTap: () => _naviguer(context, ProposeEventPage())),
+            if (currentUser.role == 'alumni') ...[
+              ListTile(leading: const Icon(Icons.thumb_up), title: Text(traductions.drawerJoin), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => Scaffold(appBar: AppBar(title: Text(traductions.drawerJoin), backgroundColor: AppColors.ensiCyan), body: AddAlumniForm(onSuccess: () => Navigator.pop(c)))))),
             ],
           ],
 
-          if (user != null && user!['role'] == 'admin') ...[
+          if (currentUser != null && currentUser.role == 'admin') ...[
             const Divider(),
-            ListTile(leading: const Icon(Icons.security), title: Text(traductions.drawerModeration), onTap: () => _naviguer(context, PageModeration(user: user ?? {}))),
+            ListTile(leading: const Icon(Icons.security), title: Text(traductions.drawerModeration), onTap: () => _naviguer(context, PageModeration())),
           ],
         ],
       ),
@@ -206,7 +198,8 @@ class HomePage extends StatelessWidget {
   }
 
   void _showAddNewsDialog(BuildContext context, AppLocalizations traductions) {
-    if (user == null) {
+    final currentUser = sl<AuthService>().currentUser;
+    if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(traductions.dialogLoginRequiredNews)),
       );
@@ -239,11 +232,12 @@ class HomePage extends StatelessWidget {
                 "titre": titleCtrl.text,
                 "description": descCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": user!['id_user'] ?? "0",
+                "auteur_id": currentUser.role,
               });
 
               Navigator.pop(ctx);
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => HomePage(user: user)));
+
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const HomePage()));
             },
             child: Text(traductions.publish), // Réutilisation de la clé existante
           ),
@@ -252,11 +246,12 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _showAddEventDialog(BuildContext context, Map<String, dynamic> currentUser, AppLocalizations traductions) {
+  void _showAddEventDialog(BuildContext context, AppLocalizations traductions) {
     final titreCtrl = TextEditingController();
     final descCtrl = TextEditingController();
     final lieuCtrl = TextEditingController();
     final dateCtrl = TextEditingController();
+    final currentUser = sl<AuthService>().currentUser;
 
     showDialog(
       context: context,
@@ -321,12 +316,12 @@ class HomePage extends StatelessWidget {
                 "description": descCtrl.text,
                 "lieu": lieuCtrl.text,
                 "date_event": dateCtrl.text,
-                "auteur_id": currentUser['id_user'] ?? "1",
+                "auteur_id": currentUser?.id,
                 "valide": 1
               });
 
               Navigator.pop(ctx);
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => HomePage(user: currentUser)));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const HomePage()));
             },
             child: Text(traductions.publish), // Réutilisation de la clé existante
           ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/View/screens/event/event_page.dart';
-import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
+import '/View/screens/employment/companies_directory_page.dart';
+import '/View/screens/event/event_page.dart';
+import '/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '/Model/core/theme/colors.dart';
+import '/View/theme/colors.dart';
 import '/View/screens/event/news_page.dart';
 import '/View/screens/alumni/directory_page.dart';
 import '/View/screens/employment/job_page.dart';
@@ -11,32 +12,35 @@ import '/View/screens/alumni/join_page.dart';
 import '/View/widget/profil_badge.dart';
 import 'event_proposition_widget.dart';
 import '/l10n/app_localizations.dart';
+import '/Model/data/services/auth_service.dart';
+import '/service_locator.dart';
+import '/View/screens/auth/login.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final Map<String, dynamic>? user;
 
-  const CustomAppBar({super.key, this.user});
+  const CustomAppBar({super.key});
 
   @override
   Size get preferredSize => const Size.fromHeight(80);
 
-  Future<void> _ouvrirSiteEcole() async {
+  Future<void> _openSchoolWebsite() async {
     final Uri url = Uri.parse('https://www.ensicaen.fr');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       debugPrint('Impossible de lancer $url');
     }
   }
 
-  void _naviguer(BuildContext context, Widget page) {
+  void _navigate(BuildContext context, Widget page) {
     Navigator.push(context, MaterialPageRoute(builder: (c) => page));
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     bool isDesktop = MediaQuery.of(context).size.width > 900;
-    final String role = user?['role'] ?? 'visiteur';
-    final Map<String, dynamic> currentUser = user ?? {};
     final traductions = AppLocalizations.of(context)!;
+    final String role = currentUser?.role?? 'visiteur';
+    final bool isConnected = sl<AuthService>().isLoggedIn;
 
     return Container(
       color: AppColors.ensiCyan,
@@ -48,7 +52,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               onTap: () {
                 Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => HomePage(user: currentUser,))
+                    MaterialPageRoute(builder: (context) => HomePage())
                 );
               },
               child: Row(
@@ -62,37 +66,40 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             if (isDesktop) ...[
               const Spacer(),
-              _buildMenuLink(context, traductions.homeTab, () => _naviguer(context, HomePage(user: currentUser))),
-              _buildMenuLink(context, traductions.drawerNews, () => _naviguer(context, NewsPage(user: currentUser))),
-              _buildMenuLink(context, traductions.drawerDirectory, () => _naviguer(context, DirectoryPage(user: currentUser))),
-              _buildMenuLink(context, traductions.eventsTab, () => _naviguer(context, EventPage(user: currentUser))),
-              _buildMenuLink(context, traductions.drawerOffers, () => _naviguer(context, JobPage(user: currentUser))),
-              _buildMenuLink(context, "ENSICAEN", _ouvrirSiteEcole),
+
+              _buildMenuLink(context, traductions.homeTab, () => _navigate(context, HomePage())),
+              _buildMenuLink(context, traductions.drawerNews, () => _navigate(context, NewsPage())),
+              _buildMenuLink(context, traductions.drawerDirectory, () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? DirectoryPage(): const Login(),),);}),
+              _buildMenuLink(context, traductions.eventsTab, (){Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? EventPage(): const Login(),),);}),
+              _buildMenuLink(context, "Cartes", () => _navigate(context, CompaniesDirectoryPage())),
+              _buildMenuLink(context, traductions.drawerOffers, () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? JobPage(): const Login(),),);}),
+              _buildMenuLink(context, "ENSICAEN", _openSchoolWebsite),
+
               const Spacer(),
 
-              if (role == 'admin') ...[
+              if (currentUser != null && currentUser.isAdmin) ...[
                 _buildHeaderButton(Icons.admin_panel_settings, traductions.drawerModeration,
-                        () => _naviguer(context, PageModeration(user: user!))),
+                        () => _navigate(context, PageModeration())),
               ],
 
               if (role == 'alumni' || role == 'student') ...[
                 _buildHeaderButton(
                     Icons.event_available,
                     traductions.drawerProposeEvent,
-                        () => _naviguer(context, ProposeEventPage(user: user!))
+                        () => _navigate(context, ProposeEventPage())
                 ),
                 if (role == 'alumni') ...[
                   const SizedBox(width: 10),
                   _buildHeaderButton(
                       Icons.thumb_up_alt_outlined,
                       traductions.drawerJoin,
-                          () => _naviguer(context, JoinPage(user: user!))
+                          () => _navigate(context, JoinPage())
                   ),
                 ],
               ],
 
               const SizedBox(width: 5),
-              ProfileBadge(user: user)
+              ProfileBadge()
             ],
             if (!isDesktop) ...[
               const Spacer(),

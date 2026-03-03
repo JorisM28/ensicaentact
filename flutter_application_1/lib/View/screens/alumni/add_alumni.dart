@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../../Model/core/theme/colors.dart';
 import '../../../service_locator.dart';
 import '../../../Model/data/services/alumni_repository.dart';
 import '../../../l10n/app_localizations.dart'; 
 
+import '/service_locator.dart';
+import '/Model/data/services/alumni_repository.dart';
+import '/View/theme/colors.dart';
 
 class StageFormModel {
   final Key key = UniqueKey();
@@ -334,6 +336,18 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20.0, top: 10.0),
+                child: Text(
+                  "Formulaire d'ajout d'alumni",
+                  style: TextStyle(
+                    fontSize: 24, 
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.ensiCyan,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
               _sectionTitle(traductions.formIdentityTitle, Icons.person, Colors.purple),
               Row(
                 children: [

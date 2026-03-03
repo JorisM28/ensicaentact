@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
-import '/Model/core/theme/colors.dart';
+import '/View/theme/colors.dart';
 import '/View/screens/event/news_page.dart';
 import '/l10n/app_localizations.dart';
+import '/Model/data/services/auth_service.dart';
 
 class ActualityWidget extends StatefulWidget {
-  final Map<String, dynamic> user;
   final VoidCallback? onAddPress;
 
-  const ActualityWidget({super.key, required this.user, this.onAddPress});
+  const ActualityWidget({super.key, this.onAddPress});
 
   @override
   State<ActualityWidget> createState() => _ActualityWidgetState();
@@ -94,13 +94,15 @@ class _ActualityWidgetState extends State<ActualityWidget> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
     final traductions = AppLocalizations.of(context)!;
     final displayList = _news.take(2).toList();
-    bool isAdmin = widget.user['role'] == 'admin';
+    bool isAdmin = currentUser?.role == 'admin';
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -151,7 +153,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
         const SizedBox(height: 20),
 
         OutlinedButton(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => NewsPage(user: widget.user))),
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const NewsPage())),
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: Color(0xFFE30613)),
             backgroundColor: Colors.white,

@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../Model/core/theme/colors.dart';
 import '../../../Model/alumnis.dart';
 import '../../../ViewModel/alumni/alumni_viewmodel.dart';
 import '../../../l10n/app_localizations.dart'; 
+import '/View/theme/colors.dart';
+import '/Model/alumnis.dart';
+import '/ViewModel/alumni/alumni_viewmodel.dart';
+import '/View/widget/custom_app_bar.dart';
+import '/service_locator.dart';
+import '/Model/data/services/auth_service.dart';
 
 class AlumniDetailPage extends StatefulWidget {
   final Alumnis alumni;
-  final Map<String, dynamic> user;
   final VoidCallback? onSave;
 
-  const AlumniDetailPage({super.key, required this.alumni, required this.user, this.onSave});
+  const AlumniDetailPage({super.key, required this.alumni, this.onSave});
 
   @override
   State<AlumniDetailPage> createState() => _AlumniDetailPageState();
@@ -49,43 +53,92 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
   @override
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!; 
-    final bool isAdmin = widget.user['role'] == 'admin';
+    final currentUser = sl<AuthService>().currentUser;
+    final bool isAdmin = currentUser?.role == 'admin';
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isBig = screenWidth > 800;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(viewModel.isEdited ? traductions.detailEditTitle : "${viewModel.currentAlumni.firstname} ${viewModel.currentAlumni.lastName}"),
-        backgroundColor: AppColors.ensiCyan,
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context, viewModel.modified),
-        ),
-        actions: [
-          if (isAdmin)
-            IconButton(
-              icon: Icon(viewModel.isEdited ? Icons.save : Icons.edit),
-              onPressed: () => viewModel.isEdited ? viewModel.save(context, widget.onSave) : viewModel.toggleEdit(),
+      appBar: CustomAppBar(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(top: 60.0, left: 20.0, right: 20.0, bottom: 20.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                _buildHeader(),
+                const SizedBox(height: 10),
+                if (viewModel.isEdited) _buildEditFields() else _buildDisplayHeader(),
+                const SizedBox(height: 20),
+                _buildMainInfoSections(isBig),
+                const SizedBox(height: 20),
+                _buildContactCard(screenWidth),
+                const SizedBox(height: 30),
+                _buildInternshipSection(screenWidth, isBig),
+              ],
             ),
+          ),
+
+          Positioned(
+            top: 15,
+            left: 15,
+            child: FloatingActionButton.small(
+              elevation: 4,
+              backgroundColor: AppColors.ensiCyan,
+              foregroundColor: Colors.white,
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                }
+              },
+              child: const Icon(Icons.arrow_back),
+            ),
+          ),
+          if(isAdmin)
+            Positioned(
+              top: 15,
+              right: 15,
+              child: FloatingActionButton.extended(
+                onPressed: () async {
+                  if (viewModel.isEdited) {
+                    try {
+                      await viewModel.save(context, widget.onSave);
+                      
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Profil mis à jour avec succès !"), 
+                            backgroundColor: Colors.green
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Erreur lors de la sauvegarde : $e"), 
+                            backgroundColor: Colors.red
+                          ),
+                        );
+                      }
+                    }
+                  } else {
+                    setState(() {
+                      viewModel.isEdited = true;
+                    });
+                  }
+                },
+                backgroundColor: viewModel.isEdited ? Colors.green : AppColors.ensiCyan,
+                icon: Icon(viewModel.isEdited ? Icons.save : Icons.edit, color: Colors.white),
+                label: Text(
+                  viewModel.isEdited ? "Enregistrer" : "Modifier",
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+          ),
         ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            _buildHeader(),
-            const SizedBox(height: 10),
-            if (viewModel.isEdited) _buildEditFields() else _buildDisplayHeader(),
-            const SizedBox(height: 20),
-            _buildMainInfoSections(isBig),
-            const SizedBox(height: 20),
-            _buildContactCard(screenWidth),
-            const SizedBox(height: 30),
-            _buildInternshipSection(screenWidth, isBig),
-          ],
-        ),
       ),
     );
   }
@@ -350,6 +403,36 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       ),
                     ]),
                     const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: editor.start,
+                            decoration: const InputDecoration(
+                              labelText: "Date de début", 
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.calendar_today, size: 20),
+                            ),
+                            readOnly: true,
+                            onTap: () => _selectionnerDate(context, editor.start),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextFormField(
+                            controller: editor.end,
+                            decoration: const InputDecoration(
+                              labelText: "Date de fin", 
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.event, size: 20),
+                            ),
+                            readOnly: true,
+                            onTap: () => _selectionnerDate(context, editor.end),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
                     TextField(controller: editor.entilted, decoration: InputDecoration(labelText: traductions.jobTitleLabel, border: OutlineInputBorder())),
                     const SizedBox(height: 10),
                     TextField(controller: editor.entreprise, decoration: InputDecoration(labelText: traductions.detailLabelCompany, border: OutlineInputBorder())),
@@ -431,26 +514,26 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0), // Un peu plus d'air à l'intérieur
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(stage.type == "E" ? Icons.apartment : Icons.school,
-                    color: AppColors.ensiCyan, size: 22), // Icône un peu plus grande
+                    color: AppColors.ensiCyan, size: 22),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     "${stage.year} - ${stage.entitled}",
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    maxLines: 2, // Permet au titre de s'afficher sur 2 lignes si besoin
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const Divider(height: 24), // Un divider plus espacé
+            const Divider(height: 24),
             _buildInternshipField(
                 stage.type == "U" ? traductions.detailInternshipUniversity : traductions.detailInternshipCompany,
                 stage.type == "E" ? Icons.apartment : Icons.school,

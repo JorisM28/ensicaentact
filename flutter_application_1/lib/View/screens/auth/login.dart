@@ -1,7 +1,7 @@
+import 'package:aad_oauth/aad_oauth.dart';
+import 'package:aad_oauth/model/config.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../Model/core/theme/colors.dart';
 import '../../../ViewModel/admin/login_check.dart';
 import '../alumni/directory_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -9,10 +9,20 @@ import '../../../l10n/app_localizations.dart';
 
 import 'package:flutter_application_ensicaentact/service_locator.dart';
 import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
+import '/View/theme/colors.dart';
+import '/service_locator.dart';
+import '/Model/data/services/auth_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '/Model/connection/auth_strategy.dart';
+import '/Model/connection/ensicaen_auth_adapter.dart';
+import '/Model/connection/i_auth_strategy.dart';
+import '/Model/connection/microsoft_auth_adapter.dart';
+import '/View/navigation.dart';
+import '/View/screens/alumni/directory_page.dart';
 
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  const Login({super.key});
 
   @override
   State<Login> createState() => _LoginState();
@@ -22,6 +32,8 @@ class _LoginState extends State<Login> {
   final _formkey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  MicrosoftAuthAdapter? _microsoftAdapter;
 
   bool _isPresentationMode = true;
   bool _isLoading = false;
@@ -261,45 +273,66 @@ class _LoginState extends State<Login> {
     );
   }
 
+
+
   void _submitLogin({bool isMicrosoftConnection = false}) async {
     final traductions = AppLocalizations.of(context)!;
     if (_isLoading) return;
+    if (!isMicrosoftConnection && !_formkey.currentState!.validate()) return;
 
-    Map<String, dynamic>? userData;
+    setState(() => _isLoading = true);
+
+    AuthResult result;
+    final authRepo = sl<AuthRepository>();
+
     if (isMicrosoftConnection) {
-      setState(() => _isLoading = true);
-      userData = await MicrosoftConnection().signIn();
-    } else {
-      if (_formkey.currentState!.validate()) {
-        setState(() => _isLoading = true);
-        userData = await EnsiCaenConnection().signIn(
-            _emailController.text.trim(),
-            _passwordController.text
-        );
-      } else {
+      try {
+        if (_microsoftAdapter == null) {
+          final Config config = Config(
+            tenant: dotenv.env['AZURE_TENANT_ID'] ?? "",
+            clientId: dotenv.env['AZURE_CLIENT_ID'] ?? "",
+            scope: "openid profile User.Read",
+            redirectUri: dotenv.env['AZURE_REDIRECT_URI'] ?? "http://localhost:39019/redirect.html",
+            navigatorKey: navigatorKey,
+            webUseRedirect: false,
+          );
+          _microsoftAdapter = MicrosoftAuthAdapter(AadOAuth(config));
+        }
+
+        authRepo.setStrategy(_microsoftAdapter!);
+        result = await authRepo.login();
+      } catch (e) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur Microsoft : $e"), backgroundColor: Colors.red));
         return;
       }
+    } else {
+      authRepo.setStrategy(EnsiCaenAuthAdapter());
+      result = await authRepo.login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text
+      );
     }
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (userData == null) return;
+    if (result.isSuccess && result.user != null) {
+      final user = result.user!;
 
-    if (userData['status'] == 'success') {
-      String role = userData['role'] ?? 'guest';
-
-      if (role == 'admin' || role == 'student' || role == 'alumni') {
-        String token = userData['token'] ?? 'microsoft_session_token';
-        await sl<AuthService>().saveSession(userData, token);
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage(user: userData!)));
+      if (user.role == 'admin' || user.role == 'student' || user.role == 'alumni') {
+        String tokenToSave = result.token ?? 'microsoft_session_token';
+        await sl<AuthService>().saveSession(user, tokenToSave);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.loginErrorConnection), backgroundColor: Colors.red));
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(userData['message'] ?? traductions.loginErrorUnknown), backgroundColor: Colors.red),
+        SnackBar(content: Text(result.errorMessage ?? traductions.loginErrorUnknown), backgroundColor: Colors.red),
       );
     }
   }
+
+
 }
