@@ -336,10 +336,10 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Padding(
+               Padding(
                 padding: EdgeInsets.only(bottom: 20.0, top: 10.0),
                 child: Text(
-                  "Formulaire d'ajout d'alumni",
+                  traductions.addAlumniFormTitle,
                   style: TextStyle(
                     fontSize: 24, 
                     fontWeight: FontWeight.bold,

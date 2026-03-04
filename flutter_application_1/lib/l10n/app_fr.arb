@@ -216,6 +216,7 @@
   "dateLabel": "Date : ",
   "sendProposalBtn": "Envoyer la proposition",
   "proposalSentSuccess": "Proposition envoyée à l'administrateur !",
+  "drawerMap": "Cartes",
   
   "sectionErrors": "",
   "errorOccurred": "Une erreur est survenue",
@@ -235,5 +236,75 @@
   "titleLabelAdmin": "Titre (Label)",
   "iconLabel": "Icône",
   "blockLabel": "Bloc",
+  "livePreview": "Aperçu en direct",
+
+  "profileBadgeWidget": "",
+  "loginBtn": "Se connecter",
+  "accountOf": "Compte de",
+  "editProfile": "Modifier le profil",
+  "viewAccount": "Afficher le compte",
+
+
+  "filtreWidget": "",
+  "filterPromotions": "Promotions :",
+  "filterSectors": "Filières :",
+  "filterInternshipCountry": "Pays Stage :",
+
+  "sectionEvents": "",
+  "searchEvent": "Rechercher un évènement...",
+  "editEvent": "Modifier l'évènement",
+  "addEvent": "Ajouter un évènement",
+  "details": "Détails",
+  "typeLabel": "Type : ",
+
+  "sectionArticle": "",
+  "deleteArticleTitle": "Supprimer l'article ?",
+  "deleteArticleContent": "Voulez-vous vraiment supprimer définitivement :\n\n",
+  "articleDeletedSuccess": "Article supprimé.",
+  "newArticle": "Nouvel Article",
+  "articleContentLabel": "Contenu de l'article",
+  "searchArticle": "Rechercher un article...",
+  "noArticle": "Aucun article.",
+  "byAuthor": "Par ",
+  "publishedOn": "• Publié le ",
+  "creditDR": "Crédit: DR",
+  "defaultTagNews": "ACTUALITÉ",
+
+  "unknownCity": "Inconnue",
+
+  "editOffer": "Modifier l'offre",
+  "offerEditedSuccess": "Offre modifiée !",
+  "offerPublishedSuccess": "Offre publiée !",
+  "serverError": "Erreur serveur",
+  "editBtn": "Modifier",
+
+
+  "emailLabel": "Email",
+  "microsoftError": "Erreur Microsoft : ",
+
+  "addAlumniFormTitle": "Formulaire d'ajout d'alumni",
+  "detailLabelEndDate": "Date de fin",
+
+  "profileUpdatedSuccess": "Profil mis à jour avec succès !",
+  "saveBtn": "Enregistrer",
+  "dateTo": " au ",
+
+
+
+  "sectionAdmin": "",
+  "adminNoPendingRequests": "Aucune demande en attente.",
+  "adminReceivedOn": "Reçu le : ",
+  "adminVerifyValidateTitle": "Vérification & Validation",
+  "adminRequestProcessedSuccess": "Demande traitée avec succès !",
+  "adminCorruptedDataError": "Erreur de données corrompues",
+
+  "updateSuccess": "Mise à jour réussie !",
+  "blockLabel": "Bloc",
+  "numberLabel": "Nombre",
+  "suffixLabel": "Suffixe (ex: %, +)",
+  "titleLabelAdmin": "Titre du bloc",
+  "iconLabel": "Icône",
   "livePreview": "Aperçu en direct"
+
+
 }

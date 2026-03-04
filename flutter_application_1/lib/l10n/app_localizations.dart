@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @typeLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Type'**
+  /// **'Type : '**
   String get typeLabel;
 
   /// No description provided for @contactEmailLabel.
@@ -1250,6 +1250,12 @@ abstract class AppLocalizations {
   /// **'Proposition envoyée à l\'administrateur !'**
   String get proposalSentSuccess;
 
+  /// No description provided for @drawerMap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cartes'**
+  String get drawerMap;
+
   /// No description provided for @sectionErrors.
   ///
   /// In fr, this message translates to:
@@ -1325,19 +1331,19 @@ abstract class AppLocalizations {
   /// No description provided for @numberLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Chiffre'**
+  /// **'Nombre'**
   String get numberLabel;
 
   /// No description provided for @suffixLabel.
   ///
   /// In fr, this message translates to:
-  /// **'Suffixe'**
+  /// **'Suffixe (ex: %, +)'**
   String get suffixLabel;
 
   /// No description provided for @titleLabelAdmin.
   ///
   /// In fr, this message translates to:
-  /// **'Titre (Label)'**
+  /// **'Titre du bloc'**
   String get titleLabelAdmin;
 
   /// No description provided for @iconLabel.
@@ -1357,6 +1363,276 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aperçu en direct'**
   String get livePreview;
+
+  /// No description provided for @profileBadgeWidget.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get profileBadgeWidget;
+
+  /// No description provided for @loginBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter'**
+  String get loginBtn;
+
+  /// No description provided for @accountOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte de'**
+  String get accountOf;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le profil'**
+  String get editProfile;
+
+  /// No description provided for @viewAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher le compte'**
+  String get viewAccount;
+
+  /// No description provided for @filtreWidget.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get filtreWidget;
+
+  /// No description provided for @filterPromotions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Promotions :'**
+  String get filterPromotions;
+
+  /// No description provided for @filterSectors.
+  ///
+  /// In fr, this message translates to:
+  /// **'Filières :'**
+  String get filterSectors;
+
+  /// No description provided for @filterInternshipCountry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pays Stage :'**
+  String get filterInternshipCountry;
+
+  /// No description provided for @sectionEvents.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get sectionEvents;
+
+  /// No description provided for @searchEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un évènement...'**
+  String get searchEvent;
+
+  /// No description provided for @editEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l\'évènement'**
+  String get editEvent;
+
+  /// No description provided for @addEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter un évènement'**
+  String get addEvent;
+
+  /// No description provided for @details.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détails'**
+  String get details;
+
+  /// No description provided for @sectionArticle.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get sectionArticle;
+
+  /// No description provided for @deleteArticleTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer l\'article ?'**
+  String get deleteArticleTitle;
+
+  /// No description provided for @deleteArticleContent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voulez-vous vraiment supprimer définitivement :\n\n'**
+  String get deleteArticleContent;
+
+  /// No description provided for @articleDeletedSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Article supprimé.'**
+  String get articleDeletedSuccess;
+
+  /// No description provided for @newArticle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel Article'**
+  String get newArticle;
+
+  /// No description provided for @articleContentLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contenu de l\'article'**
+  String get articleContentLabel;
+
+  /// No description provided for @searchArticle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un article...'**
+  String get searchArticle;
+
+  /// No description provided for @noArticle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun article.'**
+  String get noArticle;
+
+  /// No description provided for @byAuthor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par '**
+  String get byAuthor;
+
+  /// No description provided for @publishedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'• Publié le '**
+  String get publishedOn;
+
+  /// No description provided for @creditDR.
+  ///
+  /// In fr, this message translates to:
+  /// **'Crédit: DR'**
+  String get creditDR;
+
+  /// No description provided for @defaultTagNews.
+  ///
+  /// In fr, this message translates to:
+  /// **'ACTUALITÉ'**
+  String get defaultTagNews;
+
+  /// No description provided for @unknownCity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inconnue'**
+  String get unknownCity;
+
+  /// No description provided for @editOffer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l\'offre'**
+  String get editOffer;
+
+  /// No description provided for @offerEditedSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Offre modifiée !'**
+  String get offerEditedSuccess;
+
+  /// No description provided for @offerPublishedSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Offre publiée !'**
+  String get offerPublishedSuccess;
+
+  /// No description provided for @serverError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur serveur'**
+  String get serverError;
+
+  /// No description provided for @editBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get editBtn;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @microsoftError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur Microsoft : '**
+  String get microsoftError;
+
+  /// No description provided for @addAlumniFormTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Formulaire d\'ajout d\'alumni'**
+  String get addAlumniFormTitle;
+
+  /// No description provided for @detailLabelEndDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de fin'**
+  String get detailLabelEndDate;
+
+  /// No description provided for @profileUpdatedSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil mis à jour avec succès !'**
+  String get profileUpdatedSuccess;
+
+  /// No description provided for @saveBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get saveBtn;
+
+  /// No description provided for @dateTo.
+  ///
+  /// In fr, this message translates to:
+  /// **' au '**
+  String get dateTo;
+
+  /// No description provided for @sectionAdmin.
+  ///
+  /// In fr, this message translates to:
+  /// **''**
+  String get sectionAdmin;
+
+  /// No description provided for @adminNoPendingRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande en attente.'**
+  String get adminNoPendingRequests;
+
+  /// No description provided for @adminReceivedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçu le : '**
+  String get adminReceivedOn;
+
+  /// No description provided for @adminVerifyValidateTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vérification & Validation'**
+  String get adminVerifyValidateTitle;
+
+  /// No description provided for @adminRequestProcessedSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande traitée avec succès !'**
+  String get adminRequestProcessedSuccess;
+
+  /// No description provided for @adminCorruptedDataError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Erreur de données corrompues'**
+  String get adminCorruptedDataError;
 }
 
 class _AppLocalizationsDelegate

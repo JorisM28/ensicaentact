@@ -31,12 +31,12 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     viewModel.addListener(() => setState(() {}));
   }
 
-  List<Map<String, dynamic>> _getGroupedData() {
+  List<Map<String, dynamic>> _getGroupedData(AppLocalizations traductions) {
     if (_groupBy == 'Entreprise') return viewModel.allCompanies;
 
     Map<String, Map<String, dynamic>> cityGroups = {};
     for (var c in viewModel.allCompanies) {
-      String city = c['ville'] ?? 'Inconnue';
+      String city = c['ville'] ?? traductions.unknownCity;
       String country = c['pays'] ?? '';
       String key = '$city-$country';
 
@@ -93,7 +93,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
       );
     }
 
-    final displaydata = _getGroupedData();
+    final displaydata = _getGroupedData(traductions);
     final mapData = _getMapData();
 
     return Scaffold(

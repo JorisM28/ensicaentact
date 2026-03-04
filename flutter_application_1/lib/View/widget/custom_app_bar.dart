@@ -15,6 +15,8 @@ import '/l10n/app_localizations.dart';
 import '/Model/data/services/auth_service.dart';
 import '/service_locator.dart';
 import '/View/screens/auth/login.dart';
+import '/View/widget/language_switcher.dart';
+import 'package:provider/provider.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
@@ -68,12 +70,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               const Spacer(),
 
               _buildMenuLink(context, traductions.homeTab, () => _navigate(context, HomePage())),
-              _buildMenuLink(context, traductions.drawerNews, () => _navigate(context, NewsPage())),
               _buildMenuLink(context, traductions.drawerDirectory, () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? DirectoryPage(): const Login(),),);}),
-              _buildMenuLink(context, traductions.eventsTab, (){Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? EventPage(): const Login(),),);}),
-              _buildMenuLink(context, "Cartes", () => _navigate(context, CompaniesDirectoryPage())),
               _buildMenuLink(context, traductions.drawerOffers, () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? JobPage(): const Login(),),);}),
-              _buildMenuLink(context, "ENSICAEN", _openSchoolWebsite),
+              _buildMenuLink(context, traductions.drawerMap, () => _navigate(context, CompaniesDirectoryPage())),
+              _buildMenuLink(context, traductions.drawerNews, () => _navigate(context, NewsPage())),
+              _buildMenuLink(context, traductions.eventsTab, (){Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? EventPage(): const Login(),),);}),
+              _buildMenuLink(context, traductions.drawerSchoolSite, _openSchoolWebsite),
 
               const Spacer(),
 
@@ -97,7 +99,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ],
               ],
-
+              
+              const SizedBox(width: 15),
+              const LanguageSwitcher(), 
+              
+              const SizedBox(width: 15),
               const SizedBox(width: 5),
               ProfileBadge()
             ],

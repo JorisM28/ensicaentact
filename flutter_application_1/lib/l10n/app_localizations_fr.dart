@@ -138,7 +138,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cityLabel => 'Ville';
 
   @override
-  String get typeLabel => 'Type';
+  String get typeLabel => 'Type : ';
 
   @override
   String get contactEmailLabel => 'Email contact';
@@ -594,6 +594,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get proposalSentSuccess => 'Proposition envoyée à l\'administrateur !';
 
   @override
+  String get drawerMap => 'Cartes';
+
+  @override
   String get sectionErrors => '';
 
   @override
@@ -634,13 +637,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get updateSuccess => 'Mise à jour réussie !';
 
   @override
-  String get numberLabel => 'Chiffre';
+  String get numberLabel => 'Nombre';
 
   @override
-  String get suffixLabel => 'Suffixe';
+  String get suffixLabel => 'Suffixe (ex: %, +)';
 
   @override
-  String get titleLabelAdmin => 'Titre (Label)';
+  String get titleLabelAdmin => 'Titre du bloc';
 
   @override
   String get iconLabel => 'Icône';
@@ -650,4 +653,140 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get livePreview => 'Aperçu en direct';
+
+  @override
+  String get profileBadgeWidget => '';
+
+  @override
+  String get loginBtn => 'Se connecter';
+
+  @override
+  String get accountOf => 'Compte de';
+
+  @override
+  String get editProfile => 'Modifier le profil';
+
+  @override
+  String get viewAccount => 'Afficher le compte';
+
+  @override
+  String get filtreWidget => '';
+
+  @override
+  String get filterPromotions => 'Promotions :';
+
+  @override
+  String get filterSectors => 'Filières :';
+
+  @override
+  String get filterInternshipCountry => 'Pays Stage :';
+
+  @override
+  String get sectionEvents => '';
+
+  @override
+  String get searchEvent => 'Rechercher un évènement...';
+
+  @override
+  String get editEvent => 'Modifier l\'évènement';
+
+  @override
+  String get addEvent => 'Ajouter un évènement';
+
+  @override
+  String get details => 'Détails';
+
+  @override
+  String get sectionArticle => '';
+
+  @override
+  String get deleteArticleTitle => 'Supprimer l\'article ?';
+
+  @override
+  String get deleteArticleContent =>
+      'Voulez-vous vraiment supprimer définitivement :\n\n';
+
+  @override
+  String get articleDeletedSuccess => 'Article supprimé.';
+
+  @override
+  String get newArticle => 'Nouvel Article';
+
+  @override
+  String get articleContentLabel => 'Contenu de l\'article';
+
+  @override
+  String get searchArticle => 'Rechercher un article...';
+
+  @override
+  String get noArticle => 'Aucun article.';
+
+  @override
+  String get byAuthor => 'Par ';
+
+  @override
+  String get publishedOn => '• Publié le ';
+
+  @override
+  String get creditDR => 'Crédit: DR';
+
+  @override
+  String get defaultTagNews => 'ACTUALITÉ';
+
+  @override
+  String get unknownCity => 'Inconnue';
+
+  @override
+  String get editOffer => 'Modifier l\'offre';
+
+  @override
+  String get offerEditedSuccess => 'Offre modifiée !';
+
+  @override
+  String get offerPublishedSuccess => 'Offre publiée !';
+
+  @override
+  String get serverError => 'Erreur serveur';
+
+  @override
+  String get editBtn => 'Modifier';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get microsoftError => 'Erreur Microsoft : ';
+
+  @override
+  String get addAlumniFormTitle => 'Formulaire d\'ajout d\'alumni';
+
+  @override
+  String get detailLabelEndDate => 'Date de fin';
+
+  @override
+  String get profileUpdatedSuccess => 'Profil mis à jour avec succès !';
+
+  @override
+  String get saveBtn => 'Enregistrer';
+
+  @override
+  String get dateTo => ' au ';
+
+  @override
+  String get sectionAdmin => '';
+
+  @override
+  String get adminNoPendingRequests => 'Aucune demande en attente.';
+
+  @override
+  String get adminReceivedOn => 'Reçu le : ';
+
+  @override
+  String get adminVerifyValidateTitle => 'Vérification & Validation';
+
+  @override
+  String get adminRequestProcessedSuccess => 'Demande traitée avec succès !';
+
+  @override
+  String get adminCorruptedDataError => 'Erreur de données corrompues';
 }

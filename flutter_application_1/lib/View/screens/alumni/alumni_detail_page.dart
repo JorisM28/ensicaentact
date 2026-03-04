@@ -108,8 +108,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Profil mis à jour avec succès !"), 
+                          SnackBar(
+                            content: Text(traductions.profileUpdatedSuccess), 
                             backgroundColor: Colors.green
                           ),
                         );
@@ -118,7 +118,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text("Erreur lors de la sauvegarde : $e"), 
+                            content: Text(traductions.formMsgError(e.toString())), 
                             backgroundColor: Colors.red
                           ),
                         );
@@ -133,7 +133,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                 backgroundColor: viewModel.isEdited ? Colors.green : AppColors.ensiCyan,
                 icon: Icon(viewModel.isEdited ? Icons.save : Icons.edit, color: Colors.white),
                 label: Text(
-                  viewModel.isEdited ? "Enregistrer" : "Modifier",
+                  viewModel.isEdited ? traductions.saveBtn : traductions.editBtn,
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -408,8 +408,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                         Expanded(
                           child: TextFormField(
                             controller: editor.start,
-                            decoration: const InputDecoration(
-                              labelText: "Date de début", 
+                            decoration: InputDecoration(
+                              labelText: traductions.detailLabelStartDate, 
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.calendar_today, size: 20),
                             ),
@@ -421,8 +421,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                         Expanded(
                           child: TextFormField(
                             controller: editor.end,
-                            decoration: const InputDecoration(
-                              labelText: "Date de fin", 
+                            decoration: InputDecoration(
+                              labelText: traductions.detailLabelEndDate, 
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.event, size: 20),
                             ),

@@ -103,7 +103,7 @@ class _LoginState extends State<Login> {
 
               _buildTextField(
                 Icons.email,
-                "Email",
+                traductions.emailLabel,
                 controller: _emailController,
                 textColor: AppColors.ensiCyan,
                 validator: (value) {
@@ -303,7 +303,7 @@ class _LoginState extends State<Login> {
         result = await authRepo.login();
       } catch (e) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Erreur Microsoft : $e"), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${traductions.microsoftError} $e"), backgroundColor: Colors.red));
         return;
       }
     } else {

@@ -138,7 +138,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cityLabel => 'City';
 
   @override
-  String get typeLabel => 'Type';
+  String get typeLabel => 'Type : ';
 
   @override
   String get contactEmailLabel => 'Contact Email';
@@ -591,6 +591,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proposalSentSuccess => 'Proposal sent to the administrator!';
 
   @override
+  String get drawerMap => 'Map';
+
+  @override
   String get sectionErrors => '';
 
   @override
@@ -634,10 +637,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get numberLabel => 'Number';
 
   @override
-  String get suffixLabel => 'Suffix';
+  String get suffixLabel => 'Suffix (e.g., %, +)';
 
   @override
-  String get titleLabelAdmin => 'Title (Label)';
+  String get titleLabelAdmin => 'Block title';
 
   @override
   String get iconLabel => 'Icon';
@@ -647,4 +650,140 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get livePreview => 'Live Preview';
+
+  @override
+  String get profileBadgeWidget => '';
+
+  @override
+  String get loginBtn => 'Log in';
+
+  @override
+  String get accountOf => 'Account of';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get viewAccount => 'View account';
+
+  @override
+  String get filtreWidget => '';
+
+  @override
+  String get filterPromotions => 'Classes :';
+
+  @override
+  String get filterSectors => 'Majors :';
+
+  @override
+  String get filterInternshipCountry => 'Internship Country:';
+
+  @override
+  String get sectionEvents => '';
+
+  @override
+  String get searchEvent => 'Search an event...';
+
+  @override
+  String get editEvent => 'Edit event';
+
+  @override
+  String get addEvent => 'Add event';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get sectionArticle => '';
+
+  @override
+  String get deleteArticleTitle => 'Delete Article ?';
+
+  @override
+  String get deleteArticleContent =>
+      'Do you really want to permanently delete:\n\n';
+
+  @override
+  String get articleDeletedSuccess => 'Article deleted.';
+
+  @override
+  String get newArticle => 'New Article';
+
+  @override
+  String get articleContentLabel => 'Article content';
+
+  @override
+  String get searchArticle => 'Search an article...';
+
+  @override
+  String get noArticle => 'No articles.';
+
+  @override
+  String get byAuthor => 'By ';
+
+  @override
+  String get publishedOn => '• Published on';
+
+  @override
+  String get creditDR => 'Credit: DR';
+
+  @override
+  String get defaultTagNews => 'NEWS';
+
+  @override
+  String get unknownCity => 'Unknown';
+
+  @override
+  String get editOffer => 'Edit offer';
+
+  @override
+  String get offerEditedSuccess => 'Offer updated!';
+
+  @override
+  String get offerPublishedSuccess => 'Offer published!';
+
+  @override
+  String get serverError => 'Server error';
+
+  @override
+  String get editBtn => 'Edit';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get microsoftError => 'Microsoft Error: ';
+
+  @override
+  String get addAlumniFormTitle => 'Add Alumni Form';
+
+  @override
+  String get detailLabelEndDate => 'End Date';
+
+  @override
+  String get profileUpdatedSuccess => 'Profile updated successfully!';
+
+  @override
+  String get saveBtn => 'Save';
+
+  @override
+  String get dateTo => ' to ';
+
+  @override
+  String get sectionAdmin => '';
+
+  @override
+  String get adminNoPendingRequests => 'No pending requests.';
+
+  @override
+  String get adminReceivedOn => 'Received on: ';
+
+  @override
+  String get adminVerifyValidateTitle => 'Verification & Validation';
+
+  @override
+  String get adminRequestProcessedSuccess => 'Request processed successfully!';
+
+  @override
+  String get adminCorruptedDataError => 'Corrupted data error';
 }

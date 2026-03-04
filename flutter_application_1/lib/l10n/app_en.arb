@@ -216,6 +216,7 @@
   "dateLabel": "Date: ",
   "sendProposalBtn": "Send Proposal",
   "proposalSentSuccess": "Proposal sent to the administrator!",
+  "drawerMap": "Map",
   
   "sectionErrors": "",
   "errorOccurred": "An Error Occurred",
@@ -235,5 +236,73 @@
   "titleLabelAdmin": "Title (Label)",
   "iconLabel": "Icon",
   "blockLabel": "Block",
+  "livePreview": "Live Preview",
+
+
+  "profileBadgeWidget": "",
+  "loginBtn": "Log in",
+  "accountOf": "Account of",
+  "editProfile": "Edit profile",
+  "viewAccount": "View account",
+
+
+  "filtreWidget": "",
+  "filterPromotions": "Classes :",
+  "filterSectors": "Majors :",
+  "filterInternshipCountry": "Internship Country:",
+
+  "sectionEvents": "",
+  "searchEvent": "Search an event...",
+  "editEvent": "Edit event",
+  "addEvent": "Add event",
+  "details": "Details",
+  "typeLabel": "Type : ",
+
+
+  "sectionArticle": "",
+  "deleteArticleTitle": "Delete Article ?",
+  "deleteArticleContent": "Do you really want to permanently delete:\n\n",
+  "articleDeletedSuccess": "Article deleted.",
+  "newArticle": "New Article",
+  "articleContentLabel": "Article content",
+  "searchArticle": "Search an article...",
+  "noArticle": "No articles.",
+  "byAuthor": "By ",
+  "publishedOn": "• Published on",
+  "creditDR": "Credit: DR",
+  "defaultTagNews": "NEWS",
+
+  "unknownCity": "Unknown",
+
+  "editOffer": "Edit offer",
+  "offerEditedSuccess": "Offer updated!",
+  "offerPublishedSuccess": "Offer published!",
+  "serverError": "Server error",
+  "editBtn": "Edit",
+
+  "emailLabel": "Email",
+  "microsoftError": "Microsoft Error: ",
+
+  "addAlumniFormTitle": "Add Alumni Form",
+  "detailLabelEndDate": "End Date",
+
+  "profileUpdatedSuccess": "Profile updated successfully!",
+  "saveBtn": "Save",
+  "dateTo": " to ",
+
+
+  "sectionAdmin": "",
+  "adminNoPendingRequests": "No pending requests.",
+  "adminReceivedOn": "Received on: ",
+  "adminVerifyValidateTitle": "Verification & Validation",
+  "adminRequestProcessedSuccess": "Request processed successfully!",
+  "adminCorruptedDataError": "Corrupted data error",
+
+  "updateSuccess": "Update successful!",
+  "blockLabel": "Block",
+  "numberLabel": "Number",
+  "suffixLabel": "Suffix (e.g., %, +)",
+  "titleLabelAdmin": "Block title",
+  "iconLabel": "Icon",
   "livePreview": "Live Preview"
 }
