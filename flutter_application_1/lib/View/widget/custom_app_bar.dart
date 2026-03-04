@@ -66,11 +66,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               const Spacer(),
 
               _buildMenuLink(context, "Accueil", () => _navigate(context, HomePage())),
-              _buildMenuLink(context, "Actualités", () => _navigate(context, NewsPage())),
               _buildMenuLink(context, "Annuaire", () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? DirectoryPage(): const Login(),),);}),
-              _buildMenuLink(context, "Evènements", (){Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? EventPage(): const Login(),),);}),
-              _buildMenuLink(context, "Cartes", () => _navigate(context, CompaniesDirectoryPage())),
               _buildMenuLink(context, "Offres", () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? JobPage(): const Login(),),);}),
+              _buildMenuLink(context, "Cartes", () => _navigate(context, CompaniesDirectoryPage())),
+              _buildMenuLink(context, "Actualités", () => _navigate(context, NewsPage())),
+              _buildMenuLink(context, "Evènements", (){Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? EventPage(): const Login(),),);}),
               _buildMenuLink(context, "ENSICAEN", _openSchoolWebsite),
 
               const Spacer(),
