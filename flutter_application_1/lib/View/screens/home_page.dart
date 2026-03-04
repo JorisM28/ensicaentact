@@ -164,10 +164,11 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-          ListTile(leading: const Icon(Icons.newspaper), title: const Text("Actualités"), onTap: () => _naviguer(context, NewsPage())),
+          
           ListTile(leading: const Icon(Icons.people), title: const Text("Annuaire"), onTap: () => _naviguer(context, DirectoryPage())),
           ListTile(leading: const Icon(Icons.work), title: const Text("Offres"), onTap: () => _naviguer(context, JobPage())),
           ListTile(leading: const Icon(Icons.school), title: const Text("Site École"), onTap: _ouvrirSiteEcole),
+          ListTile(leading: const Icon(Icons.newspaper), title: const Text("Actualités"), onTap: () => _naviguer(context, NewsPage())),
 
           if ( currentUser != null && (currentUser.role== 'student' || currentUser.role == 'alumni')) ...[
             const Divider(),
