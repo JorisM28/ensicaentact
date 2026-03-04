@@ -6,6 +6,7 @@ import '/service_locator.dart';
 import '/View/screens/auth/login.dart';
 import '/View/screens/alumni/profile.dart';
 import '/Model/data/services/auth_service.dart';
+import '/l10n/app_localizations.dart';
 
 class ProfileBadge extends StatefulWidget {
 
@@ -25,6 +26,8 @@ class _ProfileBadgeState extends State<ProfileBadge> {
     final String role = currentUser?.role ?? 'guest';
     final bool isGuest = currentUser == null || role == 'guest';
 
+
+    final traductions = AppLocalizations.of(context)!;
 
     if (isGuest) {
       return MouseRegion(
@@ -62,10 +65,10 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                       child: Icon(Icons.login, color: Colors.white, size: 20),
                     ),
                     if (_isHovered)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(right: 12.0),
                         child: Text(
-                          "Se connecter",
+                          traductions.loginBtn,
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 13,
@@ -99,7 +102,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
         ),
       ),
       child: PopupMenuButton(
-        tooltip: "Compte de $firstName",
+        tooltip: "${traductions.accountOf} $firstName",
         offset: const Offset(0, 55),
         constraints: const BoxConstraints(minWidth: 300, maxWidth: 300),
 
@@ -152,10 +155,10 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                             MaterialPageRoute(builder: (_) => ProfilePage()),
                           );
                         },
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
                           child: Text(
-                            "Modifier le profil",
+                            traductions.editProfile,
                             style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.ensiCyan,
@@ -179,10 +182,10 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                           }
 
                         },
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
                           child: Text(
-                            "Se déconnecter",
+                            traductions.profileLogout,
                             style: TextStyle(fontSize: 12, color: Colors.black87),
                           ),
                         ),
@@ -239,7 +242,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                         side: BorderSide(color: Colors.grey.shade300),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
-                      child: const Text("Afficher le compte", style: TextStyle(color: Colors.black87)),
+                      child: Text(traductions.viewAccount, style: TextStyle(color: Colors.black87)),
                     ),
                   ),
                 ],

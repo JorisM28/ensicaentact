@@ -4,6 +4,8 @@ import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/Model/data/services/auth_service.dart';
+import '/l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 class EventPage extends StatefulWidget {
   const EventPage({super.key});
@@ -36,14 +38,14 @@ class _EventPageState extends State<EventPage> {
     }
   }
 
-  Map<String, String> _formatDateTime(String? dateStr) {
+  Map<String, String> _formatDateTime(String? dateStr, BuildContext context) {
     if (dateStr == null || dateStr.isEmpty) return {"day": "??", "month": "???", "time": ""};
     try {
       DateTime dt = DateTime.parse(dateStr);
-      List<String> months = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"];
+      String langCode = Localizations.localeOf(context).languageCode;
       return {
         "day": dt.day.toString().padLeft(2, '0'),
-        "month": months[dt.month - 1],
+        "month": DateFormat('MMM', langCode).format(dt).toUpperCase(),
         "time": "${dt.hour}h${dt.minute.toString().padLeft(2, '0')}",
       };
     } catch (e) {
@@ -53,13 +55,14 @@ class _EventPageState extends State<EventPage> {
 
 
   void _confirmDeletion(Map<String, dynamic> ev) {
+    final traductions = AppLocalizations.of(context)!; 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Supprimer l'évènement ?"),
-        content: Text("Voulez-vous supprimer : \"${ev['titre']}\" ?"),
+        title: Text(traductions.directoryDeleteConfirmTitle),
+        content: Text(traductions.directoryDeleteConfirmContent(ev['titre'] ?? traductions.untitled)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -67,10 +70,10 @@ class _EventPageState extends State<EventPage> {
               bool success = await sl<AlumniRepository>().deleteEvent(id);
               if (success) {
                 _loadData();
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Évènement supprimé")));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.eventDeletedSuccess)));
               }
             },
-            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+            child: Text(traductions.deleteBtn, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -78,6 +81,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   void _openFormEvent([Map<String, dynamic>? ev]) {
+    final traductions = AppLocalizations.of(context)!;
     final currentUser = sl<AuthService>().currentUser;
     final bool isEdit = ev != null;
     final titleCtrl = TextEditingController(text: isEdit ? ev['titre'] : "");
@@ -88,20 +92,20 @@ class _EventPageState extends State<EventPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(isEdit ? "Modifier l'évènement" : "Ajouter un évènement"),
+        title: Text(isEdit ? traductions.editEvent : traductions.addEvent),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: "Titre")),
-              TextField(controller: dateCtrl, decoration: const InputDecoration(labelText: "Date (AAAA-MM-JJ HH:MM:SS)")),
-              TextField(controller: lieuCtrl, decoration: const InputDecoration(labelText: "Lieu")),
-              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Description"), maxLines: 3),
+              TextField(controller: titleCtrl, decoration: InputDecoration(labelText: traductions.dialogTitleLabel)),
+              TextField(controller: dateCtrl, decoration: InputDecoration(labelText: "${traductions.dateLabel} (AAAA-MM-JJ HH:MM:SS)")),
+              TextField(controller: lieuCtrl, decoration: InputDecoration(labelText: traductions.dialogLocationLabel)),
+              TextField(controller: descCtrl, decoration: InputDecoration(labelText: traductions.descriptionField), maxLines: 3),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
           ElevatedButton(
             onPressed: () async {
               if (titleCtrl.text.isEmpty) return;
@@ -127,7 +131,7 @@ class _EventPageState extends State<EventPage> {
                 _loadData();
               }
             },
-            child: const Text("Enregistrer"),
+            child: Text(traductions.validate),
           ),
         ],
       ),
@@ -136,6 +140,7 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!; 
     final currentUser = sl<AuthService>().currentUser;
     bool isAdmin = currentUser?.role == 'admin';
     final evFiltres = _event.where((e) => 
@@ -152,7 +157,7 @@ class _EventPageState extends State<EventPage> {
             padding: const EdgeInsets.all(10),
             child: TextField(
               decoration: InputDecoration(
-                labelText: "Rechercher un évènement...",
+                labelText: traductions.searchEvent,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -168,7 +173,7 @@ class _EventPageState extends State<EventPage> {
                     itemCount: evFiltres.length,
                     itemBuilder: (context, i) {
                       final ev = evFiltres[i];
-                      final dt = _formatDateTime(ev['date_event']); 
+                      final dt = _formatDateTime(ev['date_event'], context);
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -242,8 +247,10 @@ class DetailEventPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
+    final traductions = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text("Détails"), backgroundColor: AppColors.ensiCyan, foregroundColor: Colors.white),
+      appBar: AppBar(title: Text(traductions.details), backgroundColor: AppColors.ensiCyan, foregroundColor: Colors.white),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -258,7 +265,8 @@ class DetailEventPage extends StatelessWidget {
                 children: [
                   Text(item['titre'] ?? "", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
-                  Text("Type : ${item['type'] ?? 'Rencontre'}", style: const TextStyle(color: AppColors.ensiCyan, fontWeight: FontWeight.bold)),
+
+                  Text("${traductions.typeLabel}${item['type'] ?? traductions.eventTypeMeeting}", style: const TextStyle(color: AppColors.ensiCyan, fontWeight: FontWeight.bold)),
                   const Divider(height: 30),
                   
                   Row(children: [const Icon(Icons.event, color: Colors.red), const SizedBox(width: 10), Text(item['date_event'] ?? "")]),
@@ -266,9 +274,11 @@ class DetailEventPage extends StatelessWidget {
                   Row(children: [const Icon(Icons.location_on, color: Colors.red), const SizedBox(width: 10), Text(item['lieu'] ?? "")]),
                   
                   const SizedBox(height: 30),
-                  const Text("Description :", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+      
+                  Text(traductions.descriptionLabel, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                   const SizedBox(height: 10),
-                  Text(item['description'] ?? "Aucune description.", style: const TextStyle(fontSize: 16, height: 1.5)),
+
+                  Text(item['description'] ?? traductions.noDescription, style: const TextStyle(fontSize: 16, height: 1.5)),
                 ],
               ),
             ),

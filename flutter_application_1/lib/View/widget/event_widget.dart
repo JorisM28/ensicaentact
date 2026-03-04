@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; 
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '../theme/colors.dart';
 import '/View/screens/event/event_page.dart';
+import '/l10n/app_localizations.dart'; 
 import '/Model/data/services/auth_service.dart';
 
 class EventWidget extends StatefulWidget {
@@ -33,13 +35,15 @@ class _EventWidgetState extends State<EventWidget> {
   }
 
   void _confirmDeletion(Map<String, dynamic> item) {
+    final traductions = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Supprimer ?"),
-        content: Text("Voulez-vous vraiment supprimer \"${item['titre']}\" ?"),
+        title: Text(traductions.directoryDeleteConfirmTitle),
+        content: Text(traductions.directoryDeleteConfirmContent(item['titre'] ?? traductions.untitled)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
@@ -51,23 +55,27 @@ class _EventWidgetState extends State<EventWidget> {
                   _events.removeWhere((element) => element['id_event'] == item['id_event']);
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Événement supprimé !"))
+                    SnackBar(content: Text(traductions.eventDeletedSuccess))
                 );
               }
             },
-            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+            child: Text(traductions.deleteBtn, style: const TextStyle(color: Colors.red)),
           )
         ],
       ),
     );
   }
 
-  Map<String, String> _formatDate(String? dateString) {
+  Map<String, String> _formatDate(String? dateString, BuildContext context) {
     if (dateString == null || dateString.isEmpty) return {"day": "??", "month": "??"};
     try {
       DateTime dt = DateTime.parse(dateString);
-      List<String> months = ["JAN", "FÉV", "MAR", "AVR", "MAI", "JUIN", "JUIL", "AOÛT", "SEPT", "OCT", "NOV", "DÉC"];
-      return {"day": dt.day.toString().padLeft(2, '0'), "month": months[dt.month - 1]};
+      String langCode = Localizations.localeOf(context).languageCode;
+      return {
+        "day": dt.day.toString().padLeft(2, '0'),
+        // Utilise intl pour traduire automatiquement le mois ("FEB" en anglais, "FÉV" en français)
+        "month": DateFormat('MMM', langCode).format(dt).toUpperCase()
+      };
     } catch (e) { return {"day": "??", "month": "??"}; }
   }
 
@@ -77,6 +85,7 @@ class _EventWidgetState extends State<EventWidget> {
 
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
+    final traductions = AppLocalizations.of(context)!;
     final displayList = _events.take(3).toList();
     bool isAdmin = currentUser?.role== 'admin';
 
@@ -89,11 +98,11 @@ class _EventWidgetState extends State<EventWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (isAdmin && widget.onAddPress != null) ...const [
-              const Spacer(),
+              Spacer(),
             ],
-            const Text(
-            "ÉVÈNEMENTS",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.ensiCyan),
+            Text(
+              traductions.eventsTab.toUpperCase(),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.ensiCyan),
             ),
             if (isAdmin && widget.onAddPress != null) ...[
             const Spacer(),
@@ -102,18 +111,18 @@ class _EventWidgetState extends State<EventWidget> {
               onPressed: widget.onAddPress,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              tooltip: "Ajouter un évènement",
+              tooltip: traductions.addEventTooltip,
             ),]
           ],),
         ),
 
         Expanded(
           child: displayList.isEmpty
-              ? const Center(child: Text("Aucun événement à venir."))
+              ? Center(child: Text(traductions.noUpcomingEvents))
               : SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
-              children: displayList.map((item) => _buildEventCard(item, isAdmin)).toList(),
+              children: displayList.map((item) => _buildEventCard(item, isAdmin, traductions)).toList(),
             ),
           ),
         ),
@@ -126,16 +135,16 @@ class _EventWidgetState extends State<EventWidget> {
               side: const BorderSide(color: Color(0xFFE30613)),
               backgroundColor: Colors.white
           ),
-          child: const Text("Voir tous les évènements", style: TextStyle(color: Color(0xFFE30613))),
+          child: Text(traductions.seeAllEvents, style: const TextStyle(color: Color(0xFFE30613))),
         ),
       ],
     );
   }
 
-  Widget _buildEventCard(Map<String, dynamic> item, bool estAdmin) {
-    final String title = item['titre'] ?? "Événement";
-    final String location = item['lieu'] ?? "Lieu non précisé";
-    final dateMap = _formatDate(item['date_event']);
+  Widget _buildEventCard(Map<String, dynamic> item, bool estAdmin, AppLocalizations traductions) {
+    final String title = item['titre'] ?? traductions.untitled;
+    final String location = item['lieu'] ?? traductions.locationNotSpecified;
+    final dateMap = _formatDate(item['date_event'], context); 
 
     return Card(
       color: Colors.grey.shade100,
@@ -143,7 +152,7 @@ class _EventWidgetState extends State<EventWidget> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: Colors.white60),
+        side: const BorderSide(color: Colors.white60),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

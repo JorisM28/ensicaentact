@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '/View/theme/colors.dart';
+import '/l10n/app_localizations.dart';
 
 class ZoneFiltres extends StatelessWidget {
   final List<String> promotionAvailable;
@@ -31,6 +32,7 @@ class ZoneFiltres extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!; 
     if (promotionAvailable.isEmpty && sectorAvailable.isEmpty && internshipCountryAvailable.isEmpty) {
       return const SizedBox();
     }
@@ -39,7 +41,7 @@ class ZoneFiltres extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (promotionAvailable.isNotEmpty) ...[
-          const Text("Promotions :", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(traductions.filterPromotions, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,
@@ -59,7 +61,7 @@ class ZoneFiltres extends StatelessWidget {
         ],
 
         if (sectorAvailable.isNotEmpty) ...[
-          const Text("Filières :", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(traductions.filterPromotions, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,
@@ -85,7 +87,7 @@ class ZoneFiltres extends StatelessWidget {
         const SizedBox(height: 15),
 
         if (internshipCountryAvailable.isNotEmpty) ...[
-          const Text("Pays Stage :", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(traductions.filterInternshipCountry, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,

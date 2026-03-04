@@ -3,6 +3,8 @@ import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
 import '/View/widget/custom_app_bar.dart';
+import '/l10n/app_localizations.dart';
+
 class JobPage extends StatefulWidget {
 
   const JobPage({super.key});
@@ -37,23 +39,24 @@ class _JobPageState extends State<JobPage> {
   }
 
   void _confirmDeletion(String idOffre) {
+    final traductions = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Supprimer l'offre ?"),
-        content: const Text("Cette action est irréversible."),
+        title: Text(traductions.deleteOfferTitle),
+        content: Text(traductions.deleteOfferContent),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
               bool success = await sl<AlumniRepository>().deleteOffer(idOffre);
               if (success) {
                 _loadRealOffers();
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Offre supprimée.")));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.offerDeletedSuccess)));
               }
             },
-            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+            child: Text(traductions.deleteBtn, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -63,6 +66,7 @@ class _JobPageState extends State<JobPage> {
   void _ouvrirFormulaire({Map<String, dynamic>? existingOffer, required bool isInternship, required Color color}) {
     final bool isEditing = existingOffer != null;
     final currentUser = sl<AuthService>().currentUser;
+    final traductions = AppLocalizations.of(context)!;
 
     final titreCtrl = TextEditingController(text: isEditing ? existingOffer['titre'] : "");
     final entCtrl = TextEditingController(text: isEditing ? existingOffer['entreprise'] : "");
@@ -86,31 +90,31 @@ class _JobPageState extends State<JobPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setStateDialog) {
           return AlertDialog(
-            title: Text(isEditing ? "Modifier l'offre" : (isInternship ? "Nouveau Stage" : "Nouvel Emploi")),
+            title: Text(isEditing ? traductions.editOffer : (isInternship ? traductions.newInternship : traductions.newJob)),
             content: SizedBox(
               width: 400,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(controller: titreCtrl, decoration: const InputDecoration(labelText: "Intitulé du poste")),
-                    TextField(controller: entCtrl, decoration: const InputDecoration(labelText: "Entreprise")),
-                    TextField(controller: villeCtrl, decoration: const InputDecoration(labelText: "Ville")),
+                    TextField(controller: titreCtrl, decoration: InputDecoration(labelText: traductions.jobTitleLabel)),
+                    TextField(controller: entCtrl, decoration: InputDecoration(labelText: traductions.companyLabel)),
+                    TextField(controller: villeCtrl, decoration: InputDecoration(labelText: traductions.cityLabel)),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: typeSelect,
                       items: possibleTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                       onChanged: (v) => setStateDialog(() => typeSelect = v!),
-                      decoration: const InputDecoration(labelText: "Type"),
+                      decoration: InputDecoration(labelText: traductions.typeLabel),
                     ),
-                    TextField(controller: emailCtrl, decoration: const InputDecoration(labelText: "Email contact")),
-                    TextField(controller: descCtrl, decoration: const InputDecoration(labelText: "Description"), maxLines: 4),
+                    TextField(controller: emailCtrl, decoration: InputDecoration(labelText:traductions.contactEmailLabel)),
+                    TextField(controller: descCtrl, decoration: InputDecoration(labelText: traductions.descriptionField), maxLines: 4),
                   ],
                 ),
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Annuler")),
+              TextButton(onPressed: () => Navigator.pop(context), child: Text(traductions.cancel)),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: color, foregroundColor: Colors.white),
                 onPressed: () async { 
@@ -140,16 +144,16 @@ class _JobPageState extends State<JobPage> {
                       Navigator.pop(context); 
                       _loadRealOffers();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(isEditing ? "Offre modifiée !" : "Offre publiée !"))
+                        SnackBar(content: Text(isEditing ? traductions.offerEditedSuccess : traductions.offerPublishedSuccess))
                       );
                     } else {
                        ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Erreur serveur"), backgroundColor: Colors.red)
+                        SnackBar(content: Text(traductions.serverError), backgroundColor: Colors.red)
                       );
                     }
                   }
                 },
-                child: Text(isEditing ? "Enregistrer" : "Publier"),
+                child: Text(isEditing ?traductions.validate : traductions.publish),
               ),
             ],
           );
@@ -160,6 +164,7 @@ class _JobPageState extends State<JobPage> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     final currentUser = sl<AuthService>().currentUser;
     String role = currentUser?.role ?? 'guest';
 
@@ -188,7 +193,7 @@ class _JobPageState extends State<JobPage> {
             child: TextField(
               controller: _searchCtrl,
               decoration: InputDecoration(
-                labelText: "Rechercher (Poste, Entreprise...)",
+                labelText: traductions.searchOfferHint,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                 suffixIcon: _search.isNotEmpty 
@@ -207,25 +212,28 @@ class _JobPageState extends State<JobPage> {
                 children: [
                   Expanded(
                     child: _buildColonne(
-                      titre: "Offres d'Emploi",
+                      titre: traductions.jobOffersTitle,
                       couleur: Colors.blue[800]!,
                       liste: jobList,
                       isStage: false,
                       canAdd: canAdd,
                       monId: myId, 
-                      isAdmin: isAdmin
+                      isAdmin: isAdmin,
+                      traductions: traductions
+
                     ),
                   ),
                   Container(width: 1, color: Colors.grey[300]),
                   Expanded(
                     child: _buildColonne(
-                      titre: "Offres de Stage",
+                      titre: traductions.internshipOffersTitle,
                       couleur: Colors.orange[800]!,
                       liste: internshipList,
                       isStage: true,
                       canAdd: canAdd,
                       monId: myId, 
-                      isAdmin: isAdmin
+                      isAdmin: isAdmin,
+                      traductions: traductions
                     ),
                   ),
                 ],
@@ -244,6 +252,7 @@ class _JobPageState extends State<JobPage> {
     required bool canAdd,
     required String monId,
     required bool isAdmin,
+    required AppLocalizations traductions,
   }) {
     return Column(
       children: [
@@ -260,7 +269,7 @@ class _JobPageState extends State<JobPage> {
 
         Expanded(
           child: liste.isEmpty
-              ? const Center(child: Text("Aucune offre trouvée", style: TextStyle(color: Colors.grey)))
+              ? Center(child: Text(traductions.noOfferFound, style: TextStyle(color: Colors.grey)))
               : ListView.builder(
                   padding: const EdgeInsets.all(10),
                   itemCount: liste.length,
@@ -280,14 +289,14 @@ class _JobPageState extends State<JobPage> {
                       margin: const EdgeInsets.only(bottom: 10),
                       elevation: 2,
                       child: ListTile(
-                        title: Text(offre['titre'] ?? 'Poste', style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
+                        title: Text(offre['titre'] ?? traductions.defaultJobTitle, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text("${offre['entreprise']} - ${offre['ville']}"),
                             if (offre['nom_auteur'] != null)
                               Text(
-                                "Par: ${offre['prenom_auteur']} ${offre['nom_auteur']}",
+                                "${traductions.byPrefix} ${offre['prenom_auteur']} ${offre['nom_auteur']}",
                                 style: TextStyle(fontSize: 10, color: Colors.grey[600], fontStyle: FontStyle.italic)
                               ),
                           ],
@@ -308,12 +317,12 @@ class _JobPageState extends State<JobPage> {
                               IconButton(
                                 icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
                                 onPressed: () => _ouvrirFormulaire(existingOffer: offre, isInternship: isStage, color: couleur),
-                                tooltip: "Modifier",
+                                tooltip: traductions.editBtn,
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red, size: 20),
                                 onPressed: () => _confirmDeletion(offre['id_offre'].toString()),
-                                tooltip: "Supprimer",
+                                tooltip: traductions.deleteBtn,
                               ),
                             ]
                           ],
@@ -337,7 +346,7 @@ class _JobPageState extends State<JobPage> {
                   padding: const EdgeInsets.all(15)
                 ),
                 icon: const Icon(Icons.add),
-                label: Text(isStage ? "Ajouter un Stage" : "Ajouter un Emploi"),
+                label: Text(isStage ? traductions.addInternship : traductions.addJob),
                 onPressed: () => _ouvrirFormulaire(isInternship: isStage, color: couleur),
               ),
             ),
@@ -347,6 +356,7 @@ class _JobPageState extends State<JobPage> {
   }
 
   void _seeDetail(Map<String, dynamic> offre) {
+    final traductions = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -356,23 +366,23 @@ class _JobPageState extends State<JobPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("🏢 ${offre['entreprise']} à ${offre['ville']}", style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text("🏢 ${offre['entreprise']} ${traductions.atLocation} ${offre['ville']}", style: const TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(5)),
-                child: Text("Type : ${offre['type']}"),
+                child: Text("${traductions.typeLabel} ${offre['type']}"),
               ),
               const Divider(height: 30),
-              const Text("Description :", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-              Text(offre['description'] ?? "Aucune description"),
+              Text(traductions.descriptionLabel, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text(offre['description'] ?? traductions.noDescription),
               const SizedBox(height: 20),
-              const Text("Contact :", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text(traductions.contactLabel, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
               SelectableText(offre['contact_email'] ?? "", style: const TextStyle(color: Colors.blue)),
             ],
           ),
         ),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("Fermer"))],
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(traductions.close))],
       ),
     );
   }

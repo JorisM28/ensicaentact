@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../../service_locator.dart';
+import '../../../Model/data/services/alumni_repository.dart';
+import '../../../l10n/app_localizations.dart'; 
+
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/View/theme/colors.dart';
@@ -108,7 +112,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      locale: const Locale("fr", "FR"),
+      locale: Locale(Localizations.localeOf(context).languageCode),
     );
 
     if (picked != null) {
@@ -294,32 +298,36 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       }
       
      if (mounted) {
+        final traductions = AppLocalizations.of(context)!;
         String msg = widget.isAdmin 
-            ? "Alumni ajouté directement !" 
-            : "Demande envoyée pour validation.";
+            ? traductions.formMsgAdded 
+            : traductions.formMsgPending;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.green));
       }
 
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur : $e"), backgroundColor: Colors.red),
-      );
+      if (mounted) {
+        final traductions = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(traductions.formMsgError(e.toString())), backgroundColor: Colors.red),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
-  @override
+@override
   Widget build(BuildContext context) {
-   List<String>? availableOption;
+    final traductions = AppLocalizations.of(context)!;
+    List<String>? availableOption;
 
     if (_selectedSector.isNotEmpty && _selectedSpecialisation != null) {
       var sectorMap = _hierarchieFormation[_selectedSector];
-      
       if (sectorMap != null) {
         availableOption = sectorMap[_selectedSpecialisation];
       }
     }
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -328,10 +336,10 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Padding(
+               Padding(
                 padding: EdgeInsets.only(bottom: 20.0, top: 10.0),
                 child: Text(
-                  "Formulaire d'ajout d'alumni",
+                  traductions.addAlumniFormTitle,
                   style: TextStyle(
                     fontSize: 24, 
                     fontWeight: FontWeight.bold,
@@ -340,22 +348,22 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   textAlign: TextAlign.center,
                 ),
               ),
-              _sectionTitle("Identité", Icons.person, Colors.purple),
+              _sectionTitle(traductions.formIdentityTitle, Icons.person, Colors.purple),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       controller: _controllerLastName,
-                      decoration: const InputDecoration(labelText: "Nom *", border: OutlineInputBorder()),
-                      validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                      decoration: InputDecoration(labelText: "${traductions.detailLabelLastName} *", border: const OutlineInputBorder()),
+                      validator: (value) => value == null || value.isEmpty ? traductions.formRequired : null,
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextFormField(
                       controller: _controllerFirstName,
-                      decoration: const InputDecoration(labelText: "Prénom *", border: OutlineInputBorder()),
-                      validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                      decoration: InputDecoration(labelText: "${traductions.detailLabelFirstName} *", border: const OutlineInputBorder()),
+                      validator: (value) => value == null || value.isEmpty ? traductions.formRequired : null,
                     ),
                   ),
                 ],
@@ -366,10 +374,10 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   Expanded(
                     child: TextFormField(
                       controller: _controllerDateOfBirth,
-                      decoration: const InputDecoration(
-                        labelText: "Date de naissance", 
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.cake),
+                      decoration: InputDecoration(
+                        labelText: traductions.detailLabelBirthDate, 
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.cake),
                       ),
                       readOnly: true,
                       onTap: () => _selectionnerDate(context, _controllerDateOfBirth),
@@ -379,11 +387,11 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _selectedGender,
-                      decoration: const InputDecoration(labelText: "Sexe", border: OutlineInputBorder()),
-                      items: const [
-                        DropdownMenuItem(value: 'I', child: Text("Inconnu")),
-                        DropdownMenuItem(value: 'M', child: Text("Homme")),
-                        DropdownMenuItem(value: 'F', child: Text("Femme")),
+                      decoration: InputDecoration(labelText: traductions.typeLabel, border: const OutlineInputBorder()), // Ou une clé formGender
+                      items: [
+                        DropdownMenuItem(value: 'I', child: Text(traductions.formGenderUnknown)),
+                        DropdownMenuItem(value: 'M', child: Text(traductions.formGenderMale)),
+                        DropdownMenuItem(value: 'F', child: Text(traductions.formGenderFemale)),
                       ],
                       onChanged: (v) => setState(() => _selectedGender = v!),
                     ),
@@ -393,18 +401,25 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               const SizedBox(height: 10),
               TextFormField(
                 controller: _controllereMail,
-                decoration: const InputDecoration(labelText: "Email", border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email)),
+                decoration: InputDecoration(
+                  labelText: traductions.profileEmail, 
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.email)
+                ),
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _controllerPhone,
-                decoration: const InputDecoration(labelText: "Téléphone", border: OutlineInputBorder(), prefixIcon: Icon(Icons.phone)),
+                decoration: InputDecoration(
+                  labelText: traductions.profilePhone, 
+                  border: const OutlineInputBorder(), 
+                  prefixIcon: const Icon(Icons.phone)
+                ),
                 keyboardType: TextInputType.phone,
               ),
               CheckboxListTile(
-                title: Text("Consentir a ce que le téléphone et le mail soit visible"),
+                title: Text(traductions.formConsent),
                 value: _consent,
                 onChanged: (value) {
                   setState(() {
@@ -416,40 +431,40 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
               const Divider(height: 30),
 
-              _sectionTitle("Formation ENSI", Icons.school, Colors.orange),
+              _sectionTitle(traductions.formFormationTitle, Icons.school, Colors.orange),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       controller: _controllerPromotion,
-                      decoration: const InputDecoration(labelText: "Promo (ex: 2024) *", border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: traductions.formPromoHint, border: const OutlineInputBorder()),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                      validator: (value) => value == null || value.isEmpty ? traductions.formRequired : null,
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _selectedFormation,
-                      decoration: const InputDecoration(labelText: "Formation", border: OutlineInputBorder()),
-                      items: const [
-                        DropdownMenuItem(value: 'FISE', child: Text("FISE (Etudiant)")),
-                        DropdownMenuItem(value: 'FISA', child: Text("FISA (Alternance)")),
-                        DropdownMenuItem(value: 'MTS', child: Text("MTS (Mastère)")),
+                      decoration: InputDecoration(labelText: traductions.detailInfoStudies, border: const OutlineInputBorder()),
+                      items: [
+                        DropdownMenuItem(value: 'FISE', child: Text(traductions.formFormationFISE)),
+                        DropdownMenuItem(value: 'FISA', child: Text(traductions.formFormationFISA)),
+                        DropdownMenuItem(value: 'MTS', child: Text(traductions.formFormationMTS)),
                       ],
                       onChanged: (v) => setState(() => _selectedFormation = v!),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _selectedSector,
-                      decoration: const InputDecoration(labelText: "Filière", border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: traductions.detailLabelSector, border: const OutlineInputBorder()),
                       items: _hierarchieFormation.keys.map((String filiere) {
                         return DropdownMenuItem(value: filiere, child: Text(filiere, overflow: TextOverflow.ellipsis));
                       }).toList(),
@@ -462,13 +477,11 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                       },
                     ),
                   ),
-                  
                   const SizedBox(width: 10),
-
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _selectedSpecialisation,
-                      decoration: const InputDecoration(labelText: "Majeure", border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: traductions.detailLabelSpecialisation, border: const OutlineInputBorder()),
                       isExpanded: true,
                       items: _selectedSector.isEmpty || _hierarchieFormation[_selectedSector] == null
                           ? []
@@ -489,33 +502,33 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 ],
               ),
 
-              if ( availableOption != null && availableOption.isNotEmpty)...[
-              const SizedBox(height : 10),
+              if (availableOption != null && availableOption.isNotEmpty)...[
+                const SizedBox(height : 10),
                 DropdownButtonFormField<String>(
-                      value: _selectedOption,
-                      decoration: const InputDecoration(labelText: "Option", border: OutlineInputBorder()),
-                      isExpanded: true,
-                      items: availableOption.map((String option) {
-                        return DropdownMenuItem(
-                          value: option, 
-                          child: Text(option, overflow: TextOverflow.ellipsis)
-                        );
-                      }).toList(),
-                      onChanged: (v) => setState(() => _selectedOption = v),
-                    ),
+                  value: _selectedOption,
+                  decoration: InputDecoration(labelText: traductions.detailLabelOption, border: const OutlineInputBorder()),
+                  isExpanded: true,
+                  items: availableOption.map((String option) {
+                    return DropdownMenuItem(
+                      value: option, 
+                      child: Text(option, overflow: TextOverflow.ellipsis)
+                    );
+                  }).toList(),
+                  onChanged: (v) => setState(() => _selectedOption = v),
+                ),
               ],
 
               const Divider(height: 30),
 
-              _sectionTitle("Poste Actuel", Icons.work, Colors.indigo),
+              _sectionTitle(traductions.formJobTitle, Icons.work, Colors.indigo),
               TextFormField(
                 controller: _controllerPosition,
-                decoration: const InputDecoration(labelText: "Intitulé du poste", border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: traductions.detailLabelJob, border: const OutlineInputBorder()),
               ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _controllerCompany,
-                decoration: const InputDecoration(labelText: "Entreprise", border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: traductions.detailLabelCompany, border: const OutlineInputBorder()),
               ),
               const SizedBox(height: 10),
               Row(
@@ -523,14 +536,14 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   Expanded(
                     child: TextFormField(
                       controller: _controllerCity,
-                      decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: traductions.detailLabelCity, border: const OutlineInputBorder()),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextFormField(
                       controller: _paysCtrl,
-                      decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: const OutlineInputBorder()),
                     ),
                   ),
                 ],
@@ -538,29 +551,30 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               const SizedBox(height: 10),
               TextFormField(
                 controller: _controllerPositionDescription,
-                decoration: const InputDecoration(
-                  labelText: "Description du poste",
-                  border: OutlineInputBorder(),
-                  alignLabelWithHint: true,),
-                  maxLines: 4,
-                  keyboardType: TextInputType.multiline,
+                decoration: InputDecoration(
+                  labelText: traductions.detailLabelJobDesc,
+                  border: const OutlineInputBorder(),
+                  alignLabelWithHint: true,
                 ),
+                maxLines: 4,
+                keyboardType: TextInputType.multiline,
+              ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
                       controller: _controllerStartDate,
-                      decoration: const InputDecoration(
-                        labelText: "Date de début", 
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.calendar_today),
+                      decoration: InputDecoration(
+                        labelText: traductions.detailLabelStartDate, 
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.calendar_today),
                       ),
                       readOnly: true,
                       onTap: () => _selectionnerDate(context, _controllerStartDate),
                     ),
                   ),
-                  ],
+                ],
               ),
 
               const Divider(height: 30),
@@ -568,19 +582,19 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _sectionTitle("Stages", Icons.work_history, Colors.green),
+                  _sectionTitle(traductions.formInternshipsTitle, Icons.work_history, Colors.green),
                   TextButton.icon(
                     onPressed: _addInternship,
                     icon: const Icon(Icons.add_circle, color: AppColors.ensiCyan),
-                    label: const Text("Ajouter un stage", style: TextStyle(color: AppColors.ensiCyan)),
+                    label: Text(traductions.detailInternshipAdd, style: const TextStyle(color: AppColors.ensiCyan)),
                   ),
                 ],
               ),
 
               if (_internships.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Text("Aucun stage ajouté (facultatif)", style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(traductions.formNoInternship, style: const TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
                 )
               else
                 ..._internships.asMap().entries.map((entry) {
@@ -600,34 +614,34 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("Stage #${index + 1}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                              Text("${traductions.detailInternshipTitle} #${index + 1}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red),
-                                tooltip: "Supprimer ce stage",
+                                tooltip: traductions.deleteBtn,
                                 onPressed: () => _supprimerStage(index),
                               ),
                             ],
                           ),
                           DropdownButtonFormField<String>(
                             value: intership.selectedYear,
-                            decoration: const InputDecoration(labelText: "Année du stage", border: OutlineInputBorder()),
-                            items: const [
-                              DropdownMenuItem(value: '1A', child: Text("1ère Année (1A)")),
-                              DropdownMenuItem(value: '2A', child: Text("2ème Année (2A)")),
-                              DropdownMenuItem(value: '3A', child: Text("PFE (3A)")),
+                            decoration: InputDecoration(labelText: traductions.formInternshipYear, border: const OutlineInputBorder()),
+                            items: [
+                              DropdownMenuItem(value: '1A', child: Text(traductions.formInternship1A)),
+                              DropdownMenuItem(value: '2A', child: Text(traductions.formInternship2A)),
+                              DropdownMenuItem(value: '3A', child: Text(traductions.formInternship3A)),
                             ],
                             onChanged: (v) => intership.selectedYear = v!,
                           ),
-                            const SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Row(
                             children: [
                               Expanded(
                                 child: TextFormField(
                                   controller: intership.controllerStartDate,
-                                  decoration: const InputDecoration(
-                                    labelText: "Date de début", 
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.calendar_today),
+                                  decoration: InputDecoration(
+                                    labelText: traductions.detailLabelStartDate, 
+                                    border: const OutlineInputBorder(),
+                                    prefixIcon: const Icon(Icons.calendar_today),
                                   ),
                                   readOnly: true,
                                   onTap: () => _selectionnerDate(context, intership.controllerStartDate),
@@ -637,10 +651,10 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                               Expanded(
                                 child: TextFormField(
                                   controller: intership.controllerEndDate,
-                                  decoration: const InputDecoration(
-                                    labelText: "Date de fin", 
-                                    border: OutlineInputBorder(),
-                                    prefixIcon: Icon(Icons.event),
+                                  decoration: InputDecoration(
+                                    labelText: traductions.detailLabelBirthDate, 
+                                    border: const OutlineInputBorder(),
+                                    prefixIcon: const Icon(Icons.event),
                                   ),
                                   readOnly: true,
                                   onTap: () => _selectionnerDate(context, intership.controllerEndDate),
@@ -651,14 +665,14 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                           const SizedBox(height: 10),
                           TextFormField(
                             controller: intership.controllerEntitled,
-                            decoration: const InputDecoration(labelText: "Sujet / Intitulé *", border: OutlineInputBorder()),
-                            validator: (value) => value == null || value.isEmpty ? 'Requis' : null,
+                            decoration: InputDecoration(labelText: traductions.formInternshipSubject, border: const OutlineInputBorder()),
+                            validator: (value) => value == null || value.isEmpty ? traductions.formRequired : null,
                           ),
                           const SizedBox(height: 10),
-                         FormField<String>(
+                          FormField<String>(
                             validator: (value) {
                               if (intership.internshipType == 'I') {
-                                return 'Type de structure requis';
+                                return traductions.formInternshipStructureReq;
                               }
                               return null;
                             },
@@ -670,7 +684,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                                     children: [
                                       Expanded(
                                         child: RadioListTile<String>(
-                                          title: const Text('Entreprise'),
+                                          title: Text(traductions.detailInternshipCompany),
                                           value: 'E',
                                           groupValue: intership.internshipType,
                                           activeColor: AppColors.ensiCyan,
@@ -685,7 +699,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                                       ),
                                       Expanded(
                                         child: RadioListTile<String>(
-                                          title: const Text('Université'),
+                                          title: Text(traductions.detailInternshipUniversity),
                                           value: 'U',
                                           groupValue: intership.internshipType,
                                           activeColor: AppColors.ensiCyan,
@@ -717,27 +731,27 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                           ),
                           TextFormField(
                             controller: intership.controllerCompany,
-                            decoration: const InputDecoration(labelText: "Nom de l'Entreprise / du Labo", border: OutlineInputBorder()),
+                            decoration: InputDecoration(labelText: traductions.formInternshipLab, border: const OutlineInputBorder()),
                           ),
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              Expanded(child: TextFormField(controller: intership.controllerCity, decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()))),
+                              Expanded(child: TextFormField(controller: intership.controllerCity, decoration: InputDecoration(labelText: traductions.detailLabelCity, border: const OutlineInputBorder()))),
                               const SizedBox(width: 10),
-                              Expanded(child: TextFormField(controller: intership.controllercountry, decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()))),
+                              Expanded(child: TextFormField(controller: intership.controllercountry, decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: const OutlineInputBorder()))),
                             ],
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
                             controller: intership.controllerDescription,
-                            decoration: const InputDecoration(
-                            labelText: "Description du stage", 
-                            border: OutlineInputBorder(),
-                            alignLabelWithHint: true,
+                            decoration: InputDecoration(
+                              labelText: traductions.detailInternshipDescription, 
+                              border: const OutlineInputBorder(),
+                              alignLabelWithHint: true,
                             ),
                             maxLines: 4,
                             keyboardType: TextInputType.multiline,
-                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -746,37 +760,37 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
               const SizedBox(height: 20),
               
-            if (widget.isAdmin && widget.requestId != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                  ),
-                  onPressed: () async {
-                    bool confirm = await showDialog(
-                      context: context, 
-                      builder: (c) => AlertDialog(
-                        title: const Text("Refuser la demande ?"),
-                        content: const Text("Cette action est irréversible."),
-                        actions: [
-                          TextButton(onPressed: ()=>Navigator.pop(c,false), child: const Text("Annuler")),
-                          TextButton(onPressed: ()=>Navigator.pop(c,true), child: const Text("Confirmer le refus")),
-                        ],
-                      )
-                    ) ?? false;
+              if (widget.isAdmin && widget.requestId != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                    ),
+                    onPressed: () async {
+                      bool confirm = await showDialog(
+                        context: context, 
+                        builder: (c) => AlertDialog(
+                          title: Text(traductions.formAdminRejectTitle),
+                          content: Text(traductions.formAdminRejectContent),
+                          actions: [
+                            TextButton(onPressed: ()=>Navigator.pop(c,false), child: Text(traductions.cancel)),
+                            TextButton(onPressed: ()=>Navigator.pop(c,true), child: Text(traductions.formAdminRejectConfirm)),
+                          ],
+                        )
+                      ) ?? false;
 
-                    if (confirm) {
-                      await sl<AlumniRepository>().deletePendingRequest({'id_demande': widget.requestId!});
-                      if (widget.onSuccess != null) widget.onSuccess!();
-                      if (mounted) Navigator.pop(context);
-                    }
-                  },
-                  icon: const Icon(Icons.delete_forever, color: Colors.white),
-                  label: const Text("REFUSER CETTE DEMANDE", style: TextStyle(color: Colors.white)),
+                      if (confirm) {
+                        await sl<AlumniRepository>().deletePendingRequest({'id_demande': widget.requestId!});
+                        if (widget.onSuccess != null) widget.onSuccess!();
+                        if (mounted) Navigator.pop(context);
+                      }
+                    },
+                    icon: const Icon(Icons.delete_forever, color: Colors.white),
+                    label: Text(traductions.formAdminRejectButton, style: const TextStyle(color: Colors.white)),
+                  ),
                 ),
-              ),
 
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
@@ -788,11 +802,10 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Icon(Icons.save, color: Colors.white),
                 label: Text(
-                  _isLoading ? "Enregistrement..." : "Enregistrer l'Alumni", 
+                  _isLoading ? traductions.formSaveLoading : traductions.formSaveButton, 
                   style: const TextStyle(color: Colors.white, fontSize: 16)
                 ),
               ),
-              
             ],
           ),
         ),
@@ -802,7 +815,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
  Widget _sectionTitle(String titre, IconData icon, Color color) {
   return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 15),
+    padding: EdgeInsets.symmetric(vertical: 15),
     child: Row(
       children: [
         Icon(icon, color: color, size: 24),

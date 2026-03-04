@@ -3,6 +3,7 @@ import '/Model/data/services/alumni_repository.dart';
 import '/View/theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
+import '/l10n/app_localizations.dart';
 
 class ProposeEventPage extends StatefulWidget {
   const ProposeEventPage({super.key});
@@ -34,12 +35,11 @@ if (_formKey.currentState!.validate()) {
       "email_auteur": currentUser?.email,
     };
 
-  
       bool success = await sl<AlumniRepository>().requestEvent(proposition);
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Proposition envoyée à l'administrateur !"))
+          SnackBar(content: Text(AppLocalizations.of(context)!.proposalSentSuccess)) 
         );
         Navigator.pop(context);
       }
@@ -48,9 +48,10 @@ if (_formKey.currentState!.validate()) {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Proposer un évènement"),
+        title: Text(traductions.drawerProposeEvent),
         backgroundColor: AppColors.ensiCyan,
         foregroundColor: Colors.white,
       ),
@@ -62,20 +63,20 @@ if (_formKey.currentState!.validate()) {
             children: [
               TextFormField(
                 controller: _titleControlelr,
-                decoration: const InputDecoration(labelText: "Titre de l'évènement"),
-                validator: (v) => v!.isEmpty ? "Champ obligatoire" : null,
+                decoration: InputDecoration(labelText: traductions.eventTitleLabel),
+                validator: (v) => v!.isEmpty ? traductions.formRequired : null,
               ),
               const SizedBox(height: 15),
               DropdownButtonFormField<String>(
                 initialValue: _selectedType,
-                items: ["Rencontre", "Conférence", "Afterwork", "Webinaire"]
+                items: [traductions.eventTypeMeeting, traductions.eventTypeConference, traductions.eventTypeAfterwork, traductions.eventTypeWebinar]
                     .map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                 onChanged: (v) => setState(() => _selectedType = v!),
-                decoration: const InputDecoration(labelText: "Type"),
+                decoration: InputDecoration(labelText: traductions.typeLabel),
               ),
               const SizedBox(height: 15),
               ListTile(
-                title: Text("Date : ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
+                title: Text("{traductions.dateLabel}${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   DateTime? picked = await showDatePicker(
@@ -89,13 +90,13 @@ if (_formKey.currentState!.validate()) {
               ),
               TextFormField(
                 controller: _placecontroller,
-                decoration: const InputDecoration(labelText: "Lieu"),
+                decoration: InputDecoration(labelText: traductions.dialogLocationLabel),
               ),
               const SizedBox(height: 15),
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 4,
-                decoration: const InputDecoration(labelText: "Description détaillée"),
+                decoration: InputDecoration(labelText: traductions.descriptionLabel),
               ),
               const SizedBox(height: 30),
               SizedBox(
@@ -107,7 +108,7 @@ if (_formKey.currentState!.validate()) {
                     padding: const EdgeInsets.all(15)
                   ),
                   onPressed: _submitPropose,
-                  child: const Text("Envoyer la proposition", style: TextStyle(fontSize: 16)),
+                  child: Text(traductions.sendProposalBtn, style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],

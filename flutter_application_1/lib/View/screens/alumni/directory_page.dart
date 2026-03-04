@@ -7,8 +7,12 @@ import '/View/widget/custom_app_bar.dart';
 import 'alumni_detail_page.dart';
 import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
+import '../../../service_locator.dart';
+import '../../../ViewModel/alumni/directory_view_model.dart';
+import '../../../l10n/app_localizations.dart'; 
 import '/service_locator.dart';
 import '/ViewModel/alumni/directory_view_model.dart';
+import '../../widget/error_pages.dart';
 import '/Model/data/services/auth_service.dart';
 import '/View/theme/colors.dart';
 
@@ -61,6 +65,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     double screenWidth = MediaQuery.of(context).size.width;
     bool isWideScreen = screenWidth > 800;
 
@@ -85,7 +90,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                     Expanded(
                       flex: 2,
                       child: viewModel.alumnis.isEmpty
-                          ? const Center(child: Text("Aucun résultat"))
+                          ? Center(child: Text(traductions.directoryNoResult))
                           : ListView.builder(
                         controller: _scrollController,
                         itemCount: viewModel.alumnis.length,
@@ -113,6 +118,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   }
 
   Widget _buildTopBar(bool isWideScreen) {
+    final traductions = AppLocalizations.of(context)!; 
     return Container(
       padding: const EdgeInsets.all(20),
       color: Colors.grey[100],
@@ -135,11 +141,12 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   }
 
   Widget _searchField() {
+    final traductions = AppLocalizations.of(context)!; 
     return TextField(
       controller: _searchController,
       onChanged: (text) => viewModel.search(text),
       decoration: InputDecoration(
-        hintText: "Recherche...",
+        hintText: traductions.directorySearchHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: _searchController.text.isNotEmpty
             ? IconButton(icon: const Icon(Icons.clear),onPressed: () {
@@ -298,6 +305,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   }
   
  Widget _buildFabStack() {
+    final traductions = AppLocalizations.of(context)!; 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -324,63 +332,68 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   }
 
   Widget _defaultView() {
-    return const Center(
+    final traductions = AppLocalizations.of(context)!;
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [Icon(Icons.touch_app, size: 80, color: Colors.grey), Text("Sélectionnez un élève", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey))],
+        children: [Icon(Icons.touch_app, size: 80, color: Colors.grey), Text(traductions.directorySelectStudent, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey))],
       ),
     );
   }
 
   void _openAddModal() {
+    final traductions = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Nouvel Alumni"),
+        title: Text(traductions.directoryNewAlumniTitle),
         content: SizedBox(width: 500, child: AddAlumniForm(isAdmin: true, onSuccess: () { Navigator.pop(context); viewModel.loadAlumnis(); })),
       ),
     );
   }
 
   Future<void> _confirmDelete(Alumnis student) async {
+    final traductions = AppLocalizations.of(context)!; 
     bool confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Supprimer ?"),
-        content: Text("Voulez-vous supprimer ${student.wholeName} ?"),
-        actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Non")), TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Oui"))],
+        title: Text(traductions.directoryDeleteConfirmTitle),
+        content: Text(traductions.directoryDeleteConfirmContent(student.wholeName)),
+        actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: Text(traductions.no)), TextButton(onPressed: () => Navigator.pop(context, true), child: Text(traductions.yes))],
       ),
     ) ?? false;
     if (confirm) viewModel.deleteAlumni(student);
   }
 
-  void _displayHistory(BuildContext context) async {
+void _displayHistory(BuildContext context) async {
+    final traductions = AppLocalizations.of(context)!; 
     await viewModel.loadHistory();
     final logs = viewModel.historyLogs;
 
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.history, color: AppColors.ensiCyan), 
-            SizedBox(width: 10), 
-            Text("History")
+            const Icon(Icons.history, color: AppColors.ensiCyan), 
+            const SizedBox(width: 10), 
+            Text(traductions.directoryHistoryTitle)
           ]
         ),
         content: SizedBox(
           width: 500,
           height: 400,
           child: logs.isEmpty
-              ? const Center(child: Text("No actions recorded."))
+              ? Center(child: Text(traductions.directoryHistoryEmpty))
               : ListView.builder(
                   itemCount: logs.length,
                   itemBuilder: (context, index) {
                     final log = logs[index];
                     final String desc = log['description'] ?? '';
                     final bool isDelete = log['action'] == 'SUPPRESSION';
+
 
                     String alumniName = "${log['prenom_alumni'] ?? ''} ${log['nom_alumni'] ?? ''}".trim();
                     String editorName = "${log['prenom_editeur'] ?? ''} ${log['nom_editeur'] ?? ''}".trim();
@@ -390,7 +403,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                     if (alumniName.isEmpty && isDelete) {
                        alumniName = desc.replaceAll("Suppression de ", "");
                     } else if (alumniName.isEmpty) {
-                       alumniName = "Unknown Alumni";
+                       alumniName = traductions.unknownUser; 
                     }
 
                     return ListTile(
@@ -414,7 +427,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context), 
-            child: const Text("Close")
+            child: Text(traductions.close)
           )
         ],
       ),

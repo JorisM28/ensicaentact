@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../Model/alumnis.dart';
+import '../../../ViewModel/alumni/alumni_viewmodel.dart';
+import '../../../l10n/app_localizations.dart'; 
 import '/View/theme/colors.dart';
 import '/Model/alumnis.dart';
 import '/ViewModel/alumni/alumni_viewmodel.dart';
@@ -39,7 +42,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
       initialDate: DateTime.now(),
       firstDate: DateTime(1950),
       lastDate: DateTime(2100),
-      locale: const Locale("fr", "FR"),
+      locale: Locale(Localizations.localeOf(context).languageCode),
     );
     if (picked != null) {
       controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
@@ -49,6 +52,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!; 
     final currentUser = sl<AuthService>().currentUser;
     final bool isAdmin = currentUser?.role == 'admin';
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -104,8 +108,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Profil mis à jour avec succès !"), 
+                          SnackBar(
+                            content: Text(traductions.profileUpdatedSuccess), 
                             backgroundColor: Colors.green
                           ),
                         );
@@ -114,7 +118,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text("Erreur lors de la sauvegarde : $e"), 
+                            content: Text(traductions.formMsgError(e.toString())), 
                             backgroundColor: Colors.red
                           ),
                         );
@@ -129,7 +133,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                 backgroundColor: viewModel.isEdited ? Colors.green : AppColors.ensiCyan,
                 icon: Icon(viewModel.isEdited ? Icons.save : Icons.edit, color: Colors.white),
                 label: Text(
-                  viewModel.isEdited ? "Enregistrer" : "Modifier",
+                  viewModel.isEdited ? traductions.saveBtn : traductions.editBtn,
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -151,31 +155,39 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
   }
 
   Widget _buildDisplayHeader() {
-    return Column(
-      children: [
-        Text("${viewModel.currentAlumni.firstname} ${viewModel.currentAlumni.lastName}",
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-        Text("Promo ${viewModel.currentAlumni.promotion}",
-            style: const TextStyle(fontSize: 20, color: Colors.grey)),
-        if (viewModel.currentAlumni.dateOfBirth.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: Text(viewModel.calculateAge(viewModel.currentAlumni.dateOfBirth),
-                style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)),
-          ),
-        const Divider(height: 40),
-      ],
-    );
-  }
+      final traductions = AppLocalizations.of(context)!; 
+
+      return Column(
+        children: [
+          Text("${viewModel.currentAlumni.firstname} ${viewModel.currentAlumni.lastName}",
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+          
+          Text("${traductions.detailLabelPromo} ${viewModel.currentAlumni.promotion}",
+              style: const TextStyle(fontSize: 20, color: Colors.grey)),
+          
+          if (viewModel.currentAlumni.dateOfBirth.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 5),
+              child: Text(
+                  traductions.detailAge(viewModel.calculateAge(viewModel.currentAlumni.dateOfBirth)),
+                  style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic)
+              ),
+            ),
+            
+          const Divider(height: 40),
+        ],
+      );
+    }
 
   Widget _buildEditFields() {
+    final traductions = AppLocalizations.of(context)!; 
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: TextField(controller: viewModel.firstNameController, decoration: const InputDecoration(labelText: "Prénom", border: OutlineInputBorder()))),
+            Expanded(child: TextField(controller: viewModel.firstNameController, decoration: InputDecoration(labelText: traductions.detailLabelFirstName, border: OutlineInputBorder()))),
             const SizedBox(width: 10),
-            Expanded(child: TextField(controller: viewModel.lastNameController, decoration: const InputDecoration(labelText: "Nom", border: OutlineInputBorder()))),
+            Expanded(child: TextField(controller: viewModel.lastNameController, decoration: InputDecoration(labelText: traductions.detailLabelLastName, border: OutlineInputBorder()))),
           ],
         ),
         const SizedBox(height: 10),
@@ -183,12 +195,12 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
           controller: viewModel.promotionController,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: const InputDecoration(labelText: "Promo (Année)", border: OutlineInputBorder()),
+          decoration: InputDecoration(labelText: traductions.detailLabelPromo, border: OutlineInputBorder()),
         ),
         const SizedBox(height: 10),
         TextFormField(
           controller: viewModel.dateOfBirthController,
-          decoration: const InputDecoration(labelText: "Date de Naissance", border: OutlineInputBorder(), prefixIcon: Icon(Icons.cake)),
+          decoration: InputDecoration(labelText: traductions.detailLabelBirthDate, border: OutlineInputBorder(), prefixIcon: Icon(Icons.cake)),
           readOnly: true,
           onTap: () => _selectionnerDate(context, viewModel.dateOfBirthController),
         ),
@@ -198,17 +210,17 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
           elevation: 0,
           child: Column(
             children: [
-              const Padding(padding: EdgeInsets.all(8.0), child: Text("Statut Administrateur", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54))),
+              Padding(padding: EdgeInsets.all(8.0), child: Text(traductions.detailAdminStatus, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54))),
               SwitchListTile(
-                  title: const Text("Autorisation des données"),
-                  subtitle: Text(viewModel.permissionSwitch ? "Visible" : "Caché"),
+                  title: Text(traductions.detailPermissionData),
+                  subtitle: Text(viewModel.permissionSwitch ? traductions.detailVisible : traductions.detailHidden),
                   activeColor: Colors.green,
                   value: viewModel.permissionSwitch,
                   onChanged: (val) => setState(() => viewModel.permissionSwitch = val)),
               const Divider(height: 1),
               SwitchListTile(
-                  title: const Text("Décédé"),
-                  subtitle: const Text("Marquer comme décédé"),
+                  title: Text(traductions.detailDeceased),
+                  subtitle:  Text(traductions.detailDeceasedSubtitle),
                   activeColor: Colors.red,
                   value: viewModel.deceasedSwitch,
                   onChanged: (val) => setState(() => viewModel.deceasedSwitch = val)),
@@ -220,28 +232,29 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
   }
 
   Widget _buildMainInfoSections(bool isBig) {
+    final traductions = AppLocalizations.of(context)!; 
     List<Widget> etuItems = [
       if (viewModel.currentAlumni.sector.isNotEmpty || viewModel.isEdited) ...[
-        _buildEditableTile(Icons.school, Colors.orange, "Filière", viewModel.sectorController, viewModel.currentAlumni.sector),
+        _buildEditableTile(Icons.school, Colors.orange, traductions.detailLabelSector, viewModel.sectorController, viewModel.currentAlumni.sector),
         const Divider(height: 1),
       ],
-      _buildEditableTile(Icons.book, Colors.redAccent, "Majeure", viewModel.specialisationController, viewModel.currentAlumni.specialisation),
+      _buildEditableTile(Icons.book, Colors.redAccent, traductions.detailLabelSpecialisation, viewModel.specialisationController, viewModel.currentAlumni.specialisation),
       const Divider(height: 1),
-      _buildEditableTile(Icons.bookmark, Colors.pinkAccent, "Option", viewModel.optionController, viewModel.currentAlumni.option),
+      _buildEditableTile(Icons.bookmark, Colors.pinkAccent, traductions.detailLabelOption, viewModel.optionController, viewModel.currentAlumni.option),
       const Divider(height: 1),
-      _buildEditableTile(Icons.workspace_premium, Colors.purple, "Double Diplôme", viewModel.doubleDiplomaController, viewModel.currentAlumni.doubleDiploma),
+      _buildEditableTile(Icons.workspace_premium, Colors.purple, traductions.detailLabelDoubleDiploma, viewModel.doubleDiplomaController, viewModel.currentAlumni.doubleDiploma),
     ];
 
     List<Widget> proItems = [
       if (viewModel.isEdited) ...[
-        _buildEditableTile(Icons.work, Colors.blue, "Poste", viewModel.positionController, viewModel.currentAlumni.job),
+        _buildEditableTile(Icons.work, Colors.blue, traductions.detailLabelJob, viewModel.positionController, viewModel.currentAlumni.job),
         const SizedBox(height: 10),
-        _buildEditableTile(Icons.description, Colors.grey, "Description du poste", viewModel.positionDescController, viewModel.currentAlumni.jobDescription),
+        _buildEditableTile(Icons.description, Colors.grey, traductions.detailLabelJobDesc, viewModel.positionDescController, viewModel.currentAlumni.jobDescription),
       ] else if (viewModel.currentAlumni.job.isNotEmpty) ...[
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           leading: const Icon(Icons.work, color: Colors.blue, size: 24),
-          title: const Text("Poste", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
+          title: Text(traductions.detailLabelJob, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey)),
           subtitle: Text(viewModel.currentAlumni.job, style: const TextStyle(fontSize: 16, color: Colors.black87)),
           trailing: viewModel.currentAlumni.jobDescription.isNotEmpty
               ? IconButton(
@@ -261,13 +274,13 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
           ),
       ],
       const Divider(height: 1),
-      _buildEditableTile(Icons.location_on, Colors.red, "Ville", viewModel.cityController, viewModel.currentAlumni.city),
+      _buildEditableTile(Icons.location_on, Colors.red, traductions.detailLabelCity, viewModel.cityController, viewModel.currentAlumni.city),
       const Divider(height: 1),
-      _buildEditableTile(Icons.business, Colors.indigo, "Entreprise", viewModel.companyController, viewModel.currentAlumni.company),
+      _buildEditableTile(Icons.business, Colors.indigo, traductions.detailLabelCompany, viewModel.companyController, viewModel.currentAlumni.company),
       if (!viewModel.isEdited && viewModel.startPosDateController.text.isNotEmpty)
         ListTile(
           leading: const Icon(Icons.timer, color: Colors.teal),
-          title: const Text("Ancienneté"),
+          title: Text(traductions.detailLabelSeniority),
           subtitle: Text("${viewModel.startPosDateController.text} (${viewModel.calculateSeniority(viewModel.startPosDateController.text)})"),
         )
       else if (viewModel.isEdited)
@@ -275,7 +288,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TextFormField(
             controller: viewModel.startPosDateController,
-            decoration: const InputDecoration(labelText: "Date de début (Poste)", border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today)),
+            decoration: InputDecoration(labelText: traductions.detailLabelStartDate, border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today)),
             readOnly: true,
             onTap: () => _selectionnerDate(context, viewModel.startPosDateController),
           ),
@@ -286,24 +299,25 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: _buildInfoCard(title: "Infos Pro", items: proItems)),
+          Expanded(child: _buildInfoCard(title: traductions.detailInfoPro, items: proItems)),
           const SizedBox(width: 20),
-          Expanded(child: _buildInfoCard(title: "Etudes", items: etuItems)),
+          Expanded(child: _buildInfoCard(title: traductions.detailInfoStudies, items: etuItems)),
         ],
       );
     }
     return Column(
       children: [
-        _buildInfoCard(title: "Infos Pro", items: proItems),
+        _buildInfoCard(title: traductions.detailInfoPro, items: proItems),
         const SizedBox(height: 20),
-        _buildInfoCard(title: "Etudes", items: etuItems),
+        _buildInfoCard(title:  traductions.detailInfoStudies, items: etuItems),
       ],
     );
   }
 
   Widget _buildContactCard(double screenWidth) {
+    final traductions = AppLocalizations.of(context)!; 
     if (!viewModel.isEdited && (viewModel.currentAlumni.permission == 0 || viewModel.currentAlumni.deceased == 1)) {
-      return const Card(elevation: 1, child: Padding(padding: EdgeInsets.all(16.0), child: Center(child: Text("Coordonnées masquées", style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)))));
+      return Card(elevation: 1, child: Padding(padding: EdgeInsets.all(16.0), child: Center(child: Text(traductions.detailContactHidden, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)))));
     }
 
     bool modeLigne = screenWidth > 600 && viewModel.currentAlumni.email.isNotEmpty && viewModel.currentAlumni.phone.isNotEmpty;
@@ -312,21 +326,21 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
       elevation: 2,
       child: Column(
         children: [
-          const Padding(padding: EdgeInsets.all(10.0), child: Text("Contact", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          Padding(padding: EdgeInsets.all(10.0), child: Text(traductions.contactLabel, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
           if (modeLigne)
             Row(
               children: [
-                Expanded(child: _buildEditableTile(Icons.email, Colors.green, "Email", viewModel.emailController, viewModel.currentAlumni.email)),
+                Expanded(child: _buildEditableTile(Icons.email, Colors.green, traductions.profileEmail, viewModel.emailController, viewModel.currentAlumni.email)),
                 Container(width: 1, height: 40, color: Colors.grey[300]),
-                Expanded(child: _buildEditableTile(Icons.phone, Colors.amber, "Téléphone", viewModel.phoneController, viewModel.currentAlumni.phone)),
+                Expanded(child: _buildEditableTile(Icons.phone, Colors.amber, traductions.profilePhone, viewModel.phoneController, viewModel.currentAlumni.phone)),
               ],
             )
           else
             Column(
               children: [
-                _buildEditableTile(Icons.email, Colors.green, "Email", viewModel.emailController, viewModel.currentAlumni.email),
+                _buildEditableTile(Icons.email, Colors.green, traductions.profileEmail, viewModel.emailController, viewModel.currentAlumni.email),
                 const Divider(indent: 20, endIndent: 20, height: 1),
-                _buildEditableTile(Icons.phone, Colors.amber, "Téléphone", viewModel.phoneController, viewModel.currentAlumni.phone),
+                _buildEditableTile(Icons.phone, Colors.amber, traductions.profilePhone, viewModel.phoneController, viewModel.currentAlumni.phone),
               ],
             ),
         ],
@@ -335,17 +349,18 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
   }
 
   Widget _buildInternshipSection(double screenWidth, bool isBig) {
+    final traductions = AppLocalizations.of(context)!; 
     return Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("Stages", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(traductions.detailInternshipTitle, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             if (viewModel.isEdited)
               ElevatedButton.icon(
                 onPressed: viewModel.addInternship,
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text("Ajouter"),
+                label: Text(traductions.detailInternshipAdd),
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.ensiCyan, foregroundColor: Colors.white),
               )
           ],
@@ -364,7 +379,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Stage #${index + 1}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                        Text("${traductions.detailInternshipTitle} #${index + 1}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                         IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => viewModel.deleteInternship(index)),
                       ],
                     ),
@@ -372,7 +387,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: ['1A', '2A', '3A'].contains(editor.year.text) ? editor.year.text : null,
-                          decoration: const InputDecoration(labelText: "Année", border: OutlineInputBorder()),
+                          decoration: InputDecoration(labelText: traductions.detailLabelPromo, border: OutlineInputBorder()),
                           items: const [DropdownMenuItem(value: '1A', child: Text("1A")), DropdownMenuItem(value: '2A', child: Text("2A")), DropdownMenuItem(value: '3A', child: Text("3A"))],
                           onChanged: (v) => v != null ? setState(() => editor.year.text = v) : null,
                         ),
@@ -381,8 +396,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       Expanded(
                         child: DropdownButtonFormField<String>(
                           value: editor.type,
-                          decoration: const InputDecoration(labelText: "Type", border: OutlineInputBorder()),
-                          items: const [DropdownMenuItem(value: 'E', child: Text("Entreprise")), DropdownMenuItem(value: 'U', child: Text("Université"))],
+                          decoration: InputDecoration(labelText: traductions.typeLabel, border: OutlineInputBorder()),
+                          items: [DropdownMenuItem(value: 'E', child: Text(traductions.detailInternshipCompany)), DropdownMenuItem(value: 'U', child: Text(traductions.detailInternshipUniversity))],
                           onChanged: (v) => setState(() => editor.type = v!),
                         ),
                       ),
@@ -393,8 +408,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                         Expanded(
                           child: TextFormField(
                             controller: editor.start,
-                            decoration: const InputDecoration(
-                              labelText: "Date de début", 
+                            decoration: InputDecoration(
+                              labelText: traductions.detailLabelStartDate, 
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.calendar_today, size: 20),
                             ),
@@ -406,8 +421,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                         Expanded(
                           child: TextFormField(
                             controller: editor.end,
-                            decoration: const InputDecoration(
-                              labelText: "Date de fin", 
+                            decoration: InputDecoration(
+                              labelText: traductions.detailLabelEndDate, 
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.event, size: 20),
                             ),
@@ -418,17 +433,17 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    TextField(controller: editor.entilted, decoration: const InputDecoration(labelText: "Intitulé", border: OutlineInputBorder())),
+                    TextField(controller: editor.entilted, decoration: InputDecoration(labelText: traductions.jobTitleLabel, border: OutlineInputBorder())),
                     const SizedBox(height: 10),
-                    TextField(controller: editor.entreprise, decoration: const InputDecoration(labelText: "Entreprise", border: OutlineInputBorder())),
+                    TextField(controller: editor.entreprise, decoration: InputDecoration(labelText: traductions.detailLabelCompany, border: OutlineInputBorder())),
                     const SizedBox(height: 10),
                     Row(children: [
-                      Expanded(child: TextField(controller: editor.city, decoration: const InputDecoration(labelText: "Ville", border: OutlineInputBorder()))),
+                      Expanded(child: TextField(controller: editor.city, decoration: InputDecoration(labelText: traductions.detailLabelCity, border: OutlineInputBorder()))),
                       const SizedBox(width: 10),
-                      Expanded(child: TextField(controller: editor.country, decoration: const InputDecoration(labelText: "Pays", border: OutlineInputBorder()))),
+                      Expanded(child: TextField(controller: editor.country, decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: OutlineInputBorder()))),
                     ]),
                     const SizedBox(height: 10),
-                    TextField(controller: editor.description, maxLines: 3, decoration: const InputDecoration(labelText: "Description", border: OutlineInputBorder())),
+                    TextField(controller: editor.description, maxLines: 3, decoration: InputDecoration(labelText: traductions.detailLabelDescription, border: OutlineInputBorder())),
                   ],
                 ),
               ),
@@ -436,9 +451,9 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
           }).toList()
         else
           viewModel.internshipDisplay.isEmpty
-              ? const Card(
+              ? Card(
                   child: ListTile(
-                      title: Text("Aucun stage renseigné",
+                      title: Text(traductions.detailInternshipNone,
                           style: TextStyle(
                               fontStyle: FontStyle.italic,
                               color: Colors.grey))))
@@ -493,6 +508,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
   }
 
   Widget _buildInternshipCard(dynamic stage) {
+    final traductions = AppLocalizations.of(context)!; 
     return Card(
       elevation: 3,
       margin: EdgeInsets.zero,
@@ -519,17 +535,17 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
             ),
             const Divider(height: 24),
             _buildInternshipField(
-                stage.type == "U" ? "Université" : "Entreprise",
+                stage.type == "U" ? traductions.detailInternshipUniversity : traductions.detailInternshipCompany,
                 stage.type == "E" ? Icons.apartment : Icons.school,
                 Colors.green,
                 stage.company),
-            _buildInternshipField("Lieu", Icons.location_on, Colors.red,
+            _buildInternshipField(traductions.detailInternshipLocation, Icons.location_on, Colors.red,
                 "${stage.city}, ${stage.country}",
                 isItalic: true),
             if (stage.startDate.isNotEmpty || stage.endDate.isNotEmpty)
-              _buildInternshipField("Période", Icons.calendar_today, Colors.blue,
+              _buildInternshipField(traductions.detailInternshipPeriod, Icons.calendar_today, Colors.blue,
                   "${stage.startDate} au ${stage.endDate}"),
-            _buildInternshipField("Description", Icons.insert_drive_file,
+            _buildInternshipField(traductions.detailInternshipDescription, Icons.insert_drive_file,
                 Colors.grey, stage.description),
           ],
         ),

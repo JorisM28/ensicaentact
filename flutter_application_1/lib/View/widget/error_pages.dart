@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '/View/screens/auth/login.dart';
 import '/View/theme/colors.dart';
+import '../../l10n/app_localizations.dart';
 
 class ErrorPage extends StatelessWidget {
   final String title;
@@ -45,9 +46,10 @@ class ErrorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Error"),
+        title: Text(traductions.errorTitle),
         backgroundColor: Colors.red[800],
         foregroundColor: Colors.white,
       ),
@@ -75,7 +77,7 @@ class ErrorPage extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: onRetry,
                   icon: const Icon(Icons.refresh),
-                  label: const Text("Recharger"),
+                  label: Text(traductions.reloadBtn),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.ensiCyan,
                     foregroundColor: Colors.white,
@@ -90,12 +92,12 @@ class ErrorPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const Login()),
                 );
               },
-              child: const Text('Se connecter'),
+              child: Text(traductions.loginBtn),
               ),
               const SizedBox(height: 10),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Retour"),
+                child: Text(traductions.backBtn),
               )
             ],
           ),

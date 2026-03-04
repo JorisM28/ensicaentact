@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '/View/widget/custom_app_bar.dart';
 import 'add_alumni.dart';
+import '../../../l10n/app_localizations.dart';
 
 void main() {
   runApp(const MyAlumniApp());
@@ -12,8 +13,11 @@ class MyAlumniApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ajout Alumni',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.directoryNewAlumniTitle,      
       debugShowCheckedModeBanner: false,
+
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         primarySwatch: Colors.cyan,
         useMaterial3: true,
@@ -28,14 +32,15 @@ class AddAlumniPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(),
       body: Column(
         children: [
           const SizedBox(height: 20),
 
-          const Text(
-            "Formulaire d'ajout d'alumni",
+          Text(
+            traductions.directoryNewAlumniTitle,
             style: TextStyle(
               fontSize: 22, 
               fontWeight: FontWeight.bold,

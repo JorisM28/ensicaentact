@@ -3,7 +3,7 @@ import '/View/widget/custom_app_bar.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
-
+import '/l10n/app_localizations.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -72,15 +72,16 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   void _confirmDeletion(BuildContext context, Map<String, dynamic> item) {
+    final traductions = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Supprimer l'article ?"),
-        content: Text("Voulez-vous vraiment supprimer définitivement : \n\n\"${item['titre']}\" ?"),
+        title: Text(traductions.deleteArticleTitle),
+        content: Text("${traductions.deleteArticleContent}\"${item['titre']}\" ?"),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text("Annuler")
+              child: Text(traductions.cancel)
           ),
           TextButton(
             onPressed: () async {
@@ -92,12 +93,12 @@ class _NewsPageState extends State<NewsPage> {
                 _loadData();
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Article supprimé."))
+                      SnackBar(content: Text(traductions.articleDeletedSuccess))
                   );
                 }
               }
             },
-            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+            child: Text(traductions.deleteBtn, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -105,6 +106,7 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   void _showAddDialog(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     final titleCtrl = TextEditingController();
     final contentCtrl = TextEditingController();
     final imgCtrl = TextEditingController();
@@ -113,29 +115,29 @@ class _NewsPageState extends State<NewsPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Nouvel Article"),
+        title: Text(traductions.newArticle),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: "Titre")),
+              TextField(controller: titleCtrl, decoration: InputDecoration(labelText: traductions.dialogTitleLabel)),
               const SizedBox(height: 10),
               TextField(
                   controller: contentCtrl,
-                  decoration: const InputDecoration(
-                      labelText: "Contenu de l'article",
+                  decoration: InputDecoration(
+                      labelText: traductions.articleContentLabel,
                       alignLabelWithHint: true,
                       border: OutlineInputBorder()
                   ),
                   maxLines: 5
               ),
               const SizedBox(height: 10),
-              TextField(controller: imgCtrl, decoration: const InputDecoration(labelText: "URL Image (optionnel)")),
+              TextField(controller: imgCtrl, decoration: InputDecoration(labelText: traductions.dialogImageUrlLabel)),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
           ElevatedButton(
             onPressed: () async {
               if (titleCtrl.text.isEmpty) return;
@@ -156,7 +158,7 @@ class _NewsPageState extends State<NewsPage> {
               Navigator.pop(ctx);
               _loadData();
             },
-            child: const Text("Publier"),
+            child: Text(traductions.publish),
           ),
         ],
       ),
@@ -194,24 +196,28 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  Widget _buildSearchBar() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-    child: TextField(
-      controller: _searchCtrl,
-      cursorColor: Colors.black,
-      decoration: const InputDecoration(
-        hintText: "Rechercher un article...",
-        prefixIcon: Icon(Icons.search, color: Colors.black54),
-        border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black12)),
-        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+    Widget _buildSearchBar() {
+    final traductions = AppLocalizations.of(context)!; 
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: TextField(
+        controller: _searchCtrl,
+        cursorColor: Colors.black,
+        decoration: InputDecoration( 
+          hintText: traductions.searchArticle, 
+          prefixIcon: const Icon(Icons.search, color: Colors.black54), 
+          border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.black12)), 
+          focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)), 
+        ),
+        onChanged: (v) => setState(() => _search = v),
       ),
-      onChanged: (v) => setState(() => _search = v),
-    ),
-  );
+    );
+  }
 
   Widget _buildHeroArticle(Map<String, dynamic> item, bool isMobile) {
     final imageUrl = _getImageUrl(item);
-    final contentPreview = item['contenu'] ?? item['description'] ?? "Pas de description";
+    final contentPreview = item['contenu'] ?? item['description'] ?? AppLocalizations.of(context)!.noDescription;
 
     Widget textPart = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,7 +317,7 @@ class _NewsPageState extends State<NewsPage> {
 
   Widget _buildNewspaperFeed(List<Map<String, dynamic>> liste) {
     if (liste.isEmpty) {
-      return const Center(child: Text("Aucun article.", style: TextStyle(fontFamily: 'serif', fontSize: 20)));
+      return Center(child: Text(AppLocalizations.of(context)!.noArticle, style: TextStyle(fontFamily: 'serif', fontSize: 20)));
     }
 
     return LayoutBuilder(
@@ -385,8 +391,9 @@ class NewspaperDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String title = item['titre'] ?? "Sans titre";
-    final String content = item['contenu'] ?? item['description'] ?? "Pas de contenu";
+    final traductions = AppLocalizations.of(context)!;
+    final String title = item['titre'] ?? traductions.untitled;
+    final String content = item['contenu'] ?? item['description'] ?? traductions.noDescription;
     final String date = item['date_publi'] ?? "";
     final String author = "${item['prenom_auteur'] ?? ''} ${item['nom_auteur'] ?? ''}";
 
@@ -413,7 +420,7 @@ class NewspaperDetailsPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  (item['tag'] ?? "ACTUALITÉ").toUpperCase(),
+                  (item['tag'] ?? traductions.defaultTagNews).toUpperCase(),
                   style: const TextStyle(color: Color(0xFFC00), fontWeight: FontWeight.bold, fontSize: 12),
                 ),
                 const SizedBox(height: 10),
@@ -424,9 +431,9 @@ class NewspaperDetailsPage extends StatelessWidget {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    Text("Par $author", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+                    Text("${traductions.byAuthor}$author", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)), 
                     const SizedBox(width: 10),
-                    if (date.isNotEmpty) Text("•  Publié le $date", style: const TextStyle(color: Colors.grey)),
+                    if (date.isNotEmpty) Text("${traductions.publishedOn}$date", style: const TextStyle(color: Colors.grey)), 
                   ],
                 ),
                 const SizedBox(height: 25),
@@ -443,7 +450,7 @@ class NewspaperDetailsPage extends StatelessWidget {
                   const SizedBox(height: 5),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: Text("Crédit: DR", style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+                    child: Text(traductions.creditDR, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
                   ),
                 ],
 

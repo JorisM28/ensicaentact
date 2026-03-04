@@ -3,6 +3,7 @@ import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/View/theme/colors.dart';
 import '/View/screens/event/news_page.dart';
+import '/l10n/app_localizations.dart';
 import '/Model/data/services/auth_service.dart';
 
 class ActualityWidget extends StatefulWidget {
@@ -40,20 +41,22 @@ class _ActualityWidgetState extends State<ActualityWidget> {
   }
 
   void _confirmerSuppression(Map<String, dynamic> item) {
+    final traductions = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Supprimer ?"),
-        content: Text("Voulez-vous vraiment supprimer \"${item['titre']}\" ?"),
+        title: Text(traductions.directoryDeleteConfirmTitle),
+        content: Text(traductions.directoryDeleteConfirmContent(item['titre'] ?? traductions.untitled)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Annuler")),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
 
               var rawId = item['id_actu'];
               if (rawId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Erreur: ID introuvable")));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.errorOccurred)));
                 return;
               }
 
@@ -64,15 +67,15 @@ class _ActualityWidgetState extends State<ActualityWidget> {
                   _news.removeWhere((element) => element['id_actu'].toString() == rawId.toString());
                 });
                 ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Actualité supprimée !"))
+                    SnackBar(content: Text(traductions.newsDeletedSuccess))
                 );
               } else if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Erreur lors de la suppression."))
+                    SnackBar(content: Text(traductions.errorOccurred))
                 );
               }
             },
-            child: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+            child: Text(traductions.deleteBtn, style: const TextStyle(color: Colors.red)),
           )
         ],
       ),
@@ -97,6 +100,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
     final currentUser = sl<AuthService>().currentUser;
     if (_isLoading) return const Center(child: CircularProgressIndicator());
 
+    final traductions = AppLocalizations.of(context)!;
     final displayList = _news.take(2).toList();
     bool isAdmin = currentUser?.role == 'admin';
 
@@ -111,9 +115,9 @@ class _ActualityWidgetState extends State<ActualityWidget> {
               if (isAdmin && widget.onAddPress != null) ...[
                 const Spacer(),
               ],
-              const Text(
-                "ACTUALITÉS",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.ensiCyan),
+              Text(
+                traductions.drawerNews.toUpperCase(),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.ensiCyan),
               ),
               if (isAdmin && widget.onAddPress != null) ...[
                 const Spacer(),
@@ -122,7 +126,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
                   onPressed: widget.onAddPress,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  tooltip: "Ajouter une actualité",
+                  tooltip: traductions.addNewsTooltip,
                 )
               ]
             ],
@@ -131,15 +135,15 @@ class _ActualityWidgetState extends State<ActualityWidget> {
 
         Expanded(
           child: displayList.isEmpty
-              ? const Center(child: Text("Aucune actualité."))
+              ? Center(child: Text(traductions.noNewsAvailable))
               : Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: _buildAdaptiveCard(displayList[0], isAdmin)),
+              Expanded(child: _buildAdaptiveCard(displayList[0], isAdmin, traductions)),
               const SizedBox(width: 20),
               Expanded(
                 child: displayList.length > 1
-                    ? _buildAdaptiveCard(displayList[1], isAdmin)
+                    ? _buildAdaptiveCard(displayList[1], isAdmin, traductions)
                     : const SizedBox(),
               ),
             ],
@@ -155,14 +159,14 @@ class _ActualityWidgetState extends State<ActualityWidget> {
             backgroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           ),
-          child: const Text("Voir toutes les actualités", style: TextStyle(color: Color(0xFFE30613))),
+          child: Text(traductions.seeAllNews, style: const TextStyle(color: Color(0xFFE30613))),
         ),
       ],
     );
   }
 
-  Widget _buildAdaptiveCard(Map<String, dynamic> item, bool estAdmin) {
-    final String title = item['titre'] ?? "Sans titre";
+  Widget _buildAdaptiveCard(Map<String, dynamic> item, bool estAdmin, AppLocalizations traductions) {
+    final String title = item['titre'] ?? traductions.untitled;
     final String tag = item['tag'] ?? "NEWS";
     final Color tagColor = _parseColor(item['tag_color']);
     final String? imageUrl = item['image_url'];

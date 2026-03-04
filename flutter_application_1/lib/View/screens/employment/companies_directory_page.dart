@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../widget/company_card_widget.dart'; 
+import '../../../ViewModel/employment_viewmodel.dart';
+import '../../../l10n/app_localizations.dart'; 
+import '../../widget/error_pages.dart';
 import '/View/widget/company_card_widget.dart';
 import '/View/widget/error_pages.dart';
 import '/View/widget/custom_app_bar.dart';
@@ -27,18 +31,18 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     viewModel.addListener(() => setState(() {}));
   }
 
-  List<Map<String, dynamic>> _getGroupedData() {
+  List<Map<String, dynamic>> _getGroupedData(AppLocalizations traductions) {
     if (_groupBy == 'Entreprise') return viewModel.allCompanies;
 
     Map<String, Map<String, dynamic>> cityGroups = {};
     for (var c in viewModel.allCompanies) {
-      String city = c['ville'] ?? 'Inconnue';
+      String city = c['ville'] ?? traductions.unknownCity;
       String country = c['pays'] ?? '';
       String key = '$city-$country';
 
       if (!cityGroups.containsKey(key)) {
         cityGroups[key] = {
-          'nom_entreprise': city,
+          'nom_entreprise': city, 
           'ville': city,
           'pays': country,
           'nombre_alumni': 0,
@@ -80,6 +84,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     final isWideScreen = MediaQuery.of(context).size.width > 900;
 
     if (viewModel.hasAccessError) {
@@ -88,7 +93,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
       );
     }
 
-    final displaydata = _getGroupedData();
+    final displaydata = _getGroupedData(traductions);
     final mapData = _getMapData();
 
     return Scaffold(
@@ -97,21 +102,21 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                _buildFilterToggle(),
+                _buildFilterToggle(traductions), 
                 Expanded(
                   child: isWideScreen
                       ? Row(
                           children: [
-                            Expanded(flex: 2, child: _buildList(displaydata)),
+                            Expanded(flex: 2, child: _buildList(displaydata, traductions)), // Et ici
                             const VerticalDivider(width: 1),
-                            Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem !=null))
+                            Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem != null)) 
                           ],
                         )
                       : Column(
                           children: [
-                            Expanded(flex: 2, child: _buildList(displaydata)),
+                            Expanded(flex: 2, child: _buildList(displaydata, traductions)), // Et ici
                             const Divider(height: 1),
-                            Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem !=null))
+                            Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem != null))
                           ],
                         ),
                 ),
@@ -120,13 +125,13 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     );
   }
 
-  Widget _buildFilterToggle() {
+  Widget _buildFilterToggle(AppLocalizations traductions) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SegmentedButton<String>(
-        segments: const [
-          ButtonSegment(value: 'Entreprise', label: Text('Par Entreprise'), icon: Icon(Icons.business)),
-          ButtonSegment(value: 'Ville', label: Text('Par Ville'), icon: Icon(Icons.location_city)),
+        segments: [
+          ButtonSegment(value: 'Entreprise', label: Text(traductions.companiesFilterCompany), icon: const Icon(Icons.business)),
+          ButtonSegment(value: 'Ville', label: Text(traductions.companiesFilterCity), icon: const Icon(Icons.location_city)),
         ],
         selected: {_groupBy},
         onSelectionChanged: (Set<String> newSelection) {
@@ -143,7 +148,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     );
   }
 
-  Widget _buildList(List<Map<String, dynamic>> data) {
+  Widget _buildList(List<Map<String, dynamic>> data, AppLocalizations traductions) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: data.length,
@@ -187,11 +192,11 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
                   children: [
                     Icon(isCityMode ? Icons.location_city : Icons.business, color: AppColors.ensiCyan),
                     const SizedBox(width: 10),
-                    Expanded(child: Text(item['nom_entreprise'] ?? "Inconnu", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.ensiCyan))),
+                    Expanded(child: Text(item['nom_entreprise'] ?? traductions.unknownCompany, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.ensiCyan))),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(color: AppColors.ensiCyan.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                      child: Text("${item['nombre_alumni'] ?? 0} alumni", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      child: Text("${item['nombre_alumni'] ?? 0} ${traductions.alumniLabel}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),

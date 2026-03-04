@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/View/screens/employment/job_page.dart';
+import '/l10n/app_localizations.dart';
 
 class JobOfferWidget extends StatelessWidget {
   const JobOfferWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
 
     return Container(
       width: double.infinity,
@@ -15,9 +17,9 @@ class JobOfferWidget extends StatelessWidget {
       color: const Color(0xFFE6E6E6),
       child: Column(
         children: [
-          const Text(
-            "OFFRES D'EMPLOI & STAGES",
-            style: TextStyle(
+          Text(
+            traductions.careersStagesTitle.toUpperCase(),
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w400,
               letterSpacing: 1.0,
@@ -34,13 +36,13 @@ class JobOfferWidget extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Text("Aucune offre disponible.");
+                return Text(traductions.noOfferFound);
               }
 
               final offres = snapshot.data!.take(4).toList();
 
               return Column(
-                children: offres.map((job) => _buildJobCard(job)).toList(),
+                children: offres.map((job) => _buildJobCard(job, traductions)).toList(),
               );
             },
           ),
@@ -55,9 +57,9 @@ class JobOfferWidget extends StatelessWidget {
               side: const BorderSide(color: Color(0xFFE30613)),
               padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
             ),
-            child: const Text(
-              "Voir toutes les offres",
-              style: TextStyle(color: Color(0xFFE30613), fontSize: 16, fontWeight: FontWeight.w500),
+            child: Text(
+              traductions.seeAllOffers,
+              style: const TextStyle(color: Color(0xFFE30613), fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -65,7 +67,7 @@ class JobOfferWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildJobCard(Map<String, dynamic> job) {
+  Widget _buildJobCard(Map<String, dynamic> job, AppLocalizations traductions) {
 
     final String type = (job['type'] ?? 'CDI').toString();
     final bool isStage = type.toLowerCase() == 'stage';
@@ -94,7 +96,7 @@ class JobOfferWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  job['titre'] ?? "Poste",
+                  job['titre'] ?? traductions.defaultJobTitle,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,

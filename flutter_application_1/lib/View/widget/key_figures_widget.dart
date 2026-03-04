@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '/l10n/app_localizations.dart';
 
 class KeyFigure {
   int id;
@@ -131,22 +132,24 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
 
       if (result['status'] == 'success') {
         if (mounted) {
+          final traductions = AppLocalizations.of(context)!;
           setState(() {
             _isEditing = false;
             _isSaving = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Mise à jour réussie !"), backgroundColor: Colors.green),
+            SnackBar(content: Text(traductions.updateSuccess), backgroundColor: Colors.green),
           );
         }
       } else {
         throw Exception(result['message']);
       }
     } catch (e) {
+      final traductions = AppLocalizations.of(context)!;
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erreur sauvegarde : $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text(traductions.formMsgError(e.toString())), backgroundColor: Colors.red),
         );
       }
     }
@@ -313,6 +316,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
   }
 
   Widget _buildAdminInterface() {
+    final traductions = AppLocalizations.of(context)!;
     double width = MediaQuery.of(context).size.width;
     bool isMobile = width < 900;
 
@@ -326,7 +330,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
           child: ExpansionTile(
             initiallyExpanded: idx == 0,
             leading: Icon(availableIcons[stat.iconKey], color: stat.color),
-            title: Text("Bloc ${idx + 1} : ${stat.label}", style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text("${traductions.blockLabel} ${idx + 1} : ${stat.label}", style: const TextStyle(fontWeight: FontWeight.bold)),
             children: [
               Padding(
                 padding: const EdgeInsets.all(15),
@@ -339,7 +343,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
                           child: TextFormField(
                             initialValue: stat.value.toString(),
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: "Chiffre", border: OutlineInputBorder()),
+                            decoration: InputDecoration(labelText: traductions.numberLabel, border: OutlineInputBorder()),
                             onChanged: (val) => setState(() => stat.value = int.tryParse(val) ?? 0),
                           ),
                         ),
@@ -347,7 +351,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
                         Expanded(
                           child: TextFormField(
                             initialValue: stat.suffix,
-                            decoration: const InputDecoration(labelText: "Suffixe", border: OutlineInputBorder()),
+                            decoration: InputDecoration(labelText: traductions.suffixLabel, border: OutlineInputBorder()),
                             onChanged: (val) => setState(() => stat.suffix = val),
                           ),
                         ),
@@ -356,13 +360,13 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
                     const SizedBox(height: 10),
                     TextFormField(
                       initialValue: stat.label,
-                      decoration: const InputDecoration(labelText: "Titre (Label)", border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: traductions.titleLabelAdmin, border: OutlineInputBorder()),
                       onChanged: (val) => setState(() => stat.label = val),
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: availableIcons.containsKey(stat.iconKey) ? stat.iconKey : 'school',
-                      decoration: const InputDecoration(labelText: "Icône", border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: traductions.iconLabel, border: OutlineInputBorder()),
                       items: availableIcons.entries.map((e) => DropdownMenuItem(
                         value: e.key,
                         child: Row(children: [Icon(e.value, size: 20), const SizedBox(width: 10), Text(e.key)]),
@@ -392,7 +396,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
           const VerticalDivider(width: 50),
           Expanded(flex: 6, child: Column(
             children: [
-              const Chip(label: Text("Aperçu en direct")),
+              Chip(label: Text(traductions.livePreview)),
               const SizedBox(height: 35),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,

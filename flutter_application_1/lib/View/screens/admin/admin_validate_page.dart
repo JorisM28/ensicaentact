@@ -4,6 +4,7 @@ import '/View/widget/custom_app_bar.dart';
 import '/View/screens/alumni/add_alumni.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
+import '/l10n/app_localizations.dart';
 
 
 class AdminValidationPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: CustomAppBar(),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -31,7 +33,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
           }
           
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("Aucune demande en attente."));
+            return Center(child: Text(traductions.adminNoPendingRequests));
           }
 
           final requests = snapshot.data!;
@@ -47,7 +49,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                 child: ListTile(
                   leading: const Icon(Icons.person_add, color: Colors.orange),
                   title: Text("${request['prenom']} ${request['nom']}"),
-                  subtitle: Text("Reçu le : $date"),
+                  subtitle: Text("${traductions.adminReceivedOn} $date"),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
                     try {
@@ -59,7 +61,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => Scaffold(
-                            appBar: AppBar(title: const Text("Vérification & Validation")),
+                            appBar: AppBar(title: Text(traductions.adminVerifyValidateTitle)),
                             body: AddAlumniForm(
                               isAdmin: true,
                               initialData: dataDecoded,
@@ -68,7 +70,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                                 Navigator.pop(context);
                                 _refresh();
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Demande traitée avec succès !"))
+                                  SnackBar(content: Text(traductions.adminRequestProcessedSuccess))
                                 );
                               },
                             ),
@@ -78,7 +80,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                     } catch (e) {
                       print("Erreur de parsing JSON: $e");
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Erreur de données corrompues"))
+                        SnackBar(content: Text(traductions.adminCorruptedDataError))
                       );
                     }
                   },

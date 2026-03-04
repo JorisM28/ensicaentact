@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import '/l10n/app_localizations.dart';
+
 
 class CompaniesMapWidget extends StatefulWidget {
   final List<Map<String, dynamic>> companies;
@@ -46,6 +48,7 @@ class _CompaniesMapWidgetState extends State<CompaniesMapWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
     final validEntreprises = widget.companies.where((e) {
       return e['latitude'] != null &&
           e['longitude'] != null &&
@@ -62,7 +65,7 @@ class _CompaniesMapWidgetState extends State<CompaniesMapWidget> {
         height: 40,
         point: LatLng(lat, lng),
         child: Tooltip(
-          message: '${e['nom_entreprise']} (${e['nombre_alumni']} alumni)',
+          message: '${e['nom_entreprise']} (${e['nombre_alumni']} ${traductions.alumniLabel})',
           child: const Icon(Icons.location_on, color: Colors.red, size: 30),
         ),
       );
