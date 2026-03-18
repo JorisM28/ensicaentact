@@ -313,6 +313,12 @@ Le document de cadrage soulignait l'importance de tracer les échanges. Nous pou
     \item \textbf{Gestion granulaire du RGPD :} Bien que le MVP respecte déjà la protection des données, une version future pourrait offrir aux Alumnis un tableau de bord précis pour gérer la visibilité de leurs coordonnées privées, tout en permettant aux étudiants d'être acteurs de la prise de contact de manière tutorée.
 \end{itemize}
 
+\subsection{Internationalisation et ouverture globale}
+L'application intègre nativement un système d'internationalisation complet (Français/Anglais), permettant une navigation fluide pour les Alumnis basés à l'étranger. Cette fonctionnalité a été implémentée via un \texttt{LocaleProvider} et un sélecteur de langue dynamique en temps réel. Pour aller plus loin, nous envisageons :
+\begin{itemize}[label=\textbullet, itemsep=5pt]
+    \item \textbf{Traduction dynamique des données (Backend) :} Actuellement, si l'interface est traduite, les données provenant de la base de données (intitulés de postes, secteurs d'activité, chiffres clés) restent dans leur langue de saisie. L'évolution logique serait d'implémenter un stockage bilingue en base de données pour assurer une cohérence totale de l'expérience utilisateur, quelle que soit la langue choisie.
+\end{itemize}
+
 \newpage
 
 
