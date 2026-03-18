@@ -830,6 +830,12 @@ abstract class AppLocalizations {
   /// **'Ville'**
   String get detailLabelCity;
 
+  /// No description provided for @detailLabelPostalCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code Postal'**
+  String get detailLabelPostalCode;
+
   /// No description provided for @detailLabelCompany.
   ///
   /// In fr, this message translates to:

@@ -4,6 +4,7 @@
     final String description;
     final String type;
     final String city;
+    final String postalCode;
     final String country;
     final String company;
     final String startDate;
@@ -17,6 +18,7 @@
       required this.description,
 
       required this.city,
+      required this.postalCode,
       required this.country,
       required this.company,
       required this.startDate,
@@ -28,6 +30,7 @@
         year: json['annee']?.toString() ?? '',
         entitled: json['intitule']?.toString() ?? '',
         city: json['ville']?.toString() ?? '',
+        postalCode: json['code_postal']?.toString() ?? '',
         description: json['description']?.toString() ?? '',
         type: json['entrepriseUniversite']?.toString() ?? 'I',
         country: json['pays']?.toString() ?? '',
@@ -61,6 +64,7 @@
     final String jobEnd;
     final String company;
     final String city;
+    final String postalCode;
     final String country;
 
     final List<Internship> internships;
@@ -87,6 +91,7 @@
       required this.jobEnd,
       required this.company,
       required this.city,
+      required this.postalCode,
       required this.country,
       required this.internships,
     });
@@ -122,6 +127,7 @@
         jobEnd: map['job_fin']?.toString() ?? '',
         company: map['entreprise']?.toString() ?? 'Non renseigné',
         city: map['ville']?.toString() ?? '',
+        postalCode: map['code_postal']?.toString() ?? '',
         country: map['pays']?.toString() ?? '',
         internships: stagesList,
       );

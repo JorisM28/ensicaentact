@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../Model/alumnis.dart';
-import '../../../ViewModel/alumni/alumni_preview_viewmodel.dart';
-import '../../../l10n/app_localizations.dart'; 
-
-import '/View/theme/colors.dart';
 import '/Model/alumnis.dart';
 import '/ViewModel/alumni/alumni_preview_viewmodel.dart';
+import '/l10n/app_localizations.dart'; 
+import '/View/theme/colors.dart';
+
 class AlumniPreview extends StatelessWidget {
   final AlumniPreviewViewModel viewModel;
 

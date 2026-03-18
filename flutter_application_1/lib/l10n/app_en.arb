@@ -139,6 +139,7 @@
   "detailLabelJob": "Position",
   "detailLabelJobDesc": "Job Description",
   "detailLabelCity": "City",
+  "detailLabelPostalCode": "Zip Code",
   "detailLabelCompany": "Company",
   "detailLabelSeniority": "Seniority",
   "detailLabelStartDate": "Start Date (Position)",

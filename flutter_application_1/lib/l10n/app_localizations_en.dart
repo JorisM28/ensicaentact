@@ -379,6 +379,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailLabelCity => 'City';
 
   @override
+  String get detailLabelPostalCode => 'Zip Code';
+
+  @override
   String get detailLabelCompany => 'Company';
 
   @override

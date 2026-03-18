@@ -91,9 +91,25 @@ class DirectoryViewModel extends ChangeNotifier {
   void _applyFilters() {
     _filteredAlumnis = _allAlumnis.where((alumni) {
       bool matchesSearch = _searchQuery.isEmpty ||
-          alumni.wholeName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          alumni.company.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          alumni.job.toLowerCase().contains(_searchQuery.toLowerCase());
+            alumni.wholeName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            alumni.city.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            alumni.company.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            alumni.job.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            alumni.sector.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            alumni.specialisation.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            alumni.option.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            alumni.promotion.toString().contains(_searchQuery.toLowerCase());
+
+        if (!matchesSearch && _searchQuery.isNotEmpty) {
+          for (var stage in alumni.internships) {
+            if (stage.city.toLowerCase().contains(_searchQuery.toLowerCase()) || 
+                stage.company.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                stage.entitled.toLowerCase().contains(_searchQuery.toLowerCase())) {
+              matchesSearch = true;
+              break;
+            }
+          }
+        }
 
       bool matchesPromotions = _selectedPromotion.isEmpty || _selectedPromotion.contains(alumni.promotion.toString());
 

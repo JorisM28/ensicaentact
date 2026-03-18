@@ -2,24 +2,17 @@ import 'package:aad_oauth/aad_oauth.dart';
 import 'package:aad_oauth/model/config.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../ViewModel/admin/login_check.dart';
-import '../alumni/directory_page.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../../l10n/app_localizations.dart';
-
+import '/View/screens/alumni/directory_page.dart';
+import '/l10n/app_localizations.dart';
 import 'package:flutter_application_ensicaentact/service_locator.dart';
 import 'package:flutter_application_ensicaentact/Model/data/services/auth_service.dart';
 import '/View/theme/colors.dart';
-import '/service_locator.dart';
-import '/Model/data/services/auth_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '/Model/connection/auth_strategy.dart';
 import '/Model/connection/ensicaen_auth_adapter.dart';
 import '/Model/connection/i_auth_strategy.dart';
 import '/Model/connection/microsoft_auth_adapter.dart';
 import '/View/navigation.dart';
-import '/View/screens/alumni/directory_page.dart';
-
 
 class Login extends StatefulWidget {
   const Login({super.key});

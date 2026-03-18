@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../../service_locator.dart';
-import '../../../Model/data/services/alumni_repository.dart';
-import '../../../l10n/app_localizations.dart'; 
-
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
+import '/l10n/app_localizations.dart'; 
 import '/View/theme/colors.dart';
 
 class StageFormModel {
@@ -16,7 +13,8 @@ class StageFormModel {
   final TextEditingController controllerEntitled = TextEditingController();
   final TextEditingController controllerCompany = TextEditingController();
   final TextEditingController controllerCity = TextEditingController();
-  final TextEditingController controllercountry = TextEditingController();
+  final TextEditingController controllerPostalCode = TextEditingController();
+  final TextEditingController controllerCountry = TextEditingController();
   final TextEditingController controllerDescription = TextEditingController();
   final TextEditingController controllerStartDate = TextEditingController();
   final TextEditingController controllerEndDate = TextEditingController();
@@ -27,7 +25,8 @@ class StageFormModel {
     controllerEntitled.dispose();
     controllerCompany.dispose();
     controllerCity.dispose();
-    controllercountry.dispose();
+    controllerPostalCode.dispose();
+    controllerCountry.dispose();
     controllerDescription.dispose();
     controllerStartDate.dispose();
     controllerEndDate.dispose();
@@ -40,7 +39,8 @@ class StageFormModel {
       "type" : internshipType,
       "entreprise": controllerCompany.text.trim(),
       "ville": controllerCity.text.trim(),
-      "pays": controllercountry.text.trim(),
+      "code_postal": controllerPostalCode.text.trim(),  
+      "pays": controllerCountry.text.trim(),
       "description": controllerDescription.text.trim(),
       "debut": controllerStartDate.text.trim(),
       "fin": controllerEndDate.text.trim(),
@@ -83,7 +83,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   final _controllerPosition = TextEditingController();
   final _controllerCompany = TextEditingController();
   final _controllerCity = TextEditingController();
-  final _paysCtrl = TextEditingController();
+  final _controllerPostalCode = TextEditingController();
+  final _controllerCountry = TextEditingController();
 
   final Map<String, Map<String, List<String>>> _hierarchieFormation = {
     'Informatique': {
@@ -122,29 +123,39 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     }
   }
 
-  Future<Map<String, double>?> _obtenirCoordonnees(String ville, String pays) async {
-    if (ville.isEmpty) return null;
+  Future<Map<String, double>?> _getCoordonnees(String city, String country, String postalCode) async {
+    if (city.isEmpty) return null;
+    String query = "";
+    if (postalCode.isNotEmpty) {
+      query = "$postalCode $city, $country"; 
+    } else {
+      query = "$city, $country";
+    }
 
-    String query = "$ville, $pays";
-    var url = Uri.parse("https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=1");
+    var url = Uri.parse("https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1");
 
     try {
       var response = await http.get(url, headers: {
-        'User-Agent': 'AlumniEnsiApp/1.0 (votre_email@exemple.com)' 
+        'User-Agent': 'AlumniEnsiApp/1.0 (gti.pedro6@exemple.com)'
       });
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
+        
         if (data is List && data.isNotEmpty) {
           return {
             "lat": double.parse(data[0]['lat']),
             "lon": double.parse(data[0]['lon']),
           };
+        } 
+        else if (postalCode.isNotEmpty) {
+          return await _getCoordonnees(city, country, postalCode);
         }
       }
     } catch (e) {
       print("Erreur de géocodage : $e");
     }
+    
     return null;
   }
 
@@ -173,7 +184,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       _controllerCompany.text = data['entreprise'] ?? '';
       _controllerPositionDescription.text = data['description'] ?? '';
       _controllerCity.text = data['ville'] ?? '';
-      _paysCtrl.text = data['pays'] ?? '';
+      _controllerPostalCode.text = data['code_postal'] ?? '';
+      _controllerCountry.text = data['pays'] ?? '';
 
       if (data['stages'] != null) {
         for (var s in data['stages']) {
@@ -183,7 +195,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
           stageModel.controllerEntitled.text = s['intitule'] ?? '';
           stageModel.controllerCompany.text = s['entreprise'] ?? '';
           stageModel.controllerCity.text = s['ville'] ?? '';
-          stageModel.controllercountry.text = s['pays'] ?? '';
+          stageModel.controllerCountry.text = s['pays'] ?? '';
           stageModel.controllerDescription.text = s['description'] ?? '';
           _internships.add(stageModel);
         }
@@ -204,7 +216,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     _controllerPositionDescription.dispose();
     _controllerStartDate.dispose();
     _controllerCity.dispose(); 
-    _paysCtrl.dispose();
+    _controllerPostalCode.dispose();
+    _controllerCountry.dispose();
     
     for (var internship in _internships) {
       internship.dispose();
@@ -235,7 +248,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     try {
       double? positionLat;
       double? positionLon;
-      var coordsPoste = await _obtenirCoordonnees(_controllerCity.text, _paysCtrl.text);
+      var coordsPoste = await _getCoordonnees(_controllerCity.text, _controllerCountry.text, _controllerPostalCode.text);
       if (coordsPoste != null) {
         positionLat = coordsPoste['lat'];
         positionLon = coordsPoste['lon'];
@@ -259,7 +272,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
         "description": _controllerPositionDescription.text.trim(),
         "debut": _controllerStartDate.text.trim(),
         "ville": _controllerCity.text.trim(),
-        "pays": _paysCtrl.text.trim(),
+        "code_postal": _controllerPostalCode.text.trim(),
+        "pays": _controllerCountry.text.trim(),
         "latitude": positionLat,
         "longitude": positionLon,
       };
@@ -268,7 +282,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       for (var s in _internships) {
         var stageMap = s.toMap();
         
-        var coordsStage = await _obtenirCoordonnees(s.controllerCity.text, s.controllercountry.text);
+        var coordsStage = await _getCoordonnees(s.controllerCity.text, s.controllerCountry.text, s.controllerPostalCode.text);
         if (coordsStage != null) {
           stageMap['latitude'] = coordsStage['lat'];
           stageMap['longitude'] = coordsStage['lon'];
@@ -542,7 +556,14 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextFormField(
-                      controller: _paysCtrl,
+                      controller: _controllerPostalCode,
+                      decoration: InputDecoration(labelText: traductions.detailLabelPostalCode, border: const OutlineInputBorder()),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _controllerCountry,
                       decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: const OutlineInputBorder()),
                     ),
                   ),
@@ -738,7 +759,9 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                             children: [
                               Expanded(child: TextFormField(controller: intership.controllerCity, decoration: InputDecoration(labelText: traductions.detailLabelCity, border: const OutlineInputBorder()))),
                               const SizedBox(width: 10),
-                              Expanded(child: TextFormField(controller: intership.controllercountry, decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: const OutlineInputBorder()))),
+                              Expanded(child: TextFormField(controller: intership.controllerPostalCode, decoration: InputDecoration(labelText: traductions.detailLabelPostalCode, border: const OutlineInputBorder()))),
+                              const SizedBox(width: 10),
+                                Expanded(child: TextFormField(controller: intership.controllerCountry, decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: const OutlineInputBorder()))),
                             ],
                           ),
                           const SizedBox(height: 10),

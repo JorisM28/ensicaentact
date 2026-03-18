@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../Model/alumnis.dart';
-import '../../../ViewModel/alumni/alumni_viewmodel.dart';
-import '../../../l10n/app_localizations.dart'; 
-import '/View/theme/colors.dart';
 import '/Model/alumnis.dart';
 import '/ViewModel/alumni/alumni_viewmodel.dart';
+import '/l10n/app_localizations.dart'; 
+import '/View/theme/colors.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
@@ -36,7 +34,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     super.dispose();
   }
 
-  Future<void> _selectionnerDate(BuildContext context, TextEditingController controller) async {
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -202,7 +200,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
           controller: viewModel.dateOfBirthController,
           decoration: InputDecoration(labelText: traductions.detailLabelBirthDate, border: OutlineInputBorder(), prefixIcon: Icon(Icons.cake)),
           readOnly: true,
-          onTap: () => _selectionnerDate(context, viewModel.dateOfBirthController),
+          onTap: () => _selectDate(context, viewModel.dateOfBirthController),
         ),
         const Divider(height: 40),
         Card(
@@ -277,6 +275,9 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
       _buildEditableTile(Icons.location_on, Colors.red, traductions.detailLabelCity, viewModel.cityController, viewModel.currentAlumni.city),
       const Divider(height: 1),
       _buildEditableTile(Icons.business, Colors.indigo, traductions.detailLabelCompany, viewModel.companyController, viewModel.currentAlumni.company),
+      const Divider(height: 1),
+      _buildEditableTile(Icons.location_city, const Color.fromARGB(255, 140, 92, 252), traductions.detailLabelPostalCode, viewModel.postalCodeController, viewModel.currentAlumni.postalCode),
+
       if (!viewModel.isEdited && viewModel.startPosDateController.text.isNotEmpty)
         ListTile(
           leading: const Icon(Icons.timer, color: Colors.teal),
@@ -290,7 +291,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
             controller: viewModel.startPosDateController,
             decoration: InputDecoration(labelText: traductions.detailLabelStartDate, border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today)),
             readOnly: true,
-            onTap: () => _selectionnerDate(context, viewModel.startPosDateController),
+            onTap: () => _selectDate(context, viewModel.startPosDateController),
           ),
         ),
     ];
@@ -414,7 +415,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                               prefixIcon: Icon(Icons.calendar_today, size: 20),
                             ),
                             readOnly: true,
-                            onTap: () => _selectionnerDate(context, editor.start),
+                            onTap: () => _selectDate(context, editor.start),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -427,7 +428,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                               prefixIcon: Icon(Icons.event, size: 20),
                             ),
                             readOnly: true,
-                            onTap: () => _selectionnerDate(context, editor.end),
+                            onTap: () => _selectDate(context, editor.end),
                           ),
                         ),
                       ],
@@ -441,6 +442,8 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                       Expanded(child: TextField(controller: editor.city, decoration: InputDecoration(labelText: traductions.detailLabelCity, border: OutlineInputBorder()))),
                       const SizedBox(width: 10),
                       Expanded(child: TextField(controller: editor.country, decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: OutlineInputBorder()))),
+                      const SizedBox(width: 10),
+                      Expanded(child: TextField(controller: editor.postalCode, decoration: InputDecoration(labelText: traductions.detailLabelPostalCode, border: OutlineInputBorder()))),
                     ]),
                     const SizedBox(height: 10),
                     TextField(controller: editor.description, maxLines: 3, decoration: InputDecoration(labelText: traductions.detailLabelDescription, border: OutlineInputBorder())),
@@ -540,7 +543,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
                 Colors.green,
                 stage.company),
             _buildInternshipField(traductions.detailInternshipLocation, Icons.location_on, Colors.red,
-                "${stage.city}, ${stage.country}",
+                "${stage.city}, ${stage.country}, ${stage.country}",
                 isItalic: true),
             if (stage.startDate.isNotEmpty || stage.endDate.isNotEmpty)
               _buildInternshipField(traductions.detailInternshipPeriod, Icons.calendar_today, Colors.blue,

@@ -380,6 +380,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get detailLabelCity => 'Ville';
 
   @override
+  String get detailLabelPostalCode => 'Code Postal';
+
+  @override
   String get detailLabelCompany => 'Entreprise';
 
   @override

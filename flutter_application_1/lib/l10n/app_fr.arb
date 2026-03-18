@@ -139,6 +139,7 @@
   "detailLabelJob": "Poste",
   "detailLabelJobDesc": "Description du poste",
   "detailLabelCity": "Ville",
+  "detailLabelPostalCode" : "Code Postal",
   "detailLabelCompany": "Entreprise",
   "detailLabelSeniority": "Ancienneté",
   "detailLabelStartDate": "Date de début (Poste)",

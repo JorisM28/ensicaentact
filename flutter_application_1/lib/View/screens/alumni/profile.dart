@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../auth/login.dart';
-import '../../../service_locator.dart';
-import '../../../Model/data/services/alumni_repository.dart';
-import '../../../l10n/app_localizations.dart'; 
-import '/View/screens/home_page.dart';
-import '/View/theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
+import '/l10n/app_localizations.dart'; 
+import '/View/screens/home_page.dart';
+import '/View/theme/colors.dart';
 import '/Model/data/services/auth_service.dart';
+import '/Model/connection/auth_strategy.dart';
 
 class ProfilePage extends StatefulWidget {
 
@@ -203,15 +201,20 @@ class _ProfilePageState extends State<ProfilePage> {
               SizedBox(
                 height: 50,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const HomePage()),
-                          (route) => false,
-                    );
+                  onPressed: () async {
+                    await sl<AuthRepository>().logout();
+                    await sl<AuthService>().logout();
+
+                    if (mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HomePage()),
+                        (route) => false,
+                      );
+                    }
                   },
                   icon: const Icon(Icons.logout, color: Colors.white),
-                  label: Text(traductions.profileLogout, style: TextStyle(fontSize: 18, color: Colors.white)),
+                  label: Text(traductions.profileLogout, style: const TextStyle(fontSize: 18, color: Colors.white)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red[400],
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
