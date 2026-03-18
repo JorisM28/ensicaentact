@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '/View/widget/base_layout.dart';
 import '/View/widget/filtre_widget.dart';
 import '/Model/alumnis.dart';
 import 'add_alumni.dart';
-import '/View/widget/custom_app_bar.dart';
 import 'alumni_detail_page.dart';
 import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
@@ -73,8 +73,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isWideScreen = screenWidth > 800;
 
-    return Scaffold(
-      appBar: CustomAppBar(),
+    return BaseLayout(
       floatingActionButton: isAdmin ? _buildFabStack() : null,
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -385,22 +384,43 @@ void _displayHistory(BuildContext context) async {
           ]
         ),
         content: SizedBox(
-          width: 500,
-          height: 400,
+          width: 550,
+          height: 500,
           child: logs.isEmpty
               ? Center(child: Text(traductions.directoryHistoryEmpty))
-              : ListView.builder(
+              : ListView.separated(
                   itemCount: logs.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final log = logs[index];
                     final String desc = log['description'] ?? '';
-                    final bool isDelete = log['action'] == 'SUPPRESSION';
+                    final String action = log['action'] ?? '';
+                    
+                    final bool isDelete = action == 'SUPPRESSION';
+                    final bool isUpdate = action == 'MODIFICATION';
+                    final bool isAdd = action == 'AJOUT';
+                    IconData iconData = Icons.info_outline;
+                    Color iconColor = Colors.grey;
+                    Color bgColor = Colors.grey[100]!;
 
+                    if (isDelete) {
+                      iconData = Icons.delete_forever;
+                      iconColor = Colors.red;
+                      bgColor = Colors.red[50]!;
+                    } else if (isUpdate) {
+                      iconData = Icons.edit;
+                      iconColor = Colors.blue;
+                      bgColor = Colors.blue[50]!;
+                    } else if (isAdd) {
+                      iconData = Icons.person_add;
+                      iconColor = Colors.green;
+                      bgColor = Colors.green[50]!;
+                    }
 
                     String alumniName = "${log['prenom_alumni'] ?? ''} ${log['nom_alumni'] ?? ''}".trim();
                     String editorName = "${log['prenom_editeur'] ?? ''} ${log['nom_editeur'] ?? ''}".trim();
 
-                    if (editorName.isEmpty) editorName = "Admin";
+                    if (editorName.isEmpty) editorName = "Admin système";
 
                     if (alumniName.isEmpty && isDelete) {
                        alumniName = desc.replaceAll("Suppression de ", "");
@@ -409,19 +429,43 @@ void _displayHistory(BuildContext context) async {
                     }
 
                     return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       leading: CircleAvatar(
-                        backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
-                        child: Icon(
-                          isDelete ? Icons.delete_forever : Icons.person_add, 
-                          color: isDelete ? Colors.red : Colors.green, 
-                          size: 20
-                        ),
+                        backgroundColor: bgColor,
+                        child: Icon(iconData, color: iconColor, size: 22),
                       ),
                       title: Text(
-                        "${log['prenom_alumni']} ${log['nom_alumni']}", 
-                        style: const TextStyle(fontWeight: FontWeight.bold)
+                        alumniName, 
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
                       ),
-                      subtitle: Text("${log['action']} on ${log['date_action']}"),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 6.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "$action par $editorName le ${log['date_action']}",
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                            ),
+                            if (desc.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: Colors.grey[300]!)
+                                ),
+                                child: Text(
+                                  desc,
+                                  style: const TextStyle(color: Colors.black87, fontStyle: FontStyle.italic, fontSize: 13),
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
+                      ),
+                      isThreeLine: desc.isNotEmpty,
                     );
                   },
                 ),
@@ -435,7 +479,6 @@ void _displayHistory(BuildContext context) async {
       ),
     );
   }
-
   void _changeKeyboardSelection(int direction) {
     final list = viewModel.alumnis;
     if (list.isEmpty) return;

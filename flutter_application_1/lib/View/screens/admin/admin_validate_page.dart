@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import '/View/widget/custom_app_bar.dart';
+import '/View/widget/base_layout.dart';
 import '/View/screens/alumni/add_alumni.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
@@ -19,7 +19,6 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
     setState(() {});
   }
 
-  // --- NOUVEAU : Fenêtre de validation générique pour les événements, offres, etc. ---
   void _showReviewDialog(BuildContext context, Map<String, dynamic> request, Map<String, dynamic> dataDecoded, String type) {
     showDialog(
       context: context,
@@ -33,7 +32,6 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
               Text("Posté par : ${request['prenom'] ?? ''} ${request['nom'] ?? ''}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
               Text("Email : ${request['email'] ?? 'Non renseigné'}"),
               const Divider(height: 30),
-              // On affiche dynamiquement tout le contenu du JSON
               ...dataDecoded.entries.map((e) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: Text("${e.key.toUpperCase()} : ${e.value}", style: const TextStyle(fontSize: 14)),
@@ -45,7 +43,6 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              // Si on refuse, on supprime juste la demande en attente
               await sl<AlumniRepository>().deletePendingRequest({'id_demande': request['id_demande']});
               _refresh();
               if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Demande refusée/supprimée")));
@@ -57,13 +54,9 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
             onPressed: () async {
               Navigator.pop(ctx);
               
-              // ROUTAGE VERS LA BONNE API DE VALIDATION SELON LE TYPE
               if (type == 'EVENEMENT') {
                 await sl<AlumniRepository>().validateEvent(int.parse(request['id_demande'].toString()));
-              } else if (type == 'OFFRE') {
-                // await sl<AlumniRepository>().validateOffer(int.parse(request['id_demande'].toString())); 
               }
-
               _refresh();
               if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Demande validée avec succès !")));
             },
@@ -77,8 +70,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
   @override
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: CustomAppBar(),
+    return BaseLayout(
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: sl<AlumniRepository>().getPendingRequests().then((list) => list.cast<Map<String, dynamic>>()),
         builder: (context, snapshot) {

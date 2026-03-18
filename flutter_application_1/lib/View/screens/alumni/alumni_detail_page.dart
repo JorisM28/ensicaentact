@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '/View/widget/base_layout.dart';
 import '/Model/alumnis.dart';
 import '/ViewModel/alumni/alumni_viewmodel.dart';
 import '/l10n/app_localizations.dart'; 
 import '/View/theme/colors.dart';
-import '/View/widget/custom_app_bar.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
 
@@ -56,8 +56,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isBig = screenWidth > 800;
 
-    return Scaffold(
-      appBar: CustomAppBar(),
+    return BaseLayout(
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Stack(
         children: [

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '/View/widget/base_layout.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
-import '/View/widget/custom_app_bar.dart';
 import '/l10n/app_localizations.dart';
 
 class JobPage extends StatefulWidget {
@@ -184,8 +184,7 @@ class _JobPageState extends State<JobPage> {
     final internshipList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
     final jobList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
 
-    return Scaffold(
-        appBar: CustomAppBar(),
+    return BaseLayout(
       body: Column(
         children: [
           Padding(

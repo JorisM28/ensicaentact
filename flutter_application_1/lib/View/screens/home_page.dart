@@ -1,38 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '/View/screens/alumni/add_alumni.dart';
-import 'employment/job_page.dart';
-import '/View/screens/alumni/directory_page.dart';
-import 'event/news_page.dart';
-import 'admin/moderation_page.dart';
 import '/View/theme/colors.dart';
 import '/View/widget/actuality_widget.dart';
 import '/View/widget/event_widget.dart';
 import '/View/widget/job_offer_widget.dart';
-import '/View/widget/event_proposition_widget.dart';
 import '/View/widget/key_figures_widget.dart';
-import '/View/widget/custom_app_bar.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/l10n/app_localizations.dart'; 
 import '/Model/data/services/auth_service.dart';
+import '/View/widget/base_layout.dart';
 
 class HomePage extends StatelessWidget {
 
 const HomePage({super.key});
 
 final Color contentColor = const Color(0xFFF8F9FA);
-
-Future<void> _ouvrirSiteEcole() async {
-  final Uri url = Uri.parse('https://www.ensicaen.fr');
-  if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-    debugPrint('Impossible de lancer $url');
-  }
-}
-
-void _naviguer(BuildContext context, Widget page) {
-  Navigator.push(context, MaterialPageRoute(builder: (c) => page));
-}
 
 @override
 Widget build(BuildContext context) {
@@ -41,13 +23,7 @@ Widget build(BuildContext context) {
   final traductions = AppLocalizations.of(context)!;
   final String role = currentUser?.role ?? 'guest';
 
-  return Scaffold(
-    backgroundColor: contentColor,
-
-    appBar: CustomAppBar(),
-
-    endDrawer: !isDesktop ? _buildMobileDrawer(context, traductions) : null,
-
+  return BaseLayout(
     body: SingleChildScrollView(
       child: Column(
         children: [
@@ -143,48 +119,6 @@ Widget _buildMobileLayout(BuildContext context, traductions) {
         ),
       ),
     ],
-  );
-}
-
-Widget _buildMobileDrawer(BuildContext context, AppLocalizations traductions) {
-  final currentUser = sl<AuthService>().currentUser;
-  return Drawer(
-    child: ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(color: AppColors.ensiCyan),
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + 20,
-            bottom: 20,
-          ),
-          child: Center(
-            child: Text(
-                traductions.drawerMenu,
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)
-            ),
-          ),
-        ),
-        
-        ListTile(leading: const Icon(Icons.people), title: Text(traductions.drawerDirectory), onTap: () => _naviguer(context, DirectoryPage())),
-        ListTile(leading: const Icon(Icons.work), title: Text(traductions.drawerOffers), onTap: () => _naviguer(context, JobPage())),
-        ListTile(leading: const Icon(Icons.school), title: Text(traductions.drawerSchoolSite), onTap: _ouvrirSiteEcole),
-        ListTile(leading: const Icon(Icons.newspaper), title: Text(traductions.drawerNews), onTap: () => _naviguer(context, NewsPage())), 
-        if ( currentUser != null && (currentUser.role== 'student' || currentUser.role == 'alumni')) ...[
-          const Divider(),
-          ListTile(leading: const Icon(Icons.event), title: Text(traductions.drawerProposeEvent), onTap: () => _naviguer(context, ProposeEventPage())),
-          if (currentUser.role == 'alumni') ...[
-            ListTile(leading: const Icon(Icons.thumb_up), title: Text(traductions.drawerJoin), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => Scaffold(appBar: AppBar(title: Text(traductions.drawerJoin), backgroundColor: AppColors.ensiCyan), body: AddAlumniForm(onSuccess: () => Navigator.pop(c)))))),
-          ],
-        ],
-
-        if (currentUser != null && currentUser.role == 'admin') ...[
-          const Divider(),
-          ListTile(leading: const Icon(Icons.security), title: Text(traductions.drawerModeration), onTap: () => _naviguer(context, PageModeration())),
-        ],
-      ],
-    ),
   );
 }
 

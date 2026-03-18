@@ -61,7 +61,7 @@ class ZoneFiltres extends StatelessWidget {
         ],
 
         if (sectorAvailable.isNotEmpty) ...[
-          Text(traductions.filterPromotions, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(traductions.filterSectors, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,
@@ -77,7 +77,6 @@ class ZoneFiltres extends StatelessWidget {
                   color: estCoche ? Colors.white : Colors.black
                 ),
                 onSelected: (bool selected) {
-                  // On prévient le parent !
                   onSectorChanged(filiere, selected);
                 },
               );
@@ -104,7 +103,6 @@ class ZoneFiltres extends StatelessWidget {
                   color: estCoche ? Colors.white : Colors.black
                 ),
                 onSelected: (bool selected) {
-                  // CORRECTION : Appelle le callback pour le pays
                   onInternshipCountryChanged(pays, selected);
                 },
               );

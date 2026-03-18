@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '/View/widget/base_layout.dart';
 import '/ViewModel/employment_viewmodel.dart';
 import '/l10n/app_localizations.dart';
 
-import '/View/widget/custom_app_bar.dart';
 class EmploymentPage extends StatefulWidget {
   const EmploymentPage({super.key});
 
@@ -51,8 +51,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
   @override
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!;
-    return Scaffold(
-        appBar: CustomAppBar(),
+    return BaseLayout(
       body: Column(
         children: [
           Padding(

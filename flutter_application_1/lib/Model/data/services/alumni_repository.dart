@@ -71,8 +71,27 @@ class AlumniRepository {
   }
 
   Future<void> updateAlumni(Map<String, dynamic> data) async {
-    await _api.post(ApiConstants.updateAlumni, data);
+  debugPrint("--- ENVOI DES DONNÉES À PHP ---");
+  debugPrint(data.toString()); // Pour vérifier ce qu'on envoie (notamment l'ID)
+
+  final response = await _api.post(ApiConstants.updateAlumni, data);
+
+  debugPrint("--- RÉPONSE DE PHP ---");
+  debugPrint(response.toString());
+
+  // Si ApiService renvoie null (ex: erreur réseau ou 500)
+  if (response == null) {
+    throw Exception("Impossible de joindre le serveur ou erreur interne.");
   }
+
+  // Si ton ApiService décode déjà le JSON en Map
+  if (response is Map<String, dynamic>) {
+    if (response['status'] == 'error') {
+      // On lance une exception avec le message d'erreur du PHP !
+      throw Exception(response['message'] ?? "Erreur refusée par le serveur.");
+    }
+  }
+}
 
   Future<List<dynamic>> getHistory() async { return await _api.get(ApiConstants.getHistory); }
   Future<List<dynamic>> getCompanies(Map<String, dynamic> data) async => await _api.post(ApiConstants.getCompany, data);

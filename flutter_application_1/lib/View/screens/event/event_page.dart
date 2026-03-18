@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '/View/widget/base_layout.dart';
 import '/View/theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
-import '/View/widget/custom_app_bar.dart';
 import '/Model/data/services/auth_service.dart';
 import '/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -148,8 +148,7 @@ class _EventPageState extends State<EventPage> {
       (e['lieu'] ?? '').toLowerCase().contains(_search.toLowerCase())
     ).toList();
 
-    return Scaffold(
-        appBar: CustomAppBar(),
+    return BaseLayout(
       body: Column(
         children: [
           

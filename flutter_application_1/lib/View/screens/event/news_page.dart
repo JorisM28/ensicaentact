@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '/View/widget/custom_app_bar.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
 import '/l10n/app_localizations.dart';
+import '/View/widget/base_layout.dart';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -172,15 +172,14 @@ class _NewsPageState extends State<NewsPage> {
         (a['titre'] ?? '').toLowerCase().contains(_search.toLowerCase())).toList();
     bool isAdmin = currentUser?.role == 'admin';
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomAppBar(),
-      floatingActionButton: isAdmin
+    return BaseLayout(
+      backgroundColor: Colors.white, 
+          floatingActionButton: isAdmin
           ? FloatingActionButton(
-        backgroundColor: const Color(0xFF1A1A1A),
-        child: const Icon(Icons.edit_note, color: Colors.white),
-        onPressed: () => _showAddDialog(context),
-      )
+              backgroundColor: const Color(0xFF1A1A1A),
+              child: const Icon(Icons.edit_note, color: Colors.white),
+              onPressed: () => _showAddDialog(context),
+            )
           : null,
       body: Column(
         children: [

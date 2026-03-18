@@ -46,6 +46,7 @@ class AlumniViewModel extends ChangeNotifier {
   late TextEditingController companyController;
   late TextEditingController cityController;
   late TextEditingController postalCodeController;
+  late TextEditingController countryController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
   late TextEditingController sectorController;
@@ -77,6 +78,7 @@ class AlumniViewModel extends ChangeNotifier {
     companyController = TextEditingController(text: currentAlumni.company);
     cityController = TextEditingController(text: currentAlumni.city);
     postalCodeController = TextEditingController(text: currentAlumni.postalCode);
+    countryController = TextEditingController(text: currentAlumni.country);
     emailController = TextEditingController(text: currentAlumni.email);
     phoneController = TextEditingController(text: currentAlumni.phone);
     sectorController = TextEditingController(text: currentAlumni.sector);
@@ -219,6 +221,7 @@ class AlumniViewModel extends ChangeNotifier {
       "entreprise": companyController.text.trim(),
       "ville": cityController.text.trim(),
       "code_postal": postalCodeController.text.trim(),
+      "pays": countryController.text.trim(),
       "latitude": coords?['lat'],
       "longitude": coords?['lon'],
       "email": emailController.text.trim(),
