@@ -35,7 +35,8 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     for (var c in viewModel.allCompanies) {
       String city = c['ville'] ?? traductions.unknownCity;
       String country = c['pays'] ?? '';
-      String key = '$city-$country';
+      String cp = c['code_postal'] ?? '';
+      String key = '$city-$cp-$country';
 
       if (!cityGroups.containsKey(key)) {
         cityGroups[key] = {
@@ -202,7 +203,9 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("${item['ville'] ?? ''}, ${item['pays'] ?? ''}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text("${item['ville'] ?? ''} ${item['code_postal'] ?? ''}${item['pays'] != null && item['pays'].isNotEmpty ? ', ' + item['pays'] : ''}", 
+                        style: const TextStyle(fontWeight: FontWeight.bold)
+                      ),
                       if (isCityMode && item['entreprises_list'] != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 4.0),

@@ -14,7 +14,6 @@ import 'event_proposition_widget.dart';
 import '/l10n/app_localizations.dart';
 import '/Model/data/services/auth_service.dart';
 import '/service_locator.dart';
-import '/View/screens/auth/login.dart';
 import '/View/widget/language_switcher.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -69,11 +68,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               const Spacer(),
 
               _buildMenuLink(context, traductions.homeTab, () => _navigate(context, HomePage())),
-              _buildMenuLink(context, traductions.drawerDirectory, () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? DirectoryPage(): const Login(),),);}),
-              _buildMenuLink(context, traductions.drawerOffers, () {Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? JobPage(): const Login(),),);}),
-              _buildMenuLink(context, traductions.drawerMap, () => _navigate(context, CompaniesDirectoryPage())),
+              if (isConnected) _buildMenuLink(context, traductions.drawerDirectory, () => _navigate(context, DirectoryPage())),
+              if (isConnected)_buildMenuLink(context, traductions.drawerOffers, () => _navigate(context,JobPage())),
+              if (isConnected) _buildMenuLink(context, traductions.drawerMap, () => _navigate(context, CompaniesDirectoryPage())),
               _buildMenuLink(context, traductions.drawerNews, () => _navigate(context, NewsPage())),
-              _buildMenuLink(context, traductions.eventsTab, (){Navigator.push(context,MaterialPageRoute(builder: (context) => isConnected ? EventPage(): const Login(),),);}),
+              if (isConnected) _buildMenuLink(context, traductions.eventsTab, () => _navigate(context, EventPage())),
               _buildMenuLink(context, traductions.drawerSchoolSite, _openSchoolWebsite),
 
               const Spacer(),
@@ -89,7 +88,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     traductions.drawerProposeEvent,
                         () => _navigate(context, ProposeEventPage())
                 ),
-                if (role == 'alumni') ...[
+              ],
+              if (!isConnected) ...[
                   const SizedBox(width: 10),
                   _buildHeaderButton(
                       Icons.thumb_up_alt_outlined,
@@ -97,7 +97,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           () => _navigate(context, JoinPage())
                   ),
                 ],
-              ],
               
               const SizedBox(width: 15),
               const LanguageSwitcher(), 
@@ -105,8 +104,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               const SizedBox(width: 15),
               const SizedBox(width: 5),
               ProfileBadge()
-            ],
-            if (!isDesktop) ...[
+            ]
+            else ...[
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.menu, color: Colors.white70, size: 30),

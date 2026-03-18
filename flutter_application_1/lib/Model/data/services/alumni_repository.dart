@@ -196,6 +196,16 @@ class AlumniRepository {
       return false;
     }
   }
+  
+  Future<bool> validateEvent(int idDemande) async {
+    try {
+      final response = await _api.post(ApiConstants.validateEvent, {'id_demande': idDemande});
+      return response != null;
+    } catch (e) {
+      debugPrint("Erreur lors de la validation de l'évènement: $e");
+      return false;
+    }
+  }
 
 
 }

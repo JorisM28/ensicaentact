@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import '/Model/alumnis.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class InternshipEditor {
   final TextEditingController entilted = TextEditingController();
   final TextEditingController entreprise = TextEditingController();
   final TextEditingController city = TextEditingController();
+  final TextEditingController postalCode = TextEditingController();
   final TextEditingController country = TextEditingController();
   final TextEditingController description = TextEditingController();
   final TextEditingController year = TextEditingController();
@@ -15,9 +18,15 @@ class InternshipEditor {
   String type = "E";
 
   void dispose() {
-    entilted.dispose(); entreprise.dispose(); city.dispose();
-    country.dispose(); description.dispose(); year.dispose();
-    start.dispose(); end.dispose();
+    entilted.dispose();
+    entreprise.dispose(); 
+    city.dispose(); 
+    postalCode.dispose();
+    country.dispose(); 
+    description.dispose(); 
+    year.dispose();
+    start.dispose(); 
+    end.dispose();
   }
 }
 
@@ -36,6 +45,7 @@ class AlumniViewModel extends ChangeNotifier {
   late TextEditingController startPosDateController;
   late TextEditingController companyController;
   late TextEditingController cityController;
+  late TextEditingController postalCodeController;
   late TextEditingController emailController;
   late TextEditingController phoneController;
   late TextEditingController sectorController;
@@ -66,6 +76,7 @@ class AlumniViewModel extends ChangeNotifier {
     startPosDateController = TextEditingController(text: currentAlumni.jobStart);
     companyController = TextEditingController(text: currentAlumni.company);
     cityController = TextEditingController(text: currentAlumni.city);
+    postalCodeController = TextEditingController(text: currentAlumni.postalCode);
     emailController = TextEditingController(text: currentAlumni.email);
     phoneController = TextEditingController(text: currentAlumni.phone);
     sectorController = TextEditingController(text: currentAlumni.sector);
@@ -90,6 +101,7 @@ class AlumniViewModel extends ChangeNotifier {
       editor.entilted.text = stage.entitled;
       editor.entreprise.text = stage.company;
       editor.city.text = stage.city;
+      editor.postalCode.text = stage.postalCode;
       editor.country.text = stage.country;
       editor.description.text = stage.description;
       editor.year.text = stage.year;
@@ -141,15 +153,44 @@ class AlumniViewModel extends ChangeNotifier {
     } catch (e) { return ""; }
   }
 
+  Future<Map<String, double>?> _getCoordonnees(String ville, String pays, {String codePostal = ""}) async {
+    if (ville.isEmpty) return null;
+
+    String query = codePostal.isNotEmpty ? "$codePostal $ville, $pays" : "$ville, $pays";
+    var url = Uri.parse("https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1");
+
+    try {
+      var response = await http.get(url, headers: {'User-Agent': 'AlumniEnsiApp/1.0'});
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        if (data is List && data.isNotEmpty) {
+          return { "lat": double.parse(data[0]['lat']), "lon": double.parse(data[0]['lon']) };
+        } else if (codePostal.isNotEmpty) {
+          return await _getCoordonnees(ville, pays);
+        }
+      }
+    } catch (e) {
+      print("Erreur de géocodage : $e");
+    }
+    return null;
+  }
+
   Future<void> save(BuildContext context, VoidCallback? onSaveCallback) async {
     int promoInt = int.tryParse(promotionController.text) ?? currentAlumni.promotion;
     int permissionInt = permissionSwitch ? 1 : 0;
     int deceasedInt = deceasedSwitch ? 1 : 0;
 
+    var coords = await _getCoordonnees(
+      cityController.text.trim(), 
+      currentAlumni.country, 
+      codePostal: postalCodeController.text.trim()
+    );
+
     List<Map<String, dynamic>> stagesData = internshipEditors.map((editor) => {
       "intitule": editor.entilted.text.trim(),
       "entreprise": editor.entreprise.text.trim(),
       "ville": editor.city.text.trim(),
+      "code_postal": editor.postalCode.text.trim(),
       "pays": editor.country.text.trim(),
       "description": editor.description.text.trim(),
       "annee": editor.year.text.trim(),
@@ -177,6 +218,9 @@ class AlumniViewModel extends ChangeNotifier {
       "debut": startPosDateController.text.trim(),
       "entreprise": companyController.text.trim(),
       "ville": cityController.text.trim(),
+      "code_postal": postalCodeController.text.trim(),
+      "latitude": coords?['lat'],
+      "longitude": coords?['lon'],
       "email": emailController.text.trim(),
       "tel": phoneController.text.trim(),
       "stages": stagesData,
@@ -190,6 +234,7 @@ class AlumniViewModel extends ChangeNotifier {
       entitled: e.entilted.text,
       company: e.entreprise.text,
       city: e.city.text,
+      postalCode: e.postalCode.text,
       country: e.country.text,
       description: e.description.text,
       year: e.year.text,
@@ -220,6 +265,7 @@ class AlumniViewModel extends ChangeNotifier {
       jobEnd: currentAlumni.jobEnd,
       company: companyController.text.trim(),
       city: cityController.text.trim(),
+      postalCode: postalCodeController.text.trim(),
       country: currentAlumni.country,
       internships: internshipDisplay,
     );
@@ -237,6 +283,7 @@ class AlumniViewModel extends ChangeNotifier {
     positionController.dispose(); positionDescController.dispose();
     startPosDateController.dispose(); companyController.dispose();
     cityController.dispose(); emailController.dispose();
+    cityController.dispose(); postalCodeController.dispose();
     phoneController.dispose(); sectorController.dispose();
     specialisationController.dispose(); optionController.dispose();
     doubleDiplomaController.dispose();

@@ -14,6 +14,7 @@ class ApiConstants {
   static const String addEvent = '$baseUrl/events/add_events.php';
   static const String deleteEvent = '$baseUrl/events/delete_events.php';
   static const String requestEvent = '$baseUrl/events/request_events.php';
+  static const String validateEvent = '$baseUrl/events/validate_events.php';
 
   static const String getCompany = '$baseUrl/get_company.php';
 
