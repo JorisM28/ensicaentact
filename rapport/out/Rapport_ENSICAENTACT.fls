@@ -387,12 +387,11 @@ INPUT /usr/share/texlive/texmf-dist/fonts/tfm/google/roboto/Roboto-Regular-lf-ts
 INPUT /usr/share/texlive/texmf-dist/fonts/enc/dvips/roboto/rbto_ocbbsb.enc
 INPUT /usr/share/texlive/texmf-dist/fonts/vf/google/roboto/Roboto-Regular-lf-t1.vf
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/google/roboto/Roboto-Regular-lf-t1--base.tfm
-INPUT /usr/share/texlive/texmf-dist/tex/latex/mwe/example-image.tex
-INPUT /usr/share/texlive/texmf-dist/tex/latex/mwe/example-image.tex
-INPUT /usr/share/texlive/texmf-dist/tex/latex/mwe/example-image.pdf
-INPUT /usr/share/texlive/texmf-dist/tex/latex/mwe/example-image.pdf
-INPUT /usr/share/texlive/texmf-dist/tex/latex/mwe/example-image.pdf
-INPUT /usr/share/texlive/texmf-dist/tex/latex/mwe/example-image.pdf
+INPUT ./images/kanban.png
+INPUT ./images/kanban.png
+INPUT ./images/kanban.png
+INPUT ./images/kanban.png
+INPUT ./images/kanban.png
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/google/roboto/Roboto-Regular-lf-sc-t1.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/vf/google/roboto/Roboto-Regular-lf-sc-t1.vf
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/google/roboto/Roboto-Regular-lf-sc-t1--base.tfm
@@ -406,4 +405,3 @@ INPUT out/Rapport_ENSICAENTACT.out
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/google/roboto/Roboto-Bold.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/google/roboto/Roboto-Italic.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/google/roboto/Roboto-Regular.pfb
-INPUT /usr/share/texmf/fonts/type1/public/lm/lmss17.pfb
