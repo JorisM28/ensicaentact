@@ -2,7 +2,7 @@
 \contentsline {section}{\numberline {1}Présentation du projet : De l'annuaire à la plateforme communautaire}{1}{section.1}%
 \contentsline {subsection}{\numberline {1.1}La mission initiale : Faciliter le contact}{1}{subsection.1.1}%
 \contentsline {subsection}{\numberline {1.2}Évolution de la vision : Promouvoir l'excellence du réseau}{1}{subsection.1.2}%
-\contentsline {subsection}{\numberline {1.3}État des Lieux (Audit et Benchmark)}{1}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.3}État des lieux :}{1}{subsection.1.3}%
 \contentsline {subsection}{\numberline {1.4}Des fonctionnalités au service de l'engagement}{1}{subsection.1.4}%
 \contentsline {subsection}{\numberline {1.5}Un cadre technique responsable : Contrainte RGPD}{2}{subsection.1.5}%
 \contentsline {section}{\numberline {2}Objectifs du Projet}{3}{section.2}%
