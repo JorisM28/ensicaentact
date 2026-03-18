@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '/View/widget/custom_app_bar.dart';
-import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
-import '/Model/data/services/auth_service.dart';
+import '/ViewModel/event/news_viewmodel.dart';
 import '/l10n/app_localizations.dart';
 
 class NewsPage extends StatefulWidget {
@@ -13,28 +12,27 @@ class NewsPage extends StatefulWidget {
 }
 
 class _NewsPageState extends State<NewsPage> {
-  List<Map<String, dynamic>> _news = [];
-  bool _isLoading = true;
-  String _search = "";
+  late final NewsViewModel _viewModel;
   final TextEditingController _searchCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _viewModel = sl<NewsViewModel>();
+    _viewModel.loadData();
+    _viewModel.addListener(_onViewModelChanged);
   }
 
-  void _loadData() async {
-    if (!mounted) return;
-    setState(() => _isLoading = true);
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
-    var dataNews = await sl<AlumniRepository>().getNews();
-
+  void _onViewModelChanged() {
     if (mounted) {
-      setState(() {
-        _news = dataNews;
-        _isLoading = false;
-      });
+      setState(() {});
     }
   }
 
@@ -87,18 +85,15 @@ class _NewsPageState extends State<NewsPage> {
             onPressed: () async {
               Navigator.pop(ctx);
               int idToDelete = int.parse(item['id_actu'].toString());
-              bool success = await sl<AlumniRepository>().deleteNews(idToDelete);
+              bool success = await _viewModel.deleteNews(idToDelete);
 
-              if (success) {
-                _loadData();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(traductions.articleDeletedSuccess))
-                  );
-                }
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(traductions.articleDeletedSuccess))
+                );
               }
             },
-            child: Text(traductions.deleteBtn, style: TextStyle(color: Colors.red)),
+            child: Text(traductions.deleteBtn, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -110,7 +105,6 @@ class _NewsPageState extends State<NewsPage> {
     final titleCtrl = TextEditingController();
     final contentCtrl = TextEditingController();
     final imgCtrl = TextEditingController();
-    final currentUser = sl<AuthService>().currentUser;
 
     showDialog(
       context: context,
@@ -127,7 +121,7 @@ class _NewsPageState extends State<NewsPage> {
                   decoration: InputDecoration(
                       labelText: traductions.articleContentLabel,
                       alignLabelWithHint: true,
-                      border: OutlineInputBorder()
+                      border: const OutlineInputBorder()
                   ),
                   maxLines: 5
               ),
@@ -142,21 +136,17 @@ class _NewsPageState extends State<NewsPage> {
             onPressed: () async {
               if (titleCtrl.text.isEmpty) return;
 
-
-              print("👤 Auteur ID envoyé : ${currentUser?.id}");
-
-              await sl<AlumniRepository>().addNews({
+              await _viewModel.addNews({
                 "titre": titleCtrl.text,
                 "contenu": contentCtrl.text,
                 "description": contentCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": currentUser?.id ?? "1",
+                "auteur_id": _viewModel.currentUser?.id ?? "1",
                 "tag": "NEWS",
                 "date_publi": DateTime.now().toIso8601String(),
               });
 
-              Navigator.pop(ctx);
-              _loadData();
+              if (mounted) Navigator.pop(ctx);
             },
             child: Text(traductions.publish),
           ),
@@ -167,14 +157,12 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = sl<AuthService>().currentUser;
-    final actusFiltrees = _news.where((a) =>
-        (a['titre'] ?? '').toLowerCase().contains(_search.toLowerCase())).toList();
-    bool isAdmin = currentUser?.role == 'admin';
+    final actusFiltrees = _viewModel.filteredNews;
+    final isAdmin = _viewModel.isAdmin;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(),
+      appBar: const CustomAppBar(),
       floatingActionButton: isAdmin
           ? FloatingActionButton(
         backgroundColor: const Color(0xFF1A1A1A),
@@ -184,10 +172,10 @@ class _NewsPageState extends State<NewsPage> {
           : null,
       body: Column(
         children: [
-          if (_search.isNotEmpty || actusFiltrees.length != _news.length)
+          if (_viewModel.searchQuery.isNotEmpty || actusFiltrees.length != _viewModel.news.length || _viewModel.news.isNotEmpty)
             _buildSearchBar(),
           Expanded(
-            child: _isLoading
+            child: _viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator(color: Colors.black))
                 : _buildNewspaperFeed(actusFiltrees),
           ),
@@ -210,7 +198,7 @@ class _NewsPageState extends State<NewsPage> {
           border: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.black12)), 
           focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)), 
         ),
-        onChanged: (v) => setState(() => _search = v),
+        onChanged: _viewModel.setSearchQuery,
       ),
     );
   }
@@ -317,7 +305,7 @@ class _NewsPageState extends State<NewsPage> {
 
   Widget _buildNewspaperFeed(List<Map<String, dynamic>> liste) {
     if (liste.isEmpty) {
-      return Center(child: Text(AppLocalizations.of(context)!.noArticle, style: TextStyle(fontFamily: 'serif', fontSize: 20)));
+      return Center(child: Text(AppLocalizations.of(context)!.noArticle, style: const TextStyle(fontFamily: 'serif', fontSize: 20)));
     }
 
     return LayoutBuilder(

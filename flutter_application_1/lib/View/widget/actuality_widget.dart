@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '/Model/data/services/alumni_repository.dart';
 import '/service_locator.dart';
 import '/View/theme/colors.dart';
 import '/View/screens/event/news_page.dart';
 import '/l10n/app_localizations.dart';
-import '/Model/data/services/auth_service.dart';
+import '/ViewModel/event/news_viewmodel.dart';
 
 class ActualityWidget extends StatefulWidget {
   final VoidCallback? onAddPress;
@@ -16,29 +15,28 @@ class ActualityWidget extends StatefulWidget {
 }
 
 class _ActualityWidgetState extends State<ActualityWidget> {
-  List<Map<String, dynamic>> _news = [];
-  bool _isLoading = true;
+  late final NewsViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _chargerDonnees();
+    _viewModel = sl<NewsViewModel>();
+    _viewModel.loadData();
+    _viewModel.addListener(_onViewModelChanged);
   }
 
-  void _chargerDonnees() async {
-    if (!mounted) return;
-    try {
-      var data = await sl<AlumniRepository>().getNews();
-      if (mounted) {
-        setState(() {
-          _news = data;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    super.dispose();
+  }
+
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
     }
   }
+
 
   void _confirmerSuppression(Map<String, dynamic> item) {
     final traductions = AppLocalizations.of(context)!;
@@ -56,16 +54,13 @@ class _ActualityWidgetState extends State<ActualityWidget> {
 
               var rawId = item['id_actu'];
               if (rawId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.errorOccurred)));
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.errorOccurred)));
                 return;
               }
 
-              bool success = await sl<AlumniRepository>().deleteNews(rawId);
+              bool success = await _viewModel.deleteNews(int.parse(rawId.toString()));
 
               if (success && mounted) {
-                setState(() {
-                  _news.removeWhere((element) => element['id_actu'].toString() == rawId.toString());
-                });
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(traductions.newsDeletedSuccess))
                 );
@@ -97,12 +92,11 @@ class _ActualityWidgetState extends State<ActualityWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = sl<AuthService>().currentUser;
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_viewModel.isLoading) return const Center(child: CircularProgressIndicator());
 
     final traductions = AppLocalizations.of(context)!;
-    final displayList = _news.take(2).toList();
-    bool isAdmin = currentUser?.role == 'admin';
+    final displayList = _viewModel.news.take(2).toList();
+    final isAdmin = _viewModel.isAdmin;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
