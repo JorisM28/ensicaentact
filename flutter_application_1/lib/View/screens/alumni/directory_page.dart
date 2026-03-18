@@ -14,7 +14,8 @@ import '/Model/data/services/auth_service.dart';
 import '/View/theme/colors.dart';
 
 class DirectoryPage extends StatefulWidget {
-  const DirectoryPage({super.key});
+  final String? initialSearch;
+  const DirectoryPage({super.key, this.initialSearch});
 
   @override
   State<DirectoryPage> createState() => _DirectoryPageState();
@@ -36,7 +37,13 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     super.initState();
     viewModel = sl<DirectoryViewModel>();
     viewModel.loadAlumnis();
-    if(isAdmin)viewModel.loadPendingRequestsCount();
+    if (isAdmin) viewModel.loadPendingRequestsCount();
+
+    if (widget.initialSearch != null && widget.initialSearch!.isNotEmpty) {
+      _searchController.text = widget.initialSearch!;
+      viewModel.search(widget.initialSearch!);
+    }
+
     viewModel.addListener((){
       if (mounted) setState(() {});
     });

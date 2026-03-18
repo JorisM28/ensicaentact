@@ -5,7 +5,7 @@ import '/l10n/app_localizations.dart';
 import '/View/widget/error_pages.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/View/theme/colors.dart';
-
+import '/View/screens/alumni/directory_page.dart';
 
 class CompaniesDirectoryPage extends StatefulWidget {
   const CompaniesDirectoryPage({super.key});
@@ -105,14 +105,14 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
                   child: isWideScreen
                       ? Row(
                           children: [
-                            Expanded(flex: 2, child: _buildList(displaydata, traductions)), // Et ici
+                            Expanded(flex: 2, child: _buildList(displaydata, traductions)),
                             const VerticalDivider(width: 1),
                             Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem != null)) 
                           ],
                         )
                       : Column(
                           children: [
-                            Expanded(flex: 2, child: _buildList(displaydata, traductions)), // Et ici
+                            Expanded(flex: 2, child: _buildList(displaydata, traductions)),
                             const Divider(height: 1),
                             Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem != null))
                           ],
@@ -195,6 +195,20 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(color: AppColors.ensiCyan.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
                       child: Text("${item['nombre_alumni'] ?? 0} ${traductions.alumniLabel}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.group_outlined, color: AppColors.ensiCyan),
+                      tooltip: "Voir les alumnis",
+                      onPressed: () {
+                        String recherche = isCityMode ? item['ville'] : item['nom_entreprise'];
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DirectoryPage(initialSearch: recherche), 
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
