@@ -16,7 +16,6 @@ import '/Model/data/services/auth_service.dart';
 import '/service_locator.dart';
 import '/View/screens/auth/login.dart';
 import '/View/widget/language_switcher.dart';
-import 'package:provider/provider.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 

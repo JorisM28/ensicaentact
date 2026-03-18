@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../Model/alumnis.dart';
-import '../../../ViewModel/alumni/alumni_viewmodel.dart';
-import '../../../l10n/app_localizations.dart'; 
-import '/View/theme/colors.dart';
 import '/Model/alumnis.dart';
 import '/ViewModel/alumni/alumni_viewmodel.dart';
+import '/l10n/app_localizations.dart'; 
+import '/View/theme/colors.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';

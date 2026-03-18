@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import '../auth/login.dart';
-import '../../../service_locator.dart';
-import '../../../Model/data/services/alumni_repository.dart';
-import '../../../l10n/app_localizations.dart'; 
-import '/View/screens/home_page.dart';
-import '/View/theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
+import '/l10n/app_localizations.dart'; 
+import '/View/screens/home_page.dart';
+import '/View/theme/colors.dart';
 import '/Model/data/services/auth_service.dart';
 
 class ProfilePage extends StatefulWidget {

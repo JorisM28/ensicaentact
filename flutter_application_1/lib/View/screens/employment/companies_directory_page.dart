@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../widget/company_card_widget.dart'; 
-import '../../../ViewModel/employment_viewmodel.dart';
-import '../../../l10n/app_localizations.dart'; 
-import '../../widget/error_pages.dart';
-import '/View/widget/company_card_widget.dart';
+import '/View/widget/company_card_widget.dart'; 
+import '/ViewModel/employment_viewmodel.dart';
+import '/l10n/app_localizations.dart'; 
 import '/View/widget/error_pages.dart';
 import '/View/widget/custom_app_bar.dart';
 import '/View/theme/colors.dart';
-import '/ViewModel/employment_viewmodel.dart';
 
 
 class CompaniesDirectoryPage extends StatefulWidget {

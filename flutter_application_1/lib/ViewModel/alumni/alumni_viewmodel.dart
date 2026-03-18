@@ -124,7 +124,7 @@ class AlumniViewModel extends ChangeNotifier {
       DateTime now = DateTime.now();
       int age = now.year - dn.year;
       if (now.month < dn.month || (now.month == dn.month && now.day < dn.day)) age--;
-      return "$age ans";
+      return "$age";
     } catch (e) { return ""; }
   }
 
@@ -137,8 +137,7 @@ class AlumniViewModel extends ChangeNotifier {
       if (months < 1) return "Moins d'un mois";
       if (months < 12) return "$months mois";
       int years = months ~/ 12;
-      int restMonths = months % 12;
-      return restMonths > 0 ? "$years ans et $restMonths mois" : "$years ans";
+      return "$years ";
     } catch (e) { return ""; }
   }
 

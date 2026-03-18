@@ -7,12 +7,9 @@ import '/View/widget/custom_app_bar.dart';
 import 'alumni_detail_page.dart';
 import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
-import '../../../service_locator.dart';
-import '../../../ViewModel/alumni/directory_view_model.dart';
-import '../../../l10n/app_localizations.dart'; 
 import '/service_locator.dart';
 import '/ViewModel/alumni/directory_view_model.dart';
-import '../../widget/error_pages.dart';
+import '/l10n/app_localizations.dart'; 
 import '/Model/data/services/auth_service.dart';
 import '/View/theme/colors.dart';
 
@@ -118,7 +115,6 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   }
 
   Widget _buildTopBar(bool isWideScreen) {
-    final traductions = AppLocalizations.of(context)!; 
     return Container(
       padding: const EdgeInsets.all(20),
       color: Colors.grey[100],
@@ -305,7 +301,6 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
   }
   
  Widget _buildFabStack() {
-    final traductions = AppLocalizations.of(context)!; 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
