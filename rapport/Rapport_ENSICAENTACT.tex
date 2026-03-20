@@ -148,12 +148,13 @@ Au cours des premiers échanges, le besoin du client a rapidement évolué. Plus
 
 Cette volonté s'est traduite par le passage d'une application utilitaire à un support d'information complet, accessible à tout utilisateur souhaitant découvrir le dynamisme de la communauté.
 
-\subsection{État des lieux :}
+\subsection{État des lieux}
 Avant de débuter le développement, une phase d'analyse critique a été menée :
 
 \begin{itemize}[label=\textbullet, itemsep=5pt]
     \item \textbf{Constat interne :} Le site existant des Alumnis a été identifié comme "sous-utilisé" et esthétiquement dépassé. La centralisation des données était inefficace pour les besoins actuels des étudiants. La multiplication d’accès aux différentes bases de données rend complexe toute recherche pour un étudiant entrant dans l’école.
     \item \textbf{Benchmark externe :} Nous avons étudié les solutions de structures aux moyens similaires (écoles d'ingénieurs) mais aussi de références d'excellence comme l'EM Normandie ou Sciences Po Paris. Elles avaient toutes en commun la centralisation de plusieurs outils sur leur page internet (offre, actualité des Alumnis,...).
+    \item \textbf{Fait aggravant de conformité (RGPD) :} Lors de l'audit, nous avons mis en évidence une faille critique liée à l'utilisation des données personnelles et à la possibilité de les exporter. Le calendrier des stages de 2\textsuperscript{e} année, exposait les données d'étudiants transmises (noms, entreprises, contacts) et affichées sans leur consentement explicite.    
 \end{itemize}
 
 Face à l'obsolescence de l'outil actuel, nous avons obtenu l'accord du client pour \textbf{partir d'une page vierge} afin de garantir une architecture propre, évolutive et conforme aux attentes des utilisateurs.
@@ -194,6 +195,8 @@ Pour mener à bien ce projet, nous avons fait le choix d'une méthodologie Agile
 
 Ce changement d'orientation, marquant le passage d'un simple annuaire à une plateforme complète de promotion du réseau, a été intégré de manière fluide au cycle de production. La réussite de cette transition repose sur l'adoption d'itérations courtes, d'une durée d'une à deux semaines par rendu, et sur un dialogue permanent avec le client.
 
+La mise en place de cette organisation a été grandement facilitée par la journée de formation \og Gestion de projet Agile \fg{} dispensée à l'école. Cet atelier pratique nous a fourni les outils méthodologiques nécessaires pour découper efficacement le projet en sous-tâches réalisables (\textit{User Stories}) et pour cartographier précisément les différents acteurs (étudiants, Alumnis, administration, DSI) avec lesquels nous allions interagir tout au long du développement.
+
 \subsection{Structure de l'équipe et responsabilités}
 L'efficacité du groupe a reposé sur une répartition claire des compétences, permettant à chaque membre de se concentrer sur des domaines d'expertise tout en collaborant sur le développement global :
 
@@ -215,6 +218,15 @@ Pour organiser notre production de manière visuelle et transparente, nous avons
 \end{figure}
 
 Le cycle de vie de nos tâches s'est articulé autour de trois colonnes majeures. L’identifications des besoins avec le client, tels que la promotion de l’école, la mises en correspondance des Alumnis avec les élèves ou encore l'annuaire. Ces tâches étaient ensuite découpées en plusieurs sous-tâches avant de les traiter individuellement dans la partie “En cours”, où elles faisaient l'objet d'un développement intensif (notamment sur les modules de sécurité, d'authentification et les moteurs de recherche). Enfin, son passage définitif dans la colonne \textit{Terminé} marquait la validation officielle de la fonctionnalité et son intégration au produit final.
+
+%TODO : RELIRE ET MODIFIER POUR COLLER A CE QUE L'ON A FAIT + AJOUTER LE CHOIX DU LANGAGE(dart)%
+\subsection{Architecture et Patrons de Conception}
+Pour garantir la maintenabilité et l'évolutivité de la plateforme, nous avons structuré le code autour de patrons de conception (\textit{Design Patterns}) robustes :
+
+\begin{itemize}[label={\color{accentColor}\textbullet}, itemsep=5pt]
+    \item \textbf{Architecture MVVM (Model-View-ViewModel) :} Nous avons séparé la logique métier (Modèle), l'interface utilisateur (Vue) et la logique de présentation (ViewModel). Ce choix permet de découpler totalement le rendu visuel de la gestion des données, facilitant ainsi le travail simultané de l'équipe sur le front-end et le back-end sans créer de conflits.
+    \item \textbf{Patrons Stratégie et Adaptateur (Authentification) :} La gestion de la connexion s'appuie sur le patron \textit{Stratégie}, permettant de basculer dynamiquement entre plusieurs méthodes d'authentification (comptes locaux vs. comptes Microsoft institutionnels) sans modifier le cœur de l'application. Pour intégrer l'API Microsoft Graph, nous avons couplé cette stratégie à un patron \textit{Adaptateur}, chargé de traduire les données brutes renvoyées par Microsoft (jetons OAuth) dans le format standard attendu par notre base d'utilisateurs interne.
+\end{itemize}
 
 \newpage
 
@@ -321,7 +333,7 @@ L'application intègre nativement un système d'internationalisation complet (Fr
 
 \newpage
 
-
+%TODO: RAJOUTER GEMINI + ETC%
 \section{Ressources et Outils}
 
 \begin{itemize}[label=\textbullet, itemsep=5pt]
@@ -345,8 +357,8 @@ L'application intègre nativement un système d'internationalisation complet (Fr
 
 \vspace{1cm}
 
-\renewcommand{\listfigurename}{Table des figures}
-\listoffigures
-\addcontentsline{toc}{section}{Table des figures}
+% \renewcommand{\listfigurename}{Table des figures}
+% \listoffigures
+% \addcontentsline{toc}{section}{Table des figures}
 
 \end{document}
