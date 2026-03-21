@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
-import '/l10n/app_localizations.dart'; 
+import '/l10n/app_localizations.dart';
 import '/View/theme/colors.dart';
+import '/ViewModel/alumni/add_alumni_viewmodel.dart';
 
 class StageFormModel {
   final Key key = UniqueKey();
-  
+
   final TextEditingController controllerEntitled = TextEditingController();
   final TextEditingController controllerCompany = TextEditingController();
   final TextEditingController controllerCity = TextEditingController();
@@ -18,7 +17,7 @@ class StageFormModel {
   final TextEditingController controllerDescription = TextEditingController();
   final TextEditingController controllerStartDate = TextEditingController();
   final TextEditingController controllerEndDate = TextEditingController();
-  String internshipType ='I';
+  String internshipType = 'I';
   String selectedYear = '2A';
 
   void dispose() {
@@ -39,7 +38,7 @@ class StageFormModel {
       "type" : internshipType,
       "entreprise": controllerCompany.text.trim(),
       "ville": controllerCity.text.trim(),
-      "code_postal": controllerPostalCode.text.trim(),  
+      "code_postal": controllerPostalCode.text.trim(),
       "pays": controllerCountry.text.trim(),
       "description": controllerDescription.text.trim(),
       "debut": controllerStartDate.text.trim(),
@@ -54,15 +53,15 @@ class AddAlumniForm extends StatefulWidget {
   final Map<String, dynamic>? initialData;
   final int? requestId;
 
-const AddAlumniForm({super.key, this.onSuccess, this.isAdmin=false, this.initialData, this.requestId});
+  const AddAlumniForm({super.key, this.onSuccess, this.isAdmin = false, this.initialData, this.requestId});
 
   @override
   State<AddAlumniForm> createState() => _AddAlumniFormState();
 }
 
 class _AddAlumniFormState extends State<AddAlumniForm> {
+  final AddAlumniViewModel _viewModel = sl<AddAlumniViewModel>();
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
   bool? _consent = false;
 
   final _controllerLastName = TextEditingController();
@@ -103,8 +102,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     },
   };
 
-  String type ='E';
-
+  String type = 'E';
   final List<StageFormModel> _internships = [];
 
   Future<void> _selectionnerDate(BuildContext context, TextEditingController controller) async {
@@ -123,60 +121,24 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     }
   }
 
-  Future<Map<String, double>?> _getCoordonnees(String city, String country, String postalCode) async {
-    if (city.isEmpty) return null;
-    String query = "";
-    if (postalCode.isNotEmpty) {
-      query = "$postalCode $city, $country"; 
-    } else {
-      query = "$city, $country";
-    }
-
-    var url = Uri.parse("https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1");
-
-    try {
-      var response = await http.get(url, headers: {
-        'User-Agent': 'AlumniEnsiApp/1.0 (gti.pedro6@exemple.com)'
-      });
-
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        
-        if (data is List && data.isNotEmpty) {
-          return {
-            "lat": double.parse(data[0]['lat']),
-            "lon": double.parse(data[0]['lon']),
-          };
-        } 
-        else if (postalCode.isNotEmpty) {
-          return await _getCoordonnees(city, country, postalCode);
-        }
-      }
-    } catch (e) {
-      print("Erreur de géocodage : $e");
-    }
-    
-    return null;
-  }
-
   @override
   void initState() {
     super.initState();
-    
+
     if (widget.initialData != null) {
       var data = widget.initialData!;
-      
+
       _controllerLastName.text = data['nom'] ?? '';
       _controllerFirstName.text = data['prenom'] ?? '';
       _selectedGender = data['sexe'] ?? 'I';
       _controllereMail.text = data['email'] ?? '';
       _controllerPhone.text = data['tel'] ?? '';
-      _consent = data['autor'] == true || data['autor'] == 1; 
+      _consent = data['autor'] == true || data['autor'] == 1;
 
       _controllerPromotion.text = (data['promo'] ?? '').toString();
       _selectedFormation = data['formation'] ?? 'FISE';
       _selectedSector = data['filiere'] ?? 'Informatique';
-      
+
       if (data['majeure'] != null) _selectedSpecialisation = data['majeure'];
       if (data['option'] != null) _selectedOption = data['option'];
 
@@ -205,20 +167,20 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
 
   @override
   void dispose() {
-    _controllerLastName.dispose(); 
-    _controllerFirstName.dispose(); 
+    _controllerLastName.dispose();
+    _controllerFirstName.dispose();
     _controllerDateOfBirth.dispose();
-    _controllereMail.dispose(); 
+    _controllereMail.dispose();
     _controllerPhone.dispose();
     _controllerPromotion.dispose();
-    _controllerPosition.dispose(); 
-    _controllerCompany.dispose(); 
+    _controllerPosition.dispose();
+    _controllerCompany.dispose();
     _controllerPositionDescription.dispose();
     _controllerStartDate.dispose();
-    _controllerCity.dispose(); 
+    _controllerCity.dispose();
     _controllerPostalCode.dispose();
     _controllerCountry.dispose();
-    
+
     for (var internship in _internships) {
       internship.dispose();
     }
@@ -238,99 +200,60 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     });
   }
 
-  Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    Map<String, dynamic> data = {
+      "nom": _controllerLastName.text.trim(),
+      "prenom": _controllerFirstName.text.trim(),
+      "dateNaissance": _controllerDateOfBirth.text.trim(),
+      "sexe": _selectedGender,
+      "email": _controllereMail.text.trim(),
+      "tel": _controllerPhone.text.trim(),
+      "autor": _consent,
+      "promo": int.tryParse(_controllerPromotion.text) ?? 2024,
+      "filiere": _selectedSector,
+      "formation": _selectedFormation,
+      "majeure": _selectedSpecialisation ?? "",
+      "option": _selectedOption ?? "",
+      "job": _controllerPosition.text.trim(),
+      "poste": _controllerPosition.text.trim(),
+      "entreprise": _controllerCompany.text.trim(),
+      "description": _controllerPositionDescription.text.trim(),
+      "debut": _controllerStartDate.text.trim(),
+      "ville": _controllerCity.text.trim(),
+      "code_postal": _controllerPostalCode.text.trim(),
+      "pays": _controllerCountry.text.trim(),
+    };
+
+    List<Map<String, dynamic>> internshipsData = _internships.map((s) => s.toMap()).toList();
 
     try {
-      double? positionLat;
-      double? positionLon;
-      var coordsPoste = await _getCoordonnees(_controllerCity.text, _controllerCountry.text, _controllerPostalCode.text);
-      if (coordsPoste != null) {
-        positionLat = coordsPoste['lat'];
-        positionLon = coordsPoste['lon'];
-      }
-      Map<String, dynamic> data = {
-        "nom": _controllerLastName.text.trim(),
-        "prenom": _controllerFirstName.text.trim(),
-        "dateNaissance": _controllerDateOfBirth.text.trim(),
-        "sexe": _selectedGender,
-        "email": _controllereMail.text.trim(),
-        "tel": _controllerPhone.text.trim(),
-        "autor":_consent,
-        "promo": int.tryParse(_controllerPromotion.text) ?? 2024,
-        "filiere": _selectedSector,
-        "formation": _selectedFormation,
-        "majeure": _selectedSpecialisation ?? "",
-        "option": _selectedOption ?? "",
-        "job": _controllerPosition.text.trim(),
-        "poste": _controllerPosition.text.trim(),
-        "entreprise": _controllerCompany.text.trim(),
-        "description": _controllerPositionDescription.text.trim(),
-        "debut": _controllerStartDate.text.trim(),
-        "ville": _controllerCity.text.trim(),
-        "code_postal": _controllerPostalCode.text.trim(),
-        "pays": _controllerCountry.text.trim(),
-        "latitude": positionLat,
-        "longitude": positionLon,
-      };
+      await _viewModel.submitForm(
+        alumniData: data,
+        internshipsData: internshipsData,
+        isAdmin: widget.isAdmin,
+        requestId: widget.requestId,
+      );
 
-      List<Map<String, dynamic>> internshipList = [];
-      for (var s in _internships) {
-        var stageMap = s.toMap();
-        
-        var coordsStage = await _getCoordonnees(s.controllerCity.text, s.controllerCountry.text, s.controllerPostalCode.text);
-        if (coordsStage != null) {
-          stageMap['latitude'] = coordsStage['lat'];
-          stageMap['longitude'] = coordsStage['lon'];
-        }
-        internshipList.add(stageMap);
-      }
+      if (widget.onSuccess != null) widget.onSuccess!();
 
-      if (internshipList.isNotEmpty) {
-        data["stages"] = internshipList;
-      }
-
-      if (_internships.isNotEmpty) {
-        data["stages"] = _internships.map((s) => s.toMap()).toList();
-      }
-
-      if (widget.isAdmin) {          
-       await sl<AlumniRepository>().addAlumni(data, isAdmin: true);
-        if (widget.requestId != null) {
-          await sl<AlumniRepository>().deletePendingRequest({'id_demande': widget.requestId!});
-        }
-      } else {
-       await sl<AlumniRepository>().addAlumni(data, isAdmin: false);
-      }
-
-      if (widget.onSuccess != null) {
-        widget.onSuccess!();
-      }
-      
-     if (mounted) {
+      if (mounted) {
         final traductions = AppLocalizations.of(context)!;
-        String msg = widget.isAdmin 
-            ? traductions.formMsgAdded 
-            : traductions.formMsgPending;
+        String msg = widget.isAdmin ? traductions.formMsgAdded : traductions.formMsgPending;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.green));
       }
-
     } catch (e) {
       if (mounted) {
         final traductions = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(traductions.formMsgError(e.toString())), backgroundColor: Colors.red),
+            SnackBar(content: Text(traductions.formMsgError(e.toString())), backgroundColor: Colors.red)
         );
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
-@override
+
+  @override
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!;
     List<String>? availableOption;
@@ -350,12 +273,12 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-               Padding(
-                padding: EdgeInsets.only(bottom: 20.0, top: 10.0),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0, top: 10.0),
                 child: Text(
                   traductions.addAlumniFormTitle,
-                  style: TextStyle(
-                    fontSize: 24, 
+                  style: const TextStyle(
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: AppColors.ensiCyan,
                   ),
@@ -389,7 +312,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                     child: TextFormField(
                       controller: _controllerDateOfBirth,
                       decoration: InputDecoration(
-                        labelText: traductions.detailLabelBirthDate, 
+                        labelText: traductions.detailLabelBirthDate,
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.cake),
                       ),
@@ -401,7 +324,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _selectedGender,
-                      decoration: InputDecoration(labelText: traductions.typeLabel, border: const OutlineInputBorder()), // Ou une clé formGender
+                      decoration: InputDecoration(labelText: traductions.typeLabel, border: const OutlineInputBorder()),
                       items: [
                         DropdownMenuItem(value: 'I', child: Text(traductions.formGenderUnknown)),
                         DropdownMenuItem(value: 'M', child: Text(traductions.formGenderMale)),
@@ -416,9 +339,9 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               TextFormField(
                 controller: _controllereMail,
                 decoration: InputDecoration(
-                  labelText: traductions.profileEmail, 
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.email)
+                    labelText: traductions.profileEmail,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.email)
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -426,9 +349,9 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               TextFormField(
                 controller: _controllerPhone,
                 decoration: InputDecoration(
-                  labelText: traductions.profilePhone, 
-                  border: const OutlineInputBorder(), 
-                  prefixIcon: const Icon(Icons.phone)
+                    labelText: traductions.profilePhone,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.phone)
                 ),
                 keyboardType: TextInputType.phone,
               ),
@@ -500,11 +423,11 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                       items: _selectedSector.isEmpty || _hierarchieFormation[_selectedSector] == null
                           ? []
                           : _hierarchieFormation[_selectedSector]!.keys.map((String majeure) {
-                              return DropdownMenuItem(
-                                value: majeure, 
-                                child: Text(majeure, overflow: TextOverflow.ellipsis)
-                              );
-                            }).toList(),
+                        return DropdownMenuItem(
+                            value: majeure,
+                            child: Text(majeure, overflow: TextOverflow.ellipsis)
+                        );
+                      }).toList(),
                       onChanged: (v) {
                         setState(() {
                           _selectedSpecialisation = v;
@@ -524,8 +447,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                   isExpanded: true,
                   items: availableOption.map((String option) {
                     return DropdownMenuItem(
-                      value: option, 
-                      child: Text(option, overflow: TextOverflow.ellipsis)
+                        value: option,
+                        child: Text(option, overflow: TextOverflow.ellipsis)
                     );
                   }).toList(),
                   onChanged: (v) => setState(() => _selectedOption = v),
@@ -587,7 +510,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                     child: TextFormField(
                       controller: _controllerStartDate,
                       decoration: InputDecoration(
-                        labelText: traductions.detailLabelStartDate, 
+                        labelText: traductions.detailLabelStartDate,
                         border: const OutlineInputBorder(),
                         prefixIcon: const Icon(Icons.calendar_today),
                       ),
@@ -660,7 +583,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                                 child: TextFormField(
                                   controller: intership.controllerStartDate,
                                   decoration: InputDecoration(
-                                    labelText: traductions.detailLabelStartDate, 
+                                    labelText: traductions.detailLabelStartDate,
                                     border: const OutlineInputBorder(),
                                     prefixIcon: const Icon(Icons.calendar_today),
                                   ),
@@ -673,7 +596,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                                 child: TextFormField(
                                   controller: intership.controllerEndDate,
                                   decoration: InputDecoration(
-                                    labelText: traductions.detailLabelBirthDate, 
+                                    labelText: traductions.detailLabelBirthDate,
                                     border: const OutlineInputBorder(),
                                     prefixIcon: const Icon(Icons.event),
                                   ),
@@ -761,14 +684,14 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                               const SizedBox(width: 10),
                               Expanded(child: TextFormField(controller: intership.controllerPostalCode, decoration: InputDecoration(labelText: traductions.detailLabelPostalCode, border: const OutlineInputBorder()))),
                               const SizedBox(width: 10),
-                                Expanded(child: TextFormField(controller: intership.controllerCountry, decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: const OutlineInputBorder()))),
+                              Expanded(child: TextFormField(controller: intership.controllerCountry, decoration: InputDecoration(labelText: traductions.detailLabelCountry, border: const OutlineInputBorder()))),
                             ],
                           ),
                           const SizedBox(height: 10),
                           TextFormField(
                             controller: intership.controllerDescription,
                             decoration: InputDecoration(
-                              labelText: traductions.detailInternshipDescription, 
+                              labelText: traductions.detailInternshipDescription,
                               border: const OutlineInputBorder(),
                               alignLabelWithHint: true,
                             ),
@@ -782,52 +705,62 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                 }),
 
               const SizedBox(height: 20),
-              
+
               if (widget.isAdmin && widget.requestId != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                    ),
-                    onPressed: () async {
-                      bool confirm = await showDialog(
-                        context: context, 
-                        builder: (c) => AlertDialog(
-                          title: Text(traductions.formAdminRejectTitle),
-                          content: Text(traductions.formAdminRejectContent),
-                          actions: [
-                            TextButton(onPressed: ()=>Navigator.pop(c,false), child: Text(traductions.cancel)),
-                            TextButton(onPressed: ()=>Navigator.pop(c,true), child: Text(traductions.formAdminRejectConfirm)),
-                          ],
-                        )
-                      ) ?? false;
+                  child: ListenableBuilder(
+                      listenable: _viewModel,
+                      builder: (context, _) {
+                        return ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                          ),
+                          onPressed: _viewModel.isLoading ? null : () async {
+                            bool confirm = await showDialog(
+                                context: context,
+                                builder: (c) => AlertDialog(
+                                  title: Text(traductions.formAdminRejectTitle),
+                                  content: Text(traductions.formAdminRejectContent),
+                                  actions: [
+                                    TextButton(onPressed: () => Navigator.pop(c, false), child: Text(traductions.cancel)),
+                                    TextButton(onPressed: () => Navigator.pop(c, true), child: Text(traductions.formAdminRejectConfirm)),
+                                  ],
+                                )
+                            ) ?? false;
 
-                      if (confirm) {
-                        await sl<AlumniRepository>().deletePendingRequest({'id_demande': widget.requestId!});
-                        if (widget.onSuccess != null) widget.onSuccess!();
-                        if (mounted) Navigator.pop(context);
+                            if (confirm) {
+                              await _viewModel.rejectRequest(widget.requestId!);
+                              if (widget.onSuccess != null) widget.onSuccess!();
+                              if (mounted) Navigator.pop(context);
+                            }
+                          },
+                          icon: const Icon(Icons.delete_forever, color: Colors.white),
+                          label: Text(traductions.formAdminRejectButton, style: const TextStyle(color: Colors.white)),
+                        );
                       }
-                    },
-                    icon: const Icon(Icons.delete_forever, color: Colors.white),
-                    label: Text(traductions.formAdminRejectButton, style: const TextStyle(color: Colors.white)),
                   ),
                 ),
 
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.ensiCyan,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
-                onPressed: _isLoading ? null : _submitForm,
-                icon: _isLoading 
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Icon(Icons.save, color: Colors.white),
-                label: Text(
-                  _isLoading ? traductions.formSaveLoading : traductions.formSaveButton, 
-                  style: const TextStyle(color: Colors.white, fontSize: 16)
-                ),
+              ListenableBuilder(
+                  listenable: _viewModel,
+                  builder: (context, _) {
+                    return ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.ensiCyan,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                      ),
+                      onPressed: _viewModel.isLoading ? null : _handleSubmit,
+                      icon: _viewModel.isLoading
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Icon(Icons.save, color: Colors.white),
+                      label: Text(
+                          _viewModel.isLoading ? traductions.formSaveLoading : traductions.formSaveButton,
+                          style: const TextStyle(color: Colors.white, fontSize: 16)
+                      ),
+                    );
+                  }
               ),
             ],
           ),
@@ -836,23 +769,23 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     );
   }
 
- Widget _sectionTitle(String titre, IconData icon, Color color) {
-  return Padding(
-    padding: EdgeInsets.symmetric(vertical: 15),
-    child: Row(
-      children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(width: 10),
-        Text(
-          titre, 
-          style: const TextStyle(
-            fontWeight: FontWeight.bold, 
-            fontSize: 18, 
-            color: AppColors.ensiCyan
-          )
-        ),
-      ],
-    ),
-  );
-}
+  Widget _sectionTitle(String titre, IconData icon, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 15),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(width: 10),
+          Text(
+              titre,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: AppColors.ensiCyan
+              )
+          ),
+        ],
+      ),
+    );
+  }
 }

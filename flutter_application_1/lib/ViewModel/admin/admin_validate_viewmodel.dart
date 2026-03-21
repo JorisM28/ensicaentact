@@ -1,37 +1,52 @@
 import 'package:flutter/foundation.dart';
-import '../../Model/data/services/alumni_repository.dart';
-import '../../service_locator.dart';
+import '/Model/data/services/alumni_repository.dart';
+import '/service_locator.dart';
 
 class AdminValidateViewModel extends ChangeNotifier {
   final AlumniRepository _repository = sl<AlumniRepository>();
 
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
+  bool isLoading = false;
+  List<Map<String, dynamic>> pendingRequests = [];
 
-  List<Map<String, dynamic>> _pendingRequests = [];
-  List<Map<String, dynamic>> get pendingRequests => _pendingRequests;
 
   Future<void> fetchPendingRequests() async {
-    _isLoading = true;
+    isLoading = true;
     notifyListeners();
 
     try {
       final list = await _repository.getPendingRequests();
-      _pendingRequests = list.cast<Map<String, dynamic>>();
+      pendingRequests = list.cast<Map<String, dynamic>>();
     } catch (e) {
-      _pendingRequests = [];
+      pendingRequests = [];
     } finally {
-      _isLoading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> deletePendingRequest(int id) async {
+
+
+  Future<bool> rejectRequest(int id) async {
     try {
       await _repository.deletePendingRequest({'id_demande': id});
       await fetchPendingRequests();
+      return true;
     } catch (e) {
-      // Handle error
+      return false;
+    }
+  }
+
+
+  Future<bool> approveRequest(int id, String type) async {
+    try {
+      if (type == 'EVENEMENT') {
+        await _repository.validateEvent(id);
+      } else if (type == 'OFFRE' || type == 'EMPLOI') {
+      }
+      await fetchPendingRequests();
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 }

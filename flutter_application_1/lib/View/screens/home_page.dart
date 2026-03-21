@@ -16,317 +16,226 @@ import '/service_locator.dart';
 import '/Model/data/services/alumni_repository.dart';
 import '/l10n/app_localizations.dart'; 
 import '/Model/data/services/auth_service.dart';
-
+import '/ViewModel/home/home_viewmodel.dart';
 class HomePage extends StatelessWidget {
 
-const HomePage({super.key});
+  const HomePage({super.key});
 
-final Color contentColor = const Color(0xFFF8F9FA);
+  final Color contentColor = const Color(0xFFF8F9FA);
 
-Future<void> _ouvrirSiteEcole() async {
-  final Uri url = Uri.parse('https://www.ensicaen.fr');
-  if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-    debugPrint('Impossible de lancer $url');
+  Future<void> _ouvrirSiteEcole() async {
+    final Uri url = Uri.parse('https://www.ensicaen.fr');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      debugPrint('Impossible de lancer $url');
+    }
   }
-}
 
-void _naviguer(BuildContext context, Widget page) {
-  Navigator.push(context, MaterialPageRoute(builder: (c) => page));
-}
+  void _naviguer(BuildContext context, Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (c) => page));
+  }
 
-@override
-Widget build(BuildContext context) {
-  final currentUser = sl<AuthService>().currentUser;
-  bool isDesktop = MediaQuery.of(context).size.width > 900;
-  final traductions = AppLocalizations.of(context)!;
-  final String role = currentUser?.role ?? 'guest';
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = sl<AuthService>().currentUser;
+    bool isDesktop = MediaQuery
+        .of(context)
+        .size
+        .width > 900;
+    final traductions = AppLocalizations.of(context)!;
+    final String role = currentUser?.role ?? 'guest';
 
-  return Scaffold(
-    backgroundColor: contentColor,
+    return Scaffold(
+      backgroundColor: contentColor,
 
-    appBar: CustomAppBar(),
+      appBar: CustomAppBar(),
 
-    endDrawer: !isDesktop ? _buildMobileDrawer(context, traductions) : null,
+      endDrawer: !isDesktop ? _buildMobileDrawer(context, traductions) : null,
 
-    body: SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 20,),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 20,),
 
-          KeyFiguresWidget(isAdmin: role == "admin"),
+            KeyFiguresWidget(isAdmin: role == "admin"),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: isDesktop
-                ? _buildDesktopLayout(context)
-                : _buildMobileLayout(context, traductions)
-          ),
+            Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 10),
+                child: isDesktop
+                    ? _buildDesktopLayout(context)
+                    : _buildMobileLayout(context, traductions)
+            ),
 
-          const Divider(height: 1, thickness: 1),
+            const Divider(height: 1, thickness: 1),
 
-          JobOfferWidget(),
+            JobOfferWidget(),
 
-          _buildFooter(), 
+            _buildFooter(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopLayout(BuildContext context) {
+    final traductions = AppLocalizations.of(context)!;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(30),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4)),
         ],
       ),
-    ),
-  );
-}
-
-Widget _buildDesktopLayout(BuildContext context) {
-  final traductions = AppLocalizations.of(context)!;
-  return Container(
-    margin: const EdgeInsets.only(bottom: 20),
-    padding: const EdgeInsets.all(30),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
-      ],
-    ),
-    child: IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: 2,
-            child: ActualityWidget(
-              onAddPress: () => _showAddNewsDialog(context, traductions),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: 2,
+              child: ActualityWidget(
+                onAddPress: () => showAddNewsDialog(context, traductions),
+              ),
             ),
-          ),
 
-          const VerticalDivider(width: 60, thickness: 1, color: Colors.white),
+            const VerticalDivider(width: 60, thickness: 1, color: Colors.white),
 
-          Expanded(
-            flex: 1,
-            child: EventWidget(
-              onAddPress: () => _showAddEventDialog(context, traductions),
+            Expanded(
+              flex: 1,
+              child: EventWidget(
+                onAddPress: () => showAddEventDialog(context, traductions),
+              ),
             ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Widget _buildMobileLayout(BuildContext context, traductions) {
-  return Column(
-    children: [
-      Container(
-        height: 520,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-        ),
-        padding: const EdgeInsets.all(15),
-        child: ActualityWidget(
-          onAddPress: () => _showAddNewsDialog(context, traductions),
+          ],
         ),
       ),
+    );
+  }
 
-      const SizedBox(height: 20),
-
-      Container(
-        height: 520,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-        ),
-        padding: const EdgeInsets.all(15),
-        child: EventWidget(
-          onAddPress: () => _showAddEventDialog(context, traductions)
-        ),
-      ),
-    ],
-  );
-}
-
-Widget _buildMobileDrawer(BuildContext context, AppLocalizations traductions) {
-  final currentUser = sl<AuthService>().currentUser;
-  return Drawer(
-    child: ListView(
-      padding: EdgeInsets.zero,
+  Widget _buildMobileLayout(BuildContext context, traductions) {
+    return Column(
       children: [
         Container(
+          height: 520,
           width: double.infinity,
-          decoration: const BoxDecoration(color: AppColors.ensiCyan),
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + 20,
-            bottom: 20,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+            ],
           ),
-          child: Center(
-            child: Text(
-                traductions.drawerMenu,
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)
-            ),
+          padding: const EdgeInsets.all(15),
+          child: ActualityWidget(
+            onAddPress: () => showAddNewsDialog(context, traductions),
           ),
         ),
-        
-        ListTile(leading: const Icon(Icons.people), title: Text(traductions.drawerDirectory), onTap: () => _naviguer(context, DirectoryPage())),
-        ListTile(leading: const Icon(Icons.work), title: Text(traductions.drawerOffers), onTap: () => _naviguer(context, JobPage())),
-        ListTile(leading: const Icon(Icons.school), title: Text(traductions.drawerSchoolSite), onTap: _ouvrirSiteEcole),
-        ListTile(leading: const Icon(Icons.newspaper), title: Text(traductions.drawerNews), onTap: () => _naviguer(context, NewsPage())), 
-        if ( currentUser != null && (currentUser.role== 'student' || currentUser.role == 'alumni')) ...[
-          const Divider(),
-          ListTile(leading: const Icon(Icons.event), title: Text(traductions.drawerProposeEvent), onTap: () => _naviguer(context, ProposeEventPage())),
-          if (currentUser.role == 'alumni') ...[
-            ListTile(leading: const Icon(Icons.thumb_up), title: Text(traductions.drawerJoin), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => Scaffold(appBar: AppBar(title: Text(traductions.drawerJoin), backgroundColor: AppColors.ensiCyan), body: AddAlumniForm(onSuccess: () => Navigator.pop(c)))))),
-          ],
-        ],
 
-        if (currentUser != null && currentUser.role == 'admin') ...[
-          const Divider(),
-          ListTile(leading: const Icon(Icons.security), title: Text(traductions.drawerModeration), onTap: () => _naviguer(context, PageModeration())),
-        ],
+        const SizedBox(height: 20),
+
+        Container(
+          height: 520,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+            ],
+          ),
+          padding: const EdgeInsets.all(15),
+          child: EventWidget(
+              onAddPress: () => showAddEventDialog(context, traductions)
+          ),
+        ),
       ],
-    ),
-  );
-}
-
-Widget _buildFooter() {
-  return Container(
-    padding: const EdgeInsets.all(20),
-    color: AppColors.ensiCyan,
-    width: double.infinity,
-    child: const Text("©2026 ENSICAEN Alumni", style: TextStyle(color: Colors.white, fontSize: 18), textAlign: TextAlign.center),
-  );
-}
-
-void _showAddNewsDialog(BuildContext context, AppLocalizations traductions) {
-  final currentUser = sl<AuthService>().currentUser;
-  if (currentUser == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(traductions.dialogLoginRequiredNews)),
     );
-    return;
   }
 
-  final titleCtrl = TextEditingController();
-  final descCtrl = TextEditingController();
-  final imgCtrl = TextEditingController();
-
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(traductions.dialogNewNews),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildMobileDrawer(BuildContext context,
+      AppLocalizations traductions) {
+    final currentUser = sl<AuthService>().currentUser;
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
         children: [
-          TextField(controller: titleCtrl, decoration: InputDecoration(labelText: traductions.dialogTitleLabel)),
-          TextField(controller: descCtrl, decoration: InputDecoration(labelText: traductions.descriptionField), maxLines: 3),
-          TextField(controller: imgCtrl, decoration: InputDecoration(labelText: traductions.dialogImageUrlLabel)),
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(color: AppColors.ensiCyan),
+            padding: EdgeInsets.only(
+              top: MediaQuery
+                  .of(context)
+                  .padding
+                  .top + 20,
+              bottom: 20,
+            ),
+            child: Center(
+              child: Text(
+                  traductions.drawerMenu,
+                  style: const TextStyle(color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold)
+              ),
+            ),
+          ),
+
+          ListTile(leading: const Icon(Icons.people),
+              title: Text(traductions.drawerDirectory),
+              onTap: () => _naviguer(context, DirectoryPage())),
+          ListTile(leading: const Icon(Icons.work),
+              title: Text(traductions.drawerOffers),
+              onTap: () => _naviguer(context, JobPage())),
+          ListTile(leading: const Icon(Icons.school),
+              title: Text(traductions.drawerSchoolSite),
+              onTap: _ouvrirSiteEcole),
+          ListTile(leading: const Icon(Icons.newspaper),
+              title: Text(traductions.drawerNews),
+              onTap: () => _naviguer(context, NewsPage())),
+          if ( currentUser != null && (currentUser.role == 'student' ||
+              currentUser.role == 'alumni')) ...[
+            const Divider(),
+            ListTile(leading: const Icon(Icons.event),
+                title: Text(traductions.drawerProposeEvent),
+                onTap: () => _naviguer(context, ProposeEventPage())),
+            if (currentUser.role == 'alumni') ...[
+              ListTile(leading: const Icon(Icons.thumb_up),
+                  title: Text(traductions.drawerJoin),
+                  onTap: () =>
+                      Navigator.push(context, MaterialPageRoute(
+                      builder: (c) =>
+                          Scaffold(appBar: AppBar(title: Text(
+                              traductions.drawerJoin),
+                              backgroundColor: AppColors.ensiCyan),
+                              body: AddAlumniForm(onSuccess: () =>
+                                  Navigator.pop(c)))))),
+            ],
+          ],
+
+          if (currentUser != null && currentUser.role == 'admin') ...[
+            const Divider(),
+            ListTile(leading: const Icon(Icons.security),
+                title: Text(traductions.drawerModeration),
+                onTap: () => _naviguer(context, PageModeration())),
+          ],
         ],
       ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
-        ElevatedButton(
-          onPressed: () async {
-            if (titleCtrl.text.isEmpty) return;
+    );
+  }
 
-            await sl<AlumniRepository>().addNews({
-              "titre": titleCtrl.text,
-              "description": descCtrl.text,
-              "image": imgCtrl.text,
-              "auteur_id": currentUser.role,
-            });
+  Widget _buildFooter() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      color: AppColors.ensiCyan,
+      width: double.infinity,
+      child: const Text("©2026 ENSICAEN Alumni",
+          style: TextStyle(color: Colors.white, fontSize: 18),
+          textAlign: TextAlign.center),
+    );
+  }
 
-            Navigator.pop(ctx);
 
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const HomePage()));
-          },
-          child: Text(traductions.publish), // Réutilisation de la clé existante
-        ),
-      ],
-    ),
-  );
-}
-
-void _showAddEventDialog(BuildContext context, AppLocalizations traductions) {
-  final titreCtrl = TextEditingController();
-  final descCtrl = TextEditingController();
-  final lieuCtrl = TextEditingController();
-  final dateCtrl = TextEditingController();
-  final currentUser = sl<AuthService>().currentUser;
-
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(traductions.dialogNewEvent),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: titreCtrl, decoration: InputDecoration(labelText: traductions.dialogTitleLabel)),
-            TextField(controller: descCtrl, decoration: InputDecoration(labelText: traductions.descriptionField), maxLines: 3),
-            TextField(controller: lieuCtrl, decoration: InputDecoration(labelText: traductions.dialogLocationLabel)),
-            TextField(
-              controller: dateCtrl,
-              decoration: InputDecoration(labelText: traductions.dialogDateTimeLabel),
-              readOnly: true,
-              onTap: () async {
-                FocusScope.of(context).requestFocus(FocusNode());
-
-                DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime(2100),
-                  // CORRECTION ICI : Pour que le calendrier s'affiche dans la bonne langue
-                  locale: Locale(Localizations.localeOf(context).languageCode),
-                );
-
-                if (pickedDate != null) {
-                  TimeOfDay? pickedTime = await showTimePicker(
-                    context: context,
-                    initialTime: const TimeOfDay(hour: 0, minute: 0),
-                    builder: (BuildContext context, Widget? child) {
-                      return MediaQuery(
-                        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-                        child: child!,
-                      );
-                    },
-                  );
-
-                  if (pickedTime != null) {
-                    String formattedDate = pickedDate.toIso8601String().split('T')[0];
-                    String formattedHour = pickedTime.hour.toString().padLeft(2, '0');
-                    String formattedMinute = pickedTime.minute.toString().padLeft(2, '0');
-
-                    dateCtrl.text = "$formattedDate $formattedHour:$formattedMinute:00";
-                  }
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
-        ElevatedButton(
-          onPressed: () async {
-            if (titreCtrl.text.isEmpty) return;
-
-            await sl<AlumniRepository>().addEvent({
-              "titre": titreCtrl.text,
-              "description": descCtrl.text,
-              "lieu": lieuCtrl.text,
-              "date_event": dateCtrl.text,
-              "auteur_id": currentUser?.id,
-              "valide": 1
-            });
-
-            Navigator.pop(ctx);
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const HomePage()));
-          },
-          child: Text(traductions.publish), // Réutilisation de la clé existante
-        ),
-      ],
-    ),
-  );
-}
 }

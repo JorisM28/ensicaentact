@@ -81,7 +81,8 @@ class _CompaniesMapWidgetState extends State<CompaniesMapWidget> {
       ),
       children: [
         TileLayer(
-          urlTemplate: 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
+          urlTemplate: 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=f38b6b73-5ccc-40c7-8ba9-63646f29a86f',
+      retinaMode: RetinaMode.isHighDensity(context),
           maxZoom: 20,
         ),
         const RichAttributionWidget(
