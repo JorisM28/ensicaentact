@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../../ViewModel/widget/profile_viewmodel.dart';
 import '/service_locator.dart';
-import '/Model/data/services/alumni_repository.dart';
-import '/l10n/app_localizations.dart'; 
+import '/l10n/app_localizations.dart';
 import '/View/screens/home_page.dart';
 import '/View/theme/colors.dart';
 import '/Model/data/services/auth_service.dart';
-import '/Model/connection/auth_strategy.dart';
+import '/ViewModel/profile/profile_viewmodel.dart';
 
 class ProfilePage extends StatefulWidget {
-
   const ProfilePage({super.key});
 
   @override
@@ -16,103 +15,87 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final ProfileViewModel _viewModel = sl<ProfileViewModel>();
 
   void _showChangePasswordDialog(BuildContext context) {
     final traductions = AppLocalizations.of(context)!;
-    final currentUser = sl<AuthService>().currentUser;
+    final currentUser = sl<AuthService>().currentUser!;
     final TextEditingController oldPassController = TextEditingController();
     final TextEditingController newPassController = TextEditingController();
     final TextEditingController confirmPassController = TextEditingController();
     final formKey = GlobalKey<FormState>();
-    bool isLoading = false;
-
 
     showDialog(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(traductions.modifyPassword),
-              content: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: oldPassController,
-                      obscureText: true,
-                      decoration: InputDecoration(labelText: traductions.lastPassword),
-                      validator: (val) => val!.isEmpty ? traductions.required : null,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: newPassController,
-                      obscureText: true,
-                      decoration: InputDecoration(labelText: traductions.newPassword),
-                      validator: (val) => val!.length < 6 ? traductions.minCharacters : null,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: confirmPassController,
-                      obscureText: true,
-                      decoration: InputDecoration(labelText: traductions.confirmNewPassword),
-                      validator: (val) {
-                        if (val != newPassController.text) return traductions.passwordsDoNotMatch;
-                        return null;
-                      },
-                    ),
-                  ],
+      builder: (contextDialog) {
+        return AlertDialog(
+          title: Text(traductions.modifyPassword),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: oldPassController,
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: traductions.lastPassword),
+                  validator: (val) => val!.isEmpty ? traductions.required : null,
                 ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(traductions.cancel),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: newPassController,
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: traductions.newPassword),
+                  validator: (val) => val!.length < 6 ? traductions.minCharacters : null,
                 ),
-                ElevatedButton(
-                  onPressed: isLoading ? null : () async {
-                    if (formKey.currentState!.validate()) {
-                      setState(() => isLoading = true);
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: confirmPassController,
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: traductions.confirmNewPassword),
+                  validator: (val) {
+                    if (val != newPassController.text) return traductions.passwordsDoNotMatch;
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(contextDialog),
+              child: Text(traductions.cancel),
+            ),
+            ListenableBuilder(
+                listenable: _viewModel,
+                builder: (context, _) {
+                  return ElevatedButton(
+                    onPressed: _viewModel.isLoading ? null : () async {
+                      if (formKey.currentState!.validate()) {
+                        bool success = await _viewModel.changePassword(
+                          currentUser.email,
+                          oldPassController.text,
+                          newPassController.text,
+                        );
 
-                      try {
-                          await sl<AlumniRepository>().updatePassword({
-                            'email': currentUser!.email,
-                            'old_password': oldPassController.text,
-                            'new_password': newPassController.text
-                          });
-
-                          setState(() => isLoading = false);
-                          Navigator.pop(context);
-
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(traductions.passwordChangedSuccess),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          }
-                      } catch (e) {
-                        setState(() => isLoading = false);
                         if (mounted) {
+                          Navigator.pop(contextDialog);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(traductions.passwordChangedError),
-                              backgroundColor: Colors.red,
+                              content: Text(success ? traductions.passwordChangedSuccess : traductions.passwordChangedError),
+                              backgroundColor: success ? Colors.green : Colors.red,
                             ),
                           );
                         }
                       }
-                    }
-                  },
-                  child: isLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Text(traductions.validate),
-                ),
-              ],
-            );
-          },
+                    },
+                    child: _viewModel.isLoading
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : Text(traductions.validate),
+                  );
+                }
+            ),
+          ],
         );
       },
     );
@@ -122,12 +105,11 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final currentUser = sl<AuthService>().currentUser;
     final traductions = AppLocalizations.of(context)!;
-    String firstName =currentUser!.firstname;
-    String lastName =currentUser.lastname;
-    String email =currentUser.email;
-    String role =currentUser.role;
-    String phone =currentUser.phone;
-
+    String firstName = currentUser!.firstname;
+    String lastName = currentUser.lastname;
+    String email = currentUser.email;
+    String role = currentUser.role;
+    String phone = currentUser.phone;
 
     return Scaffold(
       appBar: AppBar(
@@ -202,14 +184,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 height: 50,
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    await sl<AuthRepository>().logout();
-                    await sl<AuthService>().logout();
-
+                    await _viewModel.logout();
                     if (mounted) {
                       Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => const HomePage()),
-                        (route) => false,
+                            (route) => false,
                       );
                     }
                   },

@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
-import '/Model/data/services/alumni_repository.dart';
+import '../../ViewModel/widget/job_widget_viewmodel.dart';
 import '/service_locator.dart';
 import '/View/screens/employment/job_page.dart';
 import '/l10n/app_localizations.dart';
 
-class JobOfferWidget extends StatelessWidget {
+class JobOfferWidget extends StatefulWidget {
   const JobOfferWidget({super.key});
+
+  @override
+  State<JobOfferWidget> createState() => _JobOfferWidgetState();
+}
+
+class _JobOfferWidgetState extends State<JobOfferWidget> {
+  final JobOfferWidgetViewModel _viewModel = sl<JobOfferWidgetViewModel>();
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel.loadOffers();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +42,18 @@ class JobOfferWidget extends StatelessWidget {
           ),
           const SizedBox(height: 30),
 
-          FutureBuilder<List<Map<String, dynamic>>>(
-            future: sl<AlumniRepository>().getOffers(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+          ListenableBuilder(
+            listenable: _viewModel,
+            builder: (context, _) {
+              if (_viewModel.isLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+
+              if (_viewModel.offers.isEmpty) {
                 return Text(traductions.noOfferFound);
               }
 
-              final offres = snapshot.data!.take(4).toList();
+              final offres = _viewModel.offers.take(4).toList();
 
               return Column(
                 children: offres.map((job) => _buildJobCard(job, traductions)).toList(),
@@ -68,7 +82,6 @@ class JobOfferWidget extends StatelessWidget {
   }
 
   Widget _buildJobCard(Map<String, dynamic> job, AppLocalizations traductions) {
-
     final String type = (job['type'] ?? 'CDI').toString();
     final bool isStage = type.toLowerCase() == 'stage';
     final Color badgeColor = isStage ? Colors.orange[800]! : Colors.blue[800]!;
