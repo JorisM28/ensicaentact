@@ -77,7 +77,6 @@ class ZoneFiltres extends StatelessWidget {
                   color: estCoche ? Colors.white : Colors.black
                 ),
                 onSelected: (bool selected) {
-                  // On prévient le parent !
                   onSectorChanged(filiere, selected);
                 },
               );
@@ -104,7 +103,6 @@ class ZoneFiltres extends StatelessWidget {
                   color: estCoche ? Colors.white : Colors.black
                 ),
                 onSelected: (bool selected) {
-                  // CORRECTION : Appelle le callback pour le pays
                   onInternshipCountryChanged(pays, selected);
                 },
               );

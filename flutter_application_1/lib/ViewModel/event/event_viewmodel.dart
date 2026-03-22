@@ -39,7 +39,6 @@ class EventViewModel extends ChangeNotifier {
     try {
       _events = await _repository.getEvents();
     } catch (e) {
-      // Handle error gracefully
       _events = [];
     } finally {
       _isLoading = false;

@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import '/View/navigation.dart';
 
-// TODO : Le transformer avec un patron de conception "Décorateur" Ou "Proxy" ?
-
 final Config config = Config(
   tenant: dotenv.env['AZURE_TENANT_ID'] ?? "",
   clientId: dotenv.env['AZURE_CLIENT_ID'] ?? "",
