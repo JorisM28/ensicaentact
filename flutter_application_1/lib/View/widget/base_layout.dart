@@ -18,7 +18,7 @@ class BaseLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isMobile = MediaQuery.of(context).size.width <= 900;
+    bool isMobile = MediaQuery.of(context).size.width <= 1320;
 
     return Scaffold(
       backgroundColor: backgroundColor,
