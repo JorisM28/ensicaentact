@@ -1,60 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../ViewModel/widget/key_figure_widget_viewmodel.dart';
 import '/l10n/app_localizations.dart';
-
-class KeyFigure {
-  int id;
-  String label;
-  int value;
-  String suffix;
-  String iconKey;
-  Color color;
-  String colorHex;
-
-  KeyFigure({
-    required this.id,
-    required this.label,
-    required this.value,
-    this.suffix = "",
-    required this.iconKey,
-    required this.color,
-    required this.colorHex,
-  });
-
-  factory KeyFigure.fromJson(Map<String, dynamic> json) {
-    String rawColor = json['color_hex'] ?? '#000000';
-    String hexColor = rawColor.replaceAll('#', '');
-    Color colorParsed;
-    try {
-      colorParsed = Color(int.parse('0xFF$hexColor'));
-    } catch (e) {
-      colorParsed = Colors.black;
-    }
-
-    return KeyFigure(
-      id: int.parse(json['id'].toString()),
-      label: json['label'],
-      value: int.parse(json['stat_value'].toString()),
-      suffix: json['suffix'] ?? "",
-      iconKey: json['icon_key'],
-      colorHex: rawColor,
-      color: colorParsed,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'label': label,
-      'stat_value': value,
-      'suffix': suffix,
-      'icon_key': iconKey,
-      'color_hex': colorHex,
-    };
-  }
-}
+import '/service_locator.dart';
 
 final Map<String, IconData> availableIcons = {
   'school': Icons.school,
@@ -79,112 +26,75 @@ class KeyFiguresWidget extends StatefulWidget {
 }
 
 class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
+  final KeyFiguresViewModel _viewModel = sl<KeyFiguresViewModel>();
   bool _isEditing = false;
-  bool _isLoading = true;
-  bool _isSaving = false;
-  List<KeyFigure> stats = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchStats();
+    _viewModel.fetchStats();
   }
 
-  Future<void> _fetchStats() async {
-    try {
-      final response = await http.get(Uri.parse('https://alumni.theo-airey.fr/get_key_figures.php'));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == 'success') {
-          if (mounted) {
-            setState(() {
-              stats = (data['data'] as List).map((i) => KeyFigure.fromJson(i)).toList();
-              _isLoading = false;
-            });
-          }
-        }
-      }
-    } catch (e) {
-      print("Erreur de connexion : $e");
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _saveData() async {
-    setState(() => _isSaving = true);
-
-    try {
-      String jsonBody = json.encode(stats.map((e) => e.toJson()).toList());
-
-      const storage = FlutterSecureStorage();
-      String? token = await storage.read(key: 'jwt_token');
-      final response = await http.post(
-        Uri.parse('https://alumni.theo-airey.fr/set_key_figures.php'),
-        body: jsonBody,
-        headers: {
-          "Content-Type": "application/json",
-          "X-Authorization": "Bearer $token",
-        },
-      );
-
-      final result = json.decode(response.body);
-
-      if (result['status'] == 'success') {
-        if (mounted) {
+  Future<void> _handleSave() async {
+    if (_isEditing) {
+      try {
+        bool success = await _viewModel.saveData();
+        if (success && mounted) {
           final traductions = AppLocalizations.of(context)!;
-          setState(() {
-            _isEditing = false;
-            _isSaving = false;
-          });
+          setState(() => _isEditing = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(traductions.updateSuccess), backgroundColor: Colors.green),
           );
         }
-      } else {
-        throw Exception(result['message']);
+      } catch (e) {
+        if (mounted) {
+          final traductions = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(traductions.formMsgError(e.toString())), backgroundColor: Colors.red),
+          );
+        }
       }
-    } catch (e) {
-      final traductions = AppLocalizations.of(context)!;
-      if (mounted) {
-        setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(traductions.formMsgError(e.toString())), backgroundColor: Colors.red),
-        );
-      }
+    } else {
+      setState(() => _isEditing = true);
     }
   }
+
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Container(
-          height: 200,
-          color: Colors.white,
-          child: const Center(child: CircularProgressIndicator())
-      );
-    }
+    return ListenableBuilder(
+        listenable: _viewModel,
+        builder: (context, _) {
+          if (_viewModel.isLoading) {
+            return Container(
+                height: 200,
+                color: Colors.white,
+                child: const Center(child: CircularProgressIndicator())
+            );
+          }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topRight,
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            child: _isEditing
-                ? _buildAdminInterface()
-                : _buildPublicInterface(),
-          ),
+          return Container(
+            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.topRight,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  child: _isEditing
+                      ? _buildAdminInterface()
+                      : _buildPublicInterface(),
+                ),
 
-          if (widget.isAdmin)
-            Positioned(
-              top: 0,
-              right: 0,
-              child: _buildSimpleEditButton(),
+                if (widget.isAdmin)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: _buildSimpleEditButton(),
+                  ),
+              ],
             ),
-        ],
-      ),
+          );
+        }
     );
   }
 
@@ -195,20 +105,12 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: _isSaving
-            ? null
-            : () {
-          if (_isEditing) {
-            _saveData();
-          } else {
-            setState(() => _isEditing = true);
-          }
-        },
+        onTap: _viewModel.isSaving ? null : _handleSave,
         child: Container(
           width: 40,
           height: 40,
           alignment: Alignment.center,
-          child: _isSaving
+          child: _viewModel.isSaving
               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
               : Icon(
             _isEditing ? Icons.check : Icons.edit,
@@ -231,7 +133,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
         spacing: 15,
         runSpacing: 20,
         alignment: WrapAlignment.center,
-        children: stats.map((s) {
+        children: _viewModel.stats.map((s) {
           double itemWidth = (screenWidth - 60) / 2;
           return SizedBox(
             width: itemWidth,
@@ -242,7 +144,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
           : Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: stats.map((s) => _buildStatCard(s, compactMode: false)).toList(),
+        children: _viewModel.stats.map((s) => _buildStatCard(s, compactMode: false)).toList(),
       ),
     );
   }
@@ -321,7 +223,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
     bool isMobile = width < 900;
 
     var formSection = Column(
-      children: stats.asMap().entries.map((entry) {
+      children: _viewModel.stats.asMap().entries.map((entry) {
         int idx = entry.key;
         KeyFigure stat = entry.value;
         return Card(
@@ -343,16 +245,22 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
                           child: TextFormField(
                             initialValue: stat.value.toString(),
                             keyboardType: TextInputType.number,
-                            decoration: InputDecoration(labelText: traductions.numberLabel, border: OutlineInputBorder()),
-                            onChanged: (val) => setState(() => stat.value = int.tryParse(val) ?? 0),
+                            decoration: InputDecoration(labelText: traductions.numberLabel, border: const OutlineInputBorder()),
+                            onChanged: (val) {
+                              stat.value = int.tryParse(val) ?? 0;
+                              _viewModel.refreshUI();
+                            },
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: TextFormField(
                             initialValue: stat.suffix,
-                            decoration: InputDecoration(labelText: traductions.suffixLabel, border: OutlineInputBorder()),
-                            onChanged: (val) => setState(() => stat.suffix = val),
+                            decoration: InputDecoration(labelText: traductions.suffixLabel, border: const OutlineInputBorder()),
+                            onChanged: (val) {
+                              stat.suffix = val;
+                              _viewModel.refreshUI();
+                            },
                           ),
                         ),
                       ],
@@ -360,18 +268,24 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
                     const SizedBox(height: 10),
                     TextFormField(
                       initialValue: stat.label,
-                      decoration: InputDecoration(labelText: traductions.titleLabelAdmin, border: OutlineInputBorder()),
-                      onChanged: (val) => setState(() => stat.label = val),
+                      decoration: InputDecoration(labelText: traductions.titleLabelAdmin, border: const OutlineInputBorder()),
+                      onChanged: (val) {
+                        stat.label = val;
+                        _viewModel.refreshUI();
+                      },
                     ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: availableIcons.containsKey(stat.iconKey) ? stat.iconKey : 'school',
-                      decoration: InputDecoration(labelText: traductions.iconLabel, border: OutlineInputBorder()),
+                      decoration: InputDecoration(labelText: traductions.iconLabel, border: const OutlineInputBorder()),
                       items: availableIcons.entries.map((e) => DropdownMenuItem(
                         value: e.key,
                         child: Row(children: [Icon(e.value, size: 20), const SizedBox(width: 10), Text(e.key)]),
                       )).toList(),
-                      onChanged: (val) => setState(() => stat.iconKey = val!),
+                      onChanged: (val) {
+                        stat.iconKey = val!;
+                        _viewModel.refreshUI();
+                      },
                     )
                   ],
                 ),
@@ -400,7 +314,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
               const SizedBox(height: 35),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: stats.map((s) => _buildSimplePreview(s)).toList(),
+                children: _viewModel.stats.map((s) => _buildSimplePreview(s)).toList(),
               ),
             ],
           )),

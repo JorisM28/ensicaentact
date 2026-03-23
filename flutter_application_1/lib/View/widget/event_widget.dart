@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
-import '/Model/data/services/alumni_repository.dart';
+import 'package:intl/intl.dart';
+import '/ViewModel/widget/event_widget_viewmodel.dart';
 import '/service_locator.dart';
 import '../theme/colors.dart';
 import '/View/screens/event/event_page.dart';
-import '/l10n/app_localizations.dart'; 
+import '/l10n/app_localizations.dart';
 import '/Model/data/services/auth_service.dart';
 
 class EventWidget extends StatefulWidget {
@@ -17,21 +17,12 @@ class EventWidget extends StatefulWidget {
 }
 
 class _EventWidgetState extends State<EventWidget> {
-  List<Map<String, dynamic>> _events = [];
-  bool _isLoading = true;
+  final EventWidgetViewModel _viewModel = sl<EventWidgetViewModel>();
 
   @override
   void initState() {
     super.initState();
-    _loadData();
-  }
-
-  void _loadData() async {
-    if (!mounted) return;
-    try {
-      var data = await sl<AlumniRepository>().getEvents();
-      if (mounted) setState(() { _events = data; _isLoading = false; });
-    } catch (e) { if (mounted) setState(() => _isLoading = false); }
+    _viewModel.loadEvents();
   }
 
   void _confirmDeletion(Map<String, dynamic> item) {
@@ -48,12 +39,9 @@ class _EventWidgetState extends State<EventWidget> {
             onPressed: () async {
               Navigator.pop(ctx);
               int idToDelete = int.tryParse(item['id_event'].toString()) ?? 0;
-              bool success = await sl<AlumniRepository>().deleteEvent(idToDelete);
+              bool success = await _viewModel.deleteEvent(idToDelete);
 
               if (success && mounted) {
-                setState(() {
-                  _events.removeWhere((element) => element['id_event'] == item['id_event']);
-                });
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(traductions.eventDeletedSuccess))
                 );
@@ -73,78 +61,84 @@ class _EventWidgetState extends State<EventWidget> {
       String langCode = Localizations.localeOf(context).languageCode;
       return {
         "day": dt.day.toString().padLeft(2, '0'),
-        // Utilise intl pour traduire automatiquement le mois ("FEB" en anglais, "FÉV" en français)
         "month": DateFormat('MMM', langCode).format(dt).toUpperCase()
       };
-    } catch (e) { return {"day": "??", "month": "??"}; }
+    } catch (e) {
+      return {"day": "??", "month": "??"};
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final currentUser = sl<AuthService>().currentUser;
-
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
-
     final traductions = AppLocalizations.of(context)!;
-    final displayList = _events.take(3).toList();
-    bool isAdmin = currentUser?.role== 'admin';
+    bool isAdmin = currentUser?.role == 'admin';
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (isAdmin && widget.onAddPress != null) ...const [
-              Spacer(),
+    return ListenableBuilder(
+        listenable: _viewModel,
+        builder: (context, _) {
+          if (_viewModel.isLoading) return const Center(child: CircularProgressIndicator());
+
+          final displayList = _viewModel.events.take(3).toList();
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isAdmin && widget.onAddPress != null) const Spacer(),
+                    Text(
+                      traductions.eventsTab.toUpperCase(),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.ensiCyan),
+                    ),
+                    if (isAdmin && widget.onAddPress != null) ...[
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle, color: AppColors.ensiCyan, size: 24),
+                        onPressed: widget.onAddPress,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        tooltip: traductions.addEventTooltip,
+                      ),
+                    ]
+                  ],
+                ),
+              ),
+
+              Expanded(
+                child: displayList.isEmpty
+                    ? Center(child: Text(traductions.noUpcomingEvents))
+                    : SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: displayList.map((item) => _buildEventCard(item, isAdmin, traductions)).toList(),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              OutlinedButton(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const EventPage())),
+                style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFE30613)),
+                    backgroundColor: Colors.white
+                ),
+                child: Text(traductions.seeAllEvents, style: const TextStyle(color: Color(0xFFE30613))),
+              ),
             ],
-            Text(
-              traductions.eventsTab.toUpperCase(),
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.ensiCyan),
-            ),
-            if (isAdmin && widget.onAddPress != null) ...[
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add_circle, color: AppColors.ensiCyan, size: 24),
-              onPressed: widget.onAddPress,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              tooltip: traductions.addEventTooltip,
-            ),]
-          ],),
-        ),
-
-        Expanded(
-          child: displayList.isEmpty
-              ? Center(child: Text(traductions.noUpcomingEvents))
-              : SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: displayList.map((item) => _buildEventCard(item, isAdmin, traductions)).toList(),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 20),
-
-        OutlinedButton(
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => EventPage())),
-          style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFFE30613)),
-              backgroundColor: Colors.white
-          ),
-          child: Text(traductions.seeAllEvents, style: const TextStyle(color: Color(0xFFE30613))),
-        ),
-      ],
+          );
+        }
     );
   }
 
   Widget _buildEventCard(Map<String, dynamic> item, bool estAdmin, AppLocalizations traductions) {
     final String title = item['titre'] ?? traductions.untitled;
     final String location = item['lieu'] ?? traductions.locationNotSpecified;
-    final dateMap = _formatDate(item['date_event'], context); 
+    final dateMap = _formatDate(item['date_event'], context);
 
     return Card(
       color: Colors.grey.shade100,

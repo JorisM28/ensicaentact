@@ -148,23 +148,24 @@ Au cours des premiers échanges, le besoin du client a rapidement évolué. Plus
 
 Cette volonté s'est traduite par le passage d'une application utilitaire à un support d'information complet, accessible à tout utilisateur souhaitant découvrir le dynamisme de la communauté.
 
-\subsection{État des lieux :}
-Avant de débuter le développement, une phase d'analyse critique a été menée :
+\subsection{État des lieux}
+Avant de débuter le développement, une phase d'analyse a été menée :
 
 \begin{itemize}[label=\textbullet, itemsep=5pt]
     \item \textbf{Constat interne :} Le site existant des Alumnis a été identifié comme "sous-utilisé" et esthétiquement dépassé. La centralisation des données était inefficace pour les besoins actuels des étudiants. La multiplication d’accès aux différentes bases de données rend complexe toute recherche pour un étudiant entrant dans l’école.
     \item \textbf{Benchmark externe :} Nous avons étudié les solutions de structures aux moyens similaires (écoles d'ingénieurs) mais aussi de références d'excellence comme l'EM Normandie ou Sciences Po Paris. Elles avaient toutes en commun la centralisation de plusieurs outils sur leur page internet (offre, actualité des Alumnis,...).
+    \item \textbf{Fait aggravant de conformité (RGPD) :} Lors de l'audit, nous avons mis en évidence une faille critique liée à l'utilisation des données personnelles et à la possibilité de les exporter. Le calendrier des stages de 2\textsuperscript{e} année, exposait les données d'étudiants transmises (noms, entreprises, contacts) et affichées sans leur consentement explicite.    
 \end{itemize}
 
-Face à l'obsolescence de l'outil actuel, nous avons obtenu l'accord du client pour \textbf{partir d'une page vierge} afin de garantir une architecture propre, évolutive et conforme aux attentes des utilisateurs.
+Face à l'obsolescence des outils actuel, nous avons obtenu l'accord du client pour \textbf{partir d'une page vierge} afin de garantir une architecture propre, évolutive et conforme aux attentes des utilisateurs.
 
 \subsection{Des fonctionnalités au service de l'engagement}
 En concertation avec le client, plusieurs piliers fonctionnels ont été ajoutés pour garantir que la plateforme devienne le cœur battant du réseau :
 
 \begin{itemize}[label=\textbullet, itemsep=5pt]
     \item \textbf{L'annuaire intelligent et qualifié :} Pivot central du projet, cet annuaire ne se contente pas de recenser des noms. À la demande du client, il intègre des données stratégiques pour l'étudiant : la filière suivie à l'école, l’entreprise actuelle de la personne mais aussi le détail des stages de 2A et 3A réalisés. Ces informations permettent un ciblage précis pour ceux qui cherchent des conseils sur une spécialité ou un retour d'expérience sur une entreprise spécifique.
-    \item \textbf{La cartographie des entreprises :} À la suite de nos échanges avec le client, nous avons intégré une dimension géographique au projet. L'outil propose une carte des entreprises représentées au sein du réseau. Cette interface permet de visualiser en un coup d'œil l'influence des Ensicaennais sur le territoire et d'identifier les bassins d'emploi où la communauté est la plus présente.
-    \item \textbf{Le volet "Carrière" :} À notre initiative, nous avons intégré un module de dépôt d'offres de stages et d'emplois. Cette fonctionnalité crée un cercle vertueux d'entraide, facilitant directement l'employabilité des Ensicaennais et renforçant l'utilité concrète du réseau au quotidien.
+    \item \textbf{La cartographie des entreprises :} À la suite de nos échanges, nous avons intégré une dimension géographique au projet. L'outil propose une carte des entreprises représentées au sein du réseau. Cette interface permet de visualiser en un coup d'œil l'influence des Ensicannais sur le territoire et d'identifier les bassins d'emploi où la communauté est la plus présente.
+    \item \textbf{Le volet "Carrière" :} À notre initiative, nous avons intégré un module de dépôt d'offres de stages et d'emplois. Cette fonctionnalité crée un cercle vertueux d'entraide, facilitant directement l'employabilité des Ensicannais et renforçant l'utilité concrète du réseau au quotidien.
     \item \textbf{Gestion de l'actualité et des événements :} Un espace dédié permet à l'association d'administrer du contenu de manière autonome. Cet outil mettra en lumière l'engagement des anciens étudiants et diffusera les événements clés, garantissant un réseau vivant et ouvert à toute proposition d’évènement.
 \end{itemize}
 
@@ -194,6 +195,8 @@ Pour mener à bien ce projet, nous avons fait le choix d'une méthodologie Agile
 
 Ce changement d'orientation, marquant le passage d'un simple annuaire à une plateforme complète de promotion du réseau, a été intégré de manière fluide au cycle de production. La réussite de cette transition repose sur l'adoption d'itérations courtes, d'une durée d'une à deux semaines par rendu, et sur un dialogue permanent avec le client.
 
+La mise en place de cette organisation a été grandement facilitée par la journée de formation \og Gestion de projet Agile \fg{} dispensée à l'école. Cet atelier pratique nous a fourni les outils méthodologiques nécessaires pour découper efficacement le projet en sous-tâches réalisables (\textit{User Stories}) et pour cartographier précisément les différents acteurs (étudiants, Alumnis, administration, DSI) avec lesquels nous allions interagir tout au long du développement.
+
 \subsection{Structure de l'équipe et responsabilités}
 L'efficacité du groupe a reposé sur une répartition claire des compétences, permettant à chaque membre de se concentrer sur des domaines d'expertise tout en collaborant sur le développement global :
 
@@ -216,6 +219,17 @@ Pour organiser notre production de manière visuelle et transparente, nous avons
 
 Le cycle de vie de nos tâches s'est articulé autour de trois colonnes majeures. L’identifications des besoins avec le client, tels que la promotion de l’école, la mises en correspondance des Alumnis avec les élèves ou encore l'annuaire. Ces tâches étaient ensuite découpées en plusieurs sous-tâches avant de les traiter individuellement dans la partie “En cours”, où elles faisaient l'objet d'un développement intensif (notamment sur les modules de sécurité, d'authentification et les moteurs de recherche). Enfin, son passage définitif dans la colonne \textit{Terminé} marquait la validation officielle de la fonctionnalité et son intégration au produit final.
 
+\subsection{Choix Technologiques et Architecture}
+Pour garantir la maintenabilité, l'évolutivité et la performance de la plateforme, nous avons structuré notre développement autour de choix technologiques et de patrons de conception (\textit{Design Patterns}) robustes :
+
+\begin{itemize}[label={\color{accentColor}\textbullet}, itemsep=5pt]
+    \item \textbf{Technologie Multiplateforme (Dart \& Flutter) :} Afin de maximiser la portée du projet tout en optimisant le temps de développement, nous avons opté pour le langage \textbf{Dart}. Son atout majeur est de permettre la création d'applications Web, Android et iOS à partir d'une \textbf{seule et même base de code}. Ce choix stratégique garantit à l'association une couverture maximale avec un coût de maintenance minimal. De plus, le typage fort de Dart sécurise la logique métier, tandis que ses outils de développement (comme le \textit{Hot Reload}) se sont parfaitement intégrés à notre démarche Agile en accélérant les itérations sur le design de l'interface (UI/UX).
+
+    \item \textbf{Architecture MVVM (Model-View-ViewModel) :} En adéquation avec notre choix de langage, nous avons séparé la logique métier (Modèle), l'interface utilisateur (Vue) et la logique de présentation (ViewModel). Ce choix permet de découpler totalement le rendu visuel de la gestion des données, facilitant ainsi le travail simultané de l'équipe sur le front-end et le back-end sans créer de conflits, tout en rendant le code plus facilement testable.
+
+    \item \textbf{Patrons Stratégie et Adaptateur (Authentification) :} La gestion de la connexion s'appuie sur le patron \textit{Stratégie}, permettant de basculer dynamiquement entre plusieurs méthodes d'authentification (comptes locaux vs. comptes Microsoft institutionnels) sans modifier le cœur de l'application. Cette flexibilité laisse également la possibilité d'ajouter facilement d'autres méthodes de connexion futures souhaitées par le client comme LinkedIn. Pour intégrer l'API Microsoft Graph, nous avons couplé cette stratégie à un patron \textit{Adaptateur}, chargé de traduire les données brutes renvoyées par Microsoft (jetons OAuth) dans le format standard attendu par notre base d'utilisateurs interne.
+\end{itemize}
+
 \newpage
 
 \section{Bilan du Projet : Réalisations et Gestion des Aléas}
@@ -226,7 +240,7 @@ Au terme du cycle de développement, l'équipe a livré une solution répondant 
 \begin{itemize}[label=\textbullet, itemsep=5pt]
     \item \textbf{Le moteur de recherche} Alumnis couplé à différents filtres permettant un ciblage précis.
     \item \textbf{La protection des données} a été intégrée dès la conception. Le système assure la gestion du consentement et applique un masquage rigoureux des données sensibles tant que la mise en relation n'a pas été validée. L’utilisateur doit être authentifié pour avoir accès à différents types de données afin de respecter le cadre strict du RGPD.
-    \item \textbf{Le module "Carrière"} permettant le dépôt et la consultation d'offres de stages et d'emplois, afin de transformer la plateforme en un véritable hub d’embauche pour les Ensiceannais.
+    \item \textbf{Le module "Carrière"} permettant le dépôt et la consultation d'offres de stages et d'emplois, afin de transformer la plateforme en un véritable hub d’embauche pour les Ensicannais.
     \item \textbf{Une interface d'administration simplifiée} a été mise à la disposition de l'association permettant au secrétariat de gérer les actualités et les événements en totale autonomie, sans intervention technique.
 \end{itemize}
 
@@ -268,7 +282,7 @@ L'un des piliers fondamentaux de la réussite de ce projet a été l'excellente 
 \subsubsection{Communication client}
 Nous avons maintenu un dialogue constant et transparent avec notre client. Cette démarche a été cruciale pour :
 \begin{itemize}[label=\textbullet, itemsep=5pt]
-    \item \textbf{Gérer les attentes :} Expliquer de manière pédagogique les limitations techniques imposées par les contraintes de sécurité de la DGSI.
+    \item \textbf{Gérer les attentes :} Expliquer de manière pédagogique les limitations techniques imposées par les contraintes de sécurité de la DSI.
     \item \textbf{Réorientation stratégique :} Obtenir l'aval pour réorienter les objectifs du projet vers une infrastructure autonome sans perdre la valeur ajoutée finale pour l'utilisateur.
 \end{itemize}
 
@@ -279,8 +293,7 @@ Le groupe ne s'est pas laissé paralyser par l'absence des ressources initialeme
 Malgré les défis structurels, nous avons mis un point d'honneur à livrer une plateforme aboutie qui ne fait aucun compromis sur la qualité :
 \begin{itemize}[label=\textbullet, itemsep=5pt]
     \item \textbf{Interface utilisateur (UI/UX) soignée :} Nous avons développé une plateforme au design propre, moderne et intuitif. L'utilisation de thèmes cohérents (ENSICAEN Alumni) assure une expérience utilisateur professionnelle.
-    \item \textbf{Architecture sécurisée :} La sécurité a été placée au centre du développement, notamment via l'intégration de la connexion Microsoft Auth et la gestion de sessions sécurisées (tokens JWT), garantissant ainsi la protection des données des membres.
-\end{itemize}
+\item \textbf{Architecture sécurisée (\textit{Security by Design}) :} La cybersécurité a constitué un enjeu central de notre développement afin de répondre aux exigences strictes du RGPD. Outre l'intégration de Microsoft Auth, l'authentification locale par mot de passe a été sécurisée via une fonction de hachage robuste avec ajout de sel (\textit{salt}), en parfaite conformité avec les recommandations de l'ANSSI. De plus, la gestion des sessions s'appuie sur des jetons cryptographiques (tokens JWT). Ce mécanisme certifie l'identité de l'utilisateur à chaque requête et empêche toute falsification de ses droits d'accès, démontrant notre engagement absolu dans la protection des données de la communauté.\end{itemize}
 
 \subsection{Analyse des résultats}
 Malgré les contraintes extérieures, les objectifs principaux sont atteints :
@@ -321,32 +334,38 @@ L'application intègre nativement un système d'internationalisation complet (Fr
 
 \newpage
 
-
 \section{Ressources et Outils}
-
-\begin{itemize}[label=\textbullet, itemsep=5pt]
+\begin{itemize}[label={\color{accentColor}\textbullet}, itemsep=5pt]
     \item \textbf{Environnement de développement et Hébergement :} 
     \begin{itemize}
         \item Serveur dédié et base de données MySQL autonome.
         \item Administration via phpMyAdmin.
     \end{itemize}
+    
+    \item \textbf{Technologie et Programmation :} 
+    \begin{itemize}
+        \item Langage Dart et framework Flutter pour le développement multiplateforme.
+    \end{itemize}
+
     \item \textbf{Gestion de projet :} 
     \begin{itemize}
         \item Méthodologie Agile et itérations courtes.
         \item Tableau Kanban intégré au GitLab de l'ENSICAEN.
-        \item Versioning de code via Git.
+        \item Versioning et gestion du code collaboratif via Git.
     \end{itemize}
+
+    \item \textbf{Intelligence Artificielle Générative :}
+    \begin{itemize}
+        \item \textbf{Gemini :} Assistance à la structuration, à la révision et à la mise en page avancée du rapport en LaTeX et certaines partie de code Dart \& Flutter. Utilisation ponctuelle pour la clarification de concepts d'architecture logicielle (MVVM, Design Patterns) et l'aide au débogage.
+    \end{itemize}
+
     \item \textbf{Recherche et Documentation :}
     \begin{itemize}
         \item Documentation officielle Microsoft Graph API et protocoles OAuth 2.0 (Preuve de concept).
         \item Directives européennes sur le RGPD.
+        \item Recommandations de sécurité de l'\textbf{ANSSI}. 
     \end{itemize}
 \end{itemize}
 
-\vspace{1cm}
-
-\renewcommand{\listfigurename}{Table des figures}
-\listoffigures
-\addcontentsline{toc}{section}{Table des figures}
 
 \end{document}

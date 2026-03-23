@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import '/ViewModel/widget/profile_viewmodel.dart';
 import '/View/screens/home_page.dart';
 import '/View/theme/colors.dart';
-import '/Model/connection/auth_strategy.dart';
 import '/service_locator.dart';
 import '/View/screens/auth/login.dart';
 import '/View/screens/alumni/profile.dart';
-import '/Model/data/services/auth_service.dart';
 import '/l10n/app_localizations.dart';
 
 class ProfileBadge extends StatefulWidget {
-
   const ProfileBadge({super.key});
 
   @override
@@ -18,18 +16,14 @@ class ProfileBadge extends StatefulWidget {
 
 class _ProfileBadgeState extends State<ProfileBadge> {
   bool _isHovered = false;
-  
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = sl<AuthService>().currentUser;
-    final String role = currentUser?.role ?? 'guest';
-    final bool isGuest = currentUser == null || role == 'guest';
-
-
+    final viewModel = sl<ProfileViewModel>();
     final traductions = AppLocalizations.of(context)!;
 
-    if (isGuest) {
+
+    if (viewModel.isGuest) {
       return MouseRegion(
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
@@ -51,7 +45,6 @@ class _ProfileBadgeState extends State<ProfileBadge> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.white, width: 1.5),
             ),
-
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: SingleChildScrollView(
@@ -66,10 +59,10 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                     ),
                     if (_isHovered)
                       Padding(
-                        padding: EdgeInsets.only(right: 12.0),
+                        padding: const EdgeInsets.only(right: 12.0),
                         child: Text(
                           traductions.loginBtn,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13,
                               fontWeight: FontWeight.bold),
@@ -84,14 +77,6 @@ class _ProfileBadgeState extends State<ProfileBadge> {
       );
     }
 
-
-
-    final String lastName = currentUser.lastname;
-    final String firstName = currentUser.firstname;
-    final String email = currentUser.email;
-
-    final String initial = firstName.isNotEmpty ? firstName[0].toUpperCase() : "?";
-
     return Theme(
       data: Theme.of(context).copyWith(
         popupMenuTheme: PopupMenuThemeData(
@@ -102,9 +87,10 @@ class _ProfileBadgeState extends State<ProfileBadge> {
         ),
       ),
       child: PopupMenuButton(
-        tooltip: "${traductions.accountOf} $firstName",
+        tooltip: "${traductions.accountOf} ${viewModel.firstName}",
         offset: const Offset(0, 55),
         constraints: const BoxConstraints(minWidth: 300, maxWidth: 300),
+
 
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
@@ -124,7 +110,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                 radius: 18,
                 backgroundColor: AppColors.ensiCyan,
                 child: Text(
-                  initial,
+                  viewModel.initial,
                   style: const TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
@@ -132,6 +118,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
             ),
           ),
         ),
+
 
         itemBuilder: (_) => [
           PopupMenuItem(
@@ -142,37 +129,35 @@ class _ProfileBadgeState extends State<ProfileBadge> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-
                       InkWell(
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => ProfilePage()),
+                            MaterialPageRoute(builder: (_) => const ProfilePage()),
                           );
                         },
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+                          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
                           child: Text(
                             traductions.editProfile,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 12,
                                 color: AppColors.ensiCyan,
-                                fontWeight: FontWeight.bold
-                            ),
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
-
                       InkWell(
                         onTap: () async {
                           Navigator.pop(context);
-                          await sl<AuthRepository>().logout();
-                          await sl<AuthService>().logout();
+
+
+                          await viewModel.logout();
+
                           if (mounted) {
                             Navigator.pushAndRemoveUntil(
                               context,
@@ -180,38 +165,39 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                                   (route) => false,
                             );
                           }
-
                         },
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+                          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
                           child: Text(
                             traductions.profileLogout,
-                            style: TextStyle(fontSize: 12, color: Colors.black87),
+                            style: const TextStyle(fontSize: 12, color: Colors.black87),
                           ),
                         ),
                       ),
                     ],
                   ),
-
                   const Divider(height: 24),
 
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: AppColors.ensiCyan,
                     child: Text(
-                      initial,
+                      viewModel.initial,
                       style: const TextStyle(fontSize: 32, color: Colors.white),
                     ),
                   ),
-                  Text(role.toUpperCase(),
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,),
+
+                  Text(
+                    viewModel.role.toUpperCase(),
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
 
                   const SizedBox(height: 12),
 
                   Text(
-                    "$firstName $lastName",
+                    "${viewModel.firstName} ${viewModel.lastName}",
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                     textAlign: TextAlign.center,
                   ),
@@ -219,7 +205,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                   const SizedBox(height: 4),
 
                   Text(
-                    email,
+                    viewModel.email,
                     style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
@@ -234,7 +220,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                         Navigator.pop(context);
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => ProfilePage()),
+                          MaterialPageRoute(builder: (_) => const ProfilePage()),
                         );
                       },
                       style: OutlinedButton.styleFrom(
@@ -242,7 +228,7 @@ class _ProfileBadgeState extends State<ProfileBadge> {
                         side: BorderSide(color: Colors.grey.shade300),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                       ),
-                      child: Text(traductions.viewAccount, style: TextStyle(color: Colors.black87)),
+                      child: Text(traductions.viewAccount, style: const TextStyle(color: Colors.black87)),
                     ),
                   ),
                 ],

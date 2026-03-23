@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '/View/widget/base_layout.dart';
+import '/ViewModel/admin/admin_validate_viewmodel.dart';
+import '/View/widget/custom_app_bar.dart';
 import '/View/screens/alumni/add_alumni.dart';
 import '/service_locator.dart';
-import '/Model/data/services/alumni_repository.dart';
 import '/l10n/app_localizations.dart';
 
 class AdminValidationPage extends StatefulWidget {
@@ -14,12 +15,15 @@ class AdminValidationPage extends StatefulWidget {
 }
 
 class _AdminValidationPageState extends State<AdminValidationPage> {
-  
-  void _refresh() {
-    setState(() {});
+  final AdminValidateViewModel viewModel = sl<AdminValidateViewModel>();
+
+  @override
+  void initState() {
+    super.initState();
+    viewModel.fetchPendingRequests();
   }
 
-  void _showReviewDialog(BuildContext context, Map<String, dynamic> request, Map<String, dynamic> dataDecoded, String type) {
+  void showReviewDialog(Map<String, dynamic> request, Map<String, dynamic> dataDecoded, String type) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -43,9 +47,13 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await sl<AlumniRepository>().deletePendingRequest({'id_demande': request['id_demande']});
-              _refresh();
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Demande refusée/supprimée")));
+              final idReq = int.parse(request['id_demande'].toString());
+
+              bool success = await viewModel.rejectRequest(idReq);
+
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Demande refusée/supprimée")));
+              }
             },
             child: const Text("Refuser", style: TextStyle(color: Colors.red)),
           ),
@@ -53,12 +61,13 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
             onPressed: () async {
               Navigator.pop(ctx);
-              
-              if (type == 'EVENEMENT') {
-                await sl<AlumniRepository>().validateEvent(int.parse(request['id_demande'].toString()));
+              final idReq = int.parse(request['id_demande'].toString());
+
+              bool success = await viewModel.approveRequest(idReq, type);
+
+              if (success && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Demande validée avec succès !")));
               }
-              _refresh();
-              if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Demande validée avec succès !")));
             },
             child: const Text("Valider et Publier"),
           ),
@@ -70,25 +79,29 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
   @override
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!;
-    return BaseLayout(
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: sl<AlumniRepository>().getPendingRequests().then((list) => list.cast<Map<String, dynamic>>()),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-          if (!snapshot.hasData || snapshot.data!.isEmpty) return Center(child: Text(traductions.adminNoPendingRequests));
 
-          final requests = snapshot.data!;
+    return BaseLayout(
+      body: ListenableBuilder(
+        listenable: viewModel,
+        builder: (context, _) {
+          if (viewModel.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (viewModel.pendingRequests.isEmpty) {
+            return Center(child: Text(traductions.adminNoPendingRequests));
+          }
+
+          final requests = viewModel.pendingRequests;
 
           return ListView.builder(
             itemCount: requests.length,
             itemBuilder: (context, index) {
               final request = requests[index];
               final date = request['date_demande'] ?? '';
-              
-              // ON RÉCUPÈRE LE TYPE DE LA BASE DE DONNÉES (Par défaut ALUMNI si vide)
-              final type = request['type']?.toString().toUpperCase() ?? 'ALUMNI'; 
 
-              // PERSONNALISATION VISUELLE DU BADGE
+              final type = request['type']?.toString().toUpperCase() ?? 'ALUMNI';
+
               IconData iconType = Icons.person_add;
               Color colorType = Colors.cyan;
               String titlePrefix = "Alumni";
@@ -118,9 +131,9 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                       final dataDecoded = jsonDecode(request['contenu_json'] ?? '{}');
                       final idReq = int.parse(request['id_demande'].toString());
 
-                      // ROUTAGE DE L'INTERFACE
+
                       if (type == 'ALUMNI') {
-                        // Ancien comportement (Redirection vers le grand formulaire Alumni)
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -132,7 +145,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                                 requestId: idReq,
                                 onSuccess: () {
                                   Navigator.pop(context);
-                                  _refresh();
+                                  viewModel.fetchPendingRequests();
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.adminRequestProcessedSuccess)));
                                 },
                               ),
@@ -140,11 +153,11 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                           ),
                         );
                       } else {
-                        // Nouveau comportement : Pop-up résumé pour les Évènements et Offres
-                        _showReviewDialog(context, request, dataDecoded, type);
+
+                        showReviewDialog(request, dataDecoded, type);
                       }
                     } catch (e) {
-                      print("Erreur de parsing JSON: $e");
+                      debugPrint("Erreur de parsing JSON: $e");
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.adminCorruptedDataError)));
                     }
                   },

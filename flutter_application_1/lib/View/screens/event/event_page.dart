@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '/View/widget/base_layout.dart';
 import '/View/theme/colors.dart';
 import '/service_locator.dart';
-import '/Model/data/services/alumni_repository.dart';
-import '/Model/data/services/auth_service.dart';
+import '/View/widget/custom_app_bar.dart';
+import '/ViewModel/event/event_viewmodel.dart';
 import '/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
@@ -15,26 +15,26 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
-  List<Map<String, dynamic>> _event = [];
-  bool _isLoading = true;
-  String _search = "";
+  late final EventViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _viewModel = sl<EventViewModel>();
+    _viewModel.loadData();
+    _viewModel.addListener(_onViewModelChanged);
   }
 
-  
-  void _loadData() async {
-    if (!mounted) return;
-    setState(() => _isLoading = true);
-    var data = await sl<AlumniRepository>().getEvents();
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  void _onViewModelChanged() {
     if (mounted) {
-      setState(() {
-        _event = data;
-        _isLoading = false;
-      });
+      setState(() {});
     }
   }
 
@@ -67,13 +67,12 @@ class _EventPageState extends State<EventPage> {
             onPressed: () async {
               Navigator.pop(ctx);
               int id = int.parse(ev['id_event'].toString());
-              bool success = await sl<AlumniRepository>().deleteEvent(id);
-              if (success) {
-                _loadData();
+              bool success = await _viewModel.deleteEvent(id);
+              if (success && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.eventDeletedSuccess)));
               }
             },
-            child: Text(traductions.deleteBtn, style: TextStyle(color: Colors.red)),
+            child: Text(traductions.deleteBtn, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -82,7 +81,6 @@ class _EventPageState extends State<EventPage> {
 
   void _openFormEvent([Map<String, dynamic>? ev]) {
     final traductions = AppLocalizations.of(context)!;
-    final currentUser = sl<AuthService>().currentUser;
     final bool isEdit = ev != null;
     final titleCtrl = TextEditingController(text: isEdit ? ev['titre'] : "");
     final lieuCtrl = TextEditingController(text: isEdit ? ev['lieu'] : "");
@@ -115,20 +113,17 @@ class _EventPageState extends State<EventPage> {
                 "lieu": lieuCtrl.text,
                 "description": descCtrl.text,
                 "date_event": dateCtrl.text,
-                "id_auteur": currentUser?.id,
+                "id_auteur": _viewModel.currentUser?.id,
               };
 
-              bool success;
               if (isEdit) {
                 data["id_event"] = ev['id_event'].toString();
-                success = await sl<AlumniRepository>().editEvent(data);
-              } else {
-                success = await sl<AlumniRepository>().addEvent(data);
               }
 
-              if (success) {
+              bool success = await _viewModel.saveEvent(data, isEdit);
+
+              if (success && mounted) {
                 Navigator.pop(ctx);
-                _loadData();
               }
             },
             child: Text(traductions.validate),
@@ -141,12 +136,8 @@ class _EventPageState extends State<EventPage> {
   @override
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!; 
-    final currentUser = sl<AuthService>().currentUser;
-    bool isAdmin = currentUser?.role == 'admin';
-    final evFiltres = _event.where((e) => 
-      (e['titre'] ?? '').toLowerCase().contains(_search.toLowerCase()) ||
-      (e['lieu'] ?? '').toLowerCase().contains(_search.toLowerCase())
-    ).toList();
+    final isAdmin = _viewModel.isAdmin;
+    final evFiltres = _viewModel.filteredEvents;
 
     return BaseLayout(
       body: Column(
@@ -160,12 +151,12 @@ class _EventPageState extends State<EventPage> {
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              onChanged: (v) => setState(() => _search = v),
+              onChanged: _viewModel.setSearchQuery,
             ),
           ),
 
           Expanded(
-            child: _isLoading 
+            child: _viewModel.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     padding: const EdgeInsets.all(10),

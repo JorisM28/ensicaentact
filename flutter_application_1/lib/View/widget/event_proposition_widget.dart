@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '/Model/data/services/alumni_repository.dart';
+import '../../ViewModel/widget/event_widget_viewmodel.dart';
 import '/View/theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
@@ -14,36 +14,47 @@ class ProposeEventPage extends StatefulWidget {
 
 class _ProposeEventPageState extends State<ProposeEventPage> {
   final _formKey = GlobalKey<FormState>();
-    final currentUser = sl<AuthService>().currentUser;
-  final _titleControlelr = TextEditingController();
-  final _placecontroller = TextEditingController();
+  final EventWidgetViewModel _viewModel = sl<EventWidgetViewModel>();
+
+  final _titleController = TextEditingController();
+  final _placeController = TextEditingController();
   final _descriptionController = TextEditingController();
   String _selectedType = 'Rencontre';
   DateTime _selectedDate = DateTime.now();
 
-  void _submitPropose() async {
-if (_formKey.currentState!.validate()) {
-    Map<String, dynamic> proposition = {
-      "titre": _titleControlelr.text,
-      "type": _selectedType,
-      "date_event": _selectedDate.toString(),
-      "lieu": _placecontroller.text,
-      "description": _descriptionController.text,
-      "id_auteur": currentUser?.id,
-      "nom_auteur": currentUser?.lastname, 
-      "prenom_auteur": currentUser?.firstname,
-      "email_auteur": currentUser?.email,
-    };
+  Future<void> _submitPropose() async {
+    if (_formKey.currentState!.validate()) {
+      final currentUser = sl<AuthService>().currentUser;
 
-      bool success = await sl<AlumniRepository>().requestEvent(proposition);
+      Map<String, dynamic> proposition = {
+        "titre": _titleController.text,
+        "type": _selectedType,
+        "date_event": _selectedDate.toString(),
+        "lieu": _placeController.text,
+        "description": _descriptionController.text,
+        "id_auteur": currentUser?.id,
+        "nom_auteur": currentUser?.lastname,
+        "prenom_auteur": currentUser?.firstname,
+        "email_auteur": currentUser?.email,
+      };
+
+      bool success = await _viewModel.proposeEvent(proposition);
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.proposalSentSuccess)) 
+            SnackBar(content: Text(AppLocalizations.of(context)!.proposalSentSuccess))
         );
         Navigator.pop(context);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _placeController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   @override
@@ -62,21 +73,25 @@ if (_formKey.currentState!.validate()) {
           child: Column(
             children: [
               TextFormField(
-                controller: _titleControlelr,
+                controller: _titleController,
                 decoration: InputDecoration(labelText: traductions.eventTitleLabel),
                 validator: (v) => v!.isEmpty ? traductions.formRequired : null,
               ),
               const SizedBox(height: 15),
               DropdownButtonFormField<String>(
                 initialValue: _selectedType,
-                items: [traductions.eventTypeMeeting, traductions.eventTypeConference, traductions.eventTypeAfterwork, traductions.eventTypeWebinar]
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                items: [
+                  traductions.eventTypeMeeting,
+                  traductions.eventTypeConference,
+                  traductions.eventTypeAfterwork,
+                  traductions.eventTypeWebinar
+                ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
                 onChanged: (v) => setState(() => _selectedType = v!),
                 decoration: InputDecoration(labelText: traductions.typeLabel),
               ),
               const SizedBox(height: 15),
               ListTile(
-                title: Text("{traductions.dateLabel}${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
+                title: Text("${traductions.dateLabel} ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}"),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   DateTime? picked = await showDatePicker(
@@ -89,7 +104,7 @@ if (_formKey.currentState!.validate()) {
                 },
               ),
               TextFormField(
-                controller: _placecontroller,
+                controller: _placeController,
                 decoration: InputDecoration(labelText: traductions.dialogLocationLabel),
               ),
               const SizedBox(height: 15),
@@ -101,14 +116,21 @@ if (_formKey.currentState!.validate()) {
               const SizedBox(height: 30),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.ensiCyan,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.all(15)
-                  ),
-                  onPressed: _submitPropose,
-                  child: Text(traductions.sendProposalBtn, style: TextStyle(fontSize: 16)),
+                child: ListenableBuilder(
+                    listenable: _viewModel,
+                    builder: (context, _) {
+                      return ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.ensiCyan,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.all(15)
+                        ),
+                        onPressed: _viewModel.isLoading ? null : _submitPropose,
+                        child: _viewModel.isLoading
+                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            : Text(traductions.sendProposalBtn, style: const TextStyle(fontSize: 16)),
+                      );
+                    }
                 ),
               ),
             ],
