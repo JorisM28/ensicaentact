@@ -37,13 +37,17 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   String? _getImageUrl(Map<String, dynamic> item) {
+    String? rawUrl;
     if (item['image_url'] != null && item['image_url'].toString().isNotEmpty) {
-      return item['image_url'];
+      rawUrl = item['image_url'];
+    } else if (item['image'] != null && item['image'].toString().isNotEmpty) {
+      rawUrl = item['image'];
     }
-    if (item['image'] != null && item['image'].toString().isNotEmpty) {
-      return item['image'];
-    }
-    return null;
+
+    if (rawUrl == null || rawUrl.isEmpty) return null;
+
+    final encodedUrl = Uri.encodeComponent(rawUrl);
+    return "https://corsproxy.io/?$encodedUrl";
   }
 
   Widget _buildImage(String? url, {double? width, double? height}) {
@@ -65,37 +69,6 @@ class _NewsPageState extends State<NewsPage> {
         height: height ?? 200,
         color: Colors.grey[300],
         child: const Icon(Icons.broken_image, color: Colors.grey, size: 40),
-      ),
-    );
-  }
-
-  void _confirmDeletion(BuildContext context, Map<String, dynamic> item) {
-    final traductions = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(traductions.deleteArticleTitle),
-        content: Text("${traductions.deleteArticleContent}\"${item['titre']}\" ?"),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(traductions.cancel)
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              int idToDelete = int.parse(item['id_actu'].toString());
-              bool success = await _viewModel.deleteNews(idToDelete);
-
-              if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(traductions.articleDeletedSuccess))
-                );
-              }
-            },
-            child: Text(traductions.deleteBtn, style: const TextStyle(color: Colors.red)),
-          ),
-        ],
       ),
     );
   }
@@ -141,7 +114,7 @@ class _NewsPageState extends State<NewsPage> {
                 "contenu": contentCtrl.text,
                 "description": contentCtrl.text,
                 "image": imgCtrl.text,
-                "auteur_id": _viewModel.currentUser?.id ?? "1",
+                "auteur_id": _viewModel.currentUser?.id == "0" ? "2" : (_viewModel.currentUser?.id ?? "2"),
                 "tag": "NEWS",
                 "date_publi": DateTime.now().toIso8601String(),
               });

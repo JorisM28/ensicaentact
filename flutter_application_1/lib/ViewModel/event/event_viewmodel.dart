@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import '../../Model/data/services/alumni_repository.dart';
-import '../../Model/data/services/auth_service.dart';
-import '../../Model/user_model.dart';
-import '../../service_locator.dart';
+import '/Model/data/services/alumni_repository.dart';
+import '/Model/data/services/auth_service.dart';
+import '/Model/user_model.dart';
+import '/service_locator.dart';
 
 class EventViewModel extends ChangeNotifier {
   final AlumniRepository _repository = sl<AlumniRepository>();

@@ -57,10 +57,10 @@ class CustomDrawer extends StatelessWidget {
             ListTile(leading: const Icon(Icons.people), title: Text(traductions.drawerDirectory), onTap: () => _naviguer(context, DirectoryPage())),
           
           if (isConnected)
-            ListTile(leading: const Icon(Icons.work), title: Text(traductions.drawerOffers), onTap: () => _naviguer(context, JobPage())),
+            ListTile(leading: const Icon(Icons.map), title: Text(traductions.drawerMap), onTap: () => _naviguer(context, CompaniesDirectoryPage())),
           
           if (isConnected)
-            ListTile(leading: const Icon(Icons.map), title: Text(traductions.drawerMap), onTap: () => _naviguer(context, CompaniesDirectoryPage())),
+            ListTile(leading: const Icon(Icons.work), title: Text(traductions.drawerOffers), onTap: () => _naviguer(context, JobPage())),
 
           ListTile(leading: const Icon(Icons.newspaper), title: Text(traductions.drawerNews), onTap: () => _naviguer(context, NewsPage())), 
           

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/View/theme/colors.dart';
-import '/../../main.dart';
+import '/main.dart';
 
 class LanguageSwitcher extends StatelessWidget {
   const LanguageSwitcher({super.key});

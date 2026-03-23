@@ -19,7 +19,7 @@ class _ProposeEventPageState extends State<ProposeEventPage> {
   final _titleController = TextEditingController();
   final _placeController = TextEditingController();
   final _descriptionController = TextEditingController();
-  String _selectedType = 'Rencontre';
+  String? _selectedType;
   DateTime _selectedDate = DateTime.now();
 
   Future<void> _submitPropose() async {
@@ -60,6 +60,13 @@ class _ProposeEventPageState extends State<ProposeEventPage> {
   @override
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!;
+    final eventTypes = [
+      traductions.eventTypeMeeting,
+      traductions.eventTypeConference,
+      traductions.eventTypeAfterwork,
+      traductions.eventTypeWebinar
+    ];
+    _selectedType ??= eventTypes.first;
     return Scaffold(
       appBar: AppBar(
         title: Text(traductions.drawerProposeEvent),
@@ -79,14 +86,13 @@ class _ProposeEventPageState extends State<ProposeEventPage> {
               ),
               const SizedBox(height: 15),
               DropdownButtonFormField<String>(
-                initialValue: _selectedType,
-                items: [
-                  traductions.eventTypeMeeting,
-                  traductions.eventTypeConference,
-                  traductions.eventTypeAfterwork,
-                  traductions.eventTypeWebinar
-                ].map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                onChanged: (v) => setState(() => _selectedType = v!),
+                value: _selectedType,
+                items: eventTypes.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                onChanged: (v) {
+                  if (v != null) {
+                    setState(() => _selectedType = v);
+                  }
+                },
                 decoration: InputDecoration(labelText: traductions.typeLabel),
               ),
               const SizedBox(height: 15),

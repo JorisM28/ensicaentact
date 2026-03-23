@@ -12,10 +12,11 @@ class AuthService {
     currentUser = user;
     await _storage.write(key: 'jwt_token', value: token);
     Map<String, dynamic> userDataMap = {
-        'role': user.role,
-        'email': user.email,
-        'prenom': user.firstname,
-        'nom': user.lastname,
+      'id_user': user.id,
+      'role': user.role,
+      'email': user.email,
+      'prenom': user.firstname,
+      'nom': user.lastname,
       };
     await _storage.write(key: 'user_data', value: jsonEncode(userDataMap));
   }

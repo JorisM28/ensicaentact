@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '/Model/data/services/alumni_repository.dart';
 import '/Model/data/services/auth_service.dart';
 import '/View/screens/home_page.dart';
@@ -42,7 +40,7 @@ void showAddNewsDialog(BuildContext context, AppLocalizations traductions) {
               "titre": titleCtrl.text,
               "description": descCtrl.text,
               "image": imgCtrl.text,
-              "auteur_id": currentUser.role,
+              "auteur_id": currentUser.id,
             });
 
             Navigator.pop(ctx);

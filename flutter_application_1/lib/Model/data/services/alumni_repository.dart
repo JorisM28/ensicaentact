@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-
 import '/Model/alumnis.dart';
 import 'api_service.dart';
 import 'api_constants.dart';
@@ -20,9 +19,7 @@ class AlumniRepository {
     try {
       Map<String, dynamic> data = {'id_event': id};
 
-
       final response = await _api.post(ApiConstants.deleteEvent, data);
-
 
       if (response != null) {
         return true;
@@ -71,30 +68,29 @@ class AlumniRepository {
   }
 
   Future<void> updateAlumni(Map<String, dynamic> data) async {
-  debugPrint("--- ENVOI DES DONNÉES À PHP ---");
-  debugPrint(data.toString()); // Pour vérifier ce qu'on envoie (notamment l'ID)
+  debugPrint(data.toString());
 
   final response = await _api.post(ApiConstants.updateAlumni, data);
 
-  debugPrint("--- RÉPONSE DE PHP ---");
   debugPrint(response.toString());
 
-  // Si ApiService renvoie null (ex: erreur réseau ou 500)
   if (response == null) {
     throw Exception("Impossible de joindre le serveur ou erreur interne.");
   }
 
-  // Si ton ApiService décode déjà le JSON en Map
   if (response is Map<String, dynamic>) {
     if (response['status'] == 'error') {
-      // On lance une exception avec le message d'erreur du PHP !
       throw Exception(response['message'] ?? "Erreur refusée par le serveur.");
     }
   }
 }
 
-  Future<List<dynamic>> getHistory() async { return await _api.get(ApiConstants.getHistory); }
+  Future<List<dynamic>> getHistory() async { 
+    return await _api.get(ApiConstants.getHistory); 
+  }
+
   Future<List<dynamic>> getCompanies(Map<String, dynamic> data) async => await _api.post(ApiConstants.getCompany, data);
+
   Future<void> updatePassword(Map<String, dynamic> data) async => await _api.post(ApiConstants.updatePassword, data);
 
   Future<List<Map<String, dynamic>>> getOffers() async {
@@ -152,7 +148,6 @@ class AlumniRepository {
     }
   }
 
-
   Future<List<dynamic>> getPendingRequests() async {
     return await _api.get(ApiConstants.getPendingRequest); 
   }
@@ -189,7 +184,7 @@ class AlumniRepository {
 
   Future<bool> deleteNews(int newsId) async {
     try {
-      Map<String, dynamic> data = {'id': newsId};
+      Map<String, dynamic> data = {'id_actu': newsId};
 
       final response = await _api.post(ApiConstants.deleteNews, data);
 

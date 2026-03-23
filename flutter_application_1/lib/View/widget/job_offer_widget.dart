@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../ViewModel/widget/job_widget_viewmodel.dart';
+import '/ViewModel/widget/job_widget_viewmodel.dart';
 import '/service_locator.dart';
 import '/View/screens/employment/job_page.dart';
 import '/l10n/app_localizations.dart';

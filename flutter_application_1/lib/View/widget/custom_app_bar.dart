@@ -37,7 +37,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = sl<AuthService>().currentUser;
-    bool isDesktop = MediaQuery.of(context).size.width > 900;
+    bool isDesktop = MediaQuery.of(context).size.width > 1350;
     final traductions = AppLocalizations.of(context)!;
     final String role = currentUser?.role?? 'visiteur';
     final bool isConnected = sl<AuthService>().isLoggedIn;
@@ -69,8 +69,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
               _buildMenuLink(context, traductions.homeTab, () => _navigate(context, HomePage())),
               if (isConnected) _buildMenuLink(context, traductions.drawerDirectory, () => _navigate(context, DirectoryPage())),
-              if (isConnected)_buildMenuLink(context, traductions.drawerOffers, () => _navigate(context,JobPage())),
               if (isConnected) _buildMenuLink(context, traductions.drawerMap, () => _navigate(context, CompaniesDirectoryPage())),
+              if (isConnected)_buildMenuLink(context, traductions.drawerOffers, () => _navigate(context,JobPage())),
               _buildMenuLink(context, traductions.drawerNews, () => _navigate(context, NewsPage())),
               if (isConnected) _buildMenuLink(context, traductions.eventsTab, () => _navigate(context, EventPage())),
               _buildMenuLink(context, traductions.drawerSchoolSite, _openSchoolWebsite),
