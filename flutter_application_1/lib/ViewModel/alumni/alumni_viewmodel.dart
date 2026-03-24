@@ -48,6 +48,7 @@ class AlumniViewModel extends ChangeNotifier {
   late TextEditingController postalCodeController;
   late TextEditingController countryController;
   late TextEditingController emailController;
+  late TextEditingController passwordController;
   late TextEditingController phoneController;
   late TextEditingController sectorController;
   late TextEditingController specialisationController;
@@ -80,6 +81,7 @@ class AlumniViewModel extends ChangeNotifier {
     postalCodeController = TextEditingController(text: currentAlumni.postalCode);
     countryController = TextEditingController(text: currentAlumni.country);
     emailController = TextEditingController(text: currentAlumni.email);
+    passwordController = TextEditingController(text : currentAlumni.password);
     phoneController = TextEditingController(text: currentAlumni.phone);
     sectorController = TextEditingController(text: currentAlumni.sector);
     specialisationController = TextEditingController(text: currentAlumni.specialisation);
@@ -225,6 +227,7 @@ class AlumniViewModel extends ChangeNotifier {
       "latitude": coords?['lat'],
       "longitude": coords?['lon'],
       "email": emailController.text.trim(),
+      "password" : passwordController.text.trim(),
       "tel": phoneController.text.trim(),
       "stages": internshipsData,
     };
@@ -251,6 +254,7 @@ class AlumniViewModel extends ChangeNotifier {
       lastName: lastNameController.text.trim(),
       firstname: firstNameController.text.trim(),
       email: emailController.text.trim(),
+      password: passwordController.text.trim(),
       phone: phoneController.text.trim(),
       permission: permissionInt,
       deceased: deceasedInt,

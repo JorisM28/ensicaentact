@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_ensicaentact/View/screens/home_page.dart';
 import '/View/screens/alumni/join_page.dart';
 import '/View/screens/event/event_page.dart';
 import '/View/screens/employment/companies_directory_page.dart';
@@ -53,6 +54,8 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
           ),
+          ListTile(leading: const Icon(Icons.home), title: Text(traductions.homeTab), onTap: () => _naviguer(context, HomePage  ())),
+
           if (isConnected)
             ListTile(leading: const Icon(Icons.people), title: Text(traductions.drawerDirectory), onTap: () => _naviguer(context, DirectoryPage())),
           

@@ -42,7 +42,7 @@ class HomePage extends StatelessWidget {
 
             const Divider(height: 1, thickness: 1),
 
-            if (!isConnected) JobOfferWidget(),
+            if (isConnected) JobOfferWidget(),
 
             _buildFooter(),
           ],

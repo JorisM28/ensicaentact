@@ -66,6 +66,8 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   final _controllerFirstName = TextEditingController();
   final _controllerDateOfBirth = TextEditingController();
   final _controllereMail = TextEditingController();
+  final _controllerPassword = TextEditingController();
+  bool _obscurePassword = true;
   final _controllerPhone = TextEditingController();
   final _controllerPositionDescription = TextEditingController();
   final _controllerStartDate = TextEditingController();
@@ -169,6 +171,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     _controllerFirstName.dispose();
     _controllerDateOfBirth.dispose();
     _controllereMail.dispose();
+    _controllerPassword.dispose();
     _controllerPhone.dispose();
     _controllerPromotion.dispose();
     _controllerPosition.dispose();
@@ -207,6 +210,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
       "dateNaissance": _controllerDateOfBirth.text.trim(),
       "sexe": _selectedGender,
       "email": _controllereMail.text.trim(),
+      "password": _controllerPassword.text.trim(),
       "tel": _controllerPhone.text.trim(),
       "autor": _consent,
       "promo": int.tryParse(_controllerPromotion.text) ?? 2024,
@@ -337,20 +341,36 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
               TextFormField(
                 controller: _controllereMail,
                 decoration: InputDecoration(
-                    labelText: traductions.profileEmail,
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.email)
+                  labelText: "${traductions.profileEmail} *", 
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.email)
                 ),
                 keyboardType: TextInputType.emailAddress,
+                validator: (value) => value == null || value.isEmpty ? traductions.formRequired : null,
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _controllerPassword,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: "${traductions.loginPasswordLabel} *",
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                ),
+                validator: (value) => value == null || value.isEmpty ? traductions.formRequired : null,
               ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _controllerPhone,
-                decoration: InputDecoration(
-                    labelText: traductions.profilePhone,
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.phone)
-                ),
+                decoration: InputDecoration(labelText: traductions.profilePhone,border: const OutlineInputBorder(),prefixIcon: const Icon(Icons.phone)),
                 keyboardType: TextInputType.phone,
               ),
               CheckboxListTile(
