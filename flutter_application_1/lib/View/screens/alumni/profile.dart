@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../ViewModel/widget/profile_viewmodel.dart';
+import '/ViewModel/widget/profile_viewmodel.dart';
 import '/service_locator.dart';
 import '/l10n/app_localizations.dart';
 import '/View/screens/home_page.dart';
 import '/View/theme/colors.dart';
 import '/Model/data/services/auth_service.dart';
-import '/ViewModel/profile/profile_viewmodel.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

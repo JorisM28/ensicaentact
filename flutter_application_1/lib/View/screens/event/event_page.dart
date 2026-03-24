@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '/View/widget/base_layout.dart';
 import '/View/theme/colors.dart';
 import '/service_locator.dart';
-import '/View/widget/custom_app_bar.dart';
 import '/ViewModel/event/event_viewmodel.dart';
 import '/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -138,8 +138,7 @@ class _EventPageState extends State<EventPage> {
     final isAdmin = _viewModel.isAdmin;
     final evFiltres = _viewModel.filteredEvents;
 
-    return Scaffold(
-        appBar: const CustomAppBar(),
+    return BaseLayout(
       body: Column(
         children: [
           

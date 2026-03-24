@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../ViewModel/widget/key_figure_widget_viewmodel.dart';
+import '/ViewModel/widget/key_figure_widget_viewmodel.dart';
 import '/l10n/app_localizations.dart';
 import '/service_locator.dart';
 
@@ -124,7 +124,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
 
   Widget _buildPublicInterface() {
     double screenWidth = MediaQuery.of(context).size.width;
-    bool isMobile = screenWidth < 800;
+    bool isMobile = screenWidth < 1060;
 
     return Center(
       key: const ValueKey("Public"),
@@ -220,7 +220,7 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
   Widget _buildAdminInterface() {
     final traductions = AppLocalizations.of(context)!;
     double width = MediaQuery.of(context).size.width;
-    bool isMobile = width < 900;
+    bool isMobile = width < 1060;
 
     var formSection = Column(
       children: _viewModel.stats.asMap().entries.map((entry) {
@@ -306,30 +306,27 @@ class _KeyFiguresWidgetState extends State<KeyFiguresWidget> {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 4, child: formSection),
+          Expanded(flex: 5, child: formSection),
           const VerticalDivider(width: 50),
-          Expanded(flex: 6, child: Column(
+          Expanded(flex: 5, child: Column(
             children: [
               Chip(label: Text(traductions.livePreview)),
               const SizedBox(height: 35),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: _viewModel.stats.map((s) => _buildSimplePreview(s)).toList(),
+              Wrap(
+                spacing: 30,
+                runSpacing: 30,
+                alignment: WrapAlignment.center,
+                children: _viewModel.stats.map((s) {
+                  return SizedBox(
+                    width: 180,
+                    child: _buildStatCard(s, compactMode: true),
+                  );
+                }).toList(),
               ),
             ],
           )),
         ],
       );
     }
-  }
-
-  Widget _buildSimplePreview(KeyFigure stat) {
-    return Column(
-      children: [
-        Icon(availableIcons[stat.iconKey], color: stat.color, size: 40),
-        Text("${stat.value}${stat.suffix}", style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-        Text(stat.label),
-      ],
-    );
   }
 }

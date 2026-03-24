@@ -46,6 +46,7 @@
     final String lastName;
     final String firstname;
     final String email;
+    final String password;
     final String phone;
     final int permission;
     final int deceased;
@@ -74,6 +75,7 @@
       required this.lastName,
       required this.firstname,
       required this.email,
+      required this.password,
       required this.phone,
       required this.permission,
       required this.deceased,
@@ -109,6 +111,7 @@
         lastName: map['nom']?.toString() ?? '',
         firstname: map['prenom']?.toString() ?? '',  
         email: map['email']?.toString() ?? '',
+        password: map['password']?.toString() ?? '',
         phone: map['tel']?.toString() ?? '',
         permission: int.tryParse(map['autor'].toString()) ?? 0,
         deceased: int.tryParse(map['decede'].toString()) ?? 0,

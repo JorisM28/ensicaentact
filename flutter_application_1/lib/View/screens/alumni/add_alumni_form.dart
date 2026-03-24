@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '/View/widget/custom_app_bar.dart';
+import '/View/widget/base_layout.dart';
 import 'add_alumni.dart';
-import '../../../l10n/app_localizations.dart';
+import '/l10n/app_localizations.dart';
 
 void main() {
   runApp(const MyAlumniApp());
@@ -33,8 +33,7 @@ class AddAlumniPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final traductions = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: CustomAppBar(),
+    return BaseLayout(
       body: Column(
         children: [
           const SizedBox(height: 20),

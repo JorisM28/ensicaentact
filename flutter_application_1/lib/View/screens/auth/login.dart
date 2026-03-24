@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import '/View/screens/home_page.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../Model/connection/i_auth_strategy.dart';
-import '../../../ViewModel/auth_viewmodel.dart';
+import '/Model/connection/i_auth_strategy.dart';
+import '/ViewModel/auth_viewmodel.dart';
 import '/l10n/app_localizations.dart';
 import '/View/theme/colors.dart';
-import '/View/screens/alumni/directory_page.dart';
 import '/service_locator.dart';
-import '/Model/connection/auth_strategy.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -29,7 +28,7 @@ class _LoginState extends State<Login> {
 
     if (result.isSuccess && result.user != null) {
       if (['admin', 'student', 'alumni'].contains(result.user!.role)) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => DirectoryPage()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomePage()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(traductions.loginErrorConnection), backgroundColor: Colors.red)

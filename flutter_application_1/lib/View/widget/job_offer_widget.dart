@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../ViewModel/widget/job_widget_viewmodel.dart';
+import '/ViewModel/widget/job_widget_viewmodel.dart';
 import '/service_locator.dart';
 import '/View/screens/employment/job_page.dart';
 import '/l10n/app_localizations.dart';
@@ -53,10 +53,10 @@ class _JobOfferWidgetState extends State<JobOfferWidget> {
                 return Text(traductions.noOfferFound);
               }
 
-              final offres = _viewModel.offers.take(4).toList();
+              final offers = _viewModel.offers.take(4).toList();
 
               return Column(
-                children: offres.map((job) => _buildJobCard(job, traductions)).toList(),
+                children: offers.map((job) => _buildJobCard(job, traductions)).toList(),
               );
             },
           ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '/View/widget/base_layout.dart';
 import '/View/widget/company_card_widget.dart'; 
 import '/ViewModel/employment_viewmodel.dart';
 import '/l10n/app_localizations.dart'; 
 import '/View/widget/error_pages.dart';
-import '/View/widget/custom_app_bar.dart';
 import '/View/theme/colors.dart';
 import '/View/screens/alumni/directory_page.dart';
 
@@ -94,8 +94,7 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
     final displaydata = _getGroupedData(traductions);
     final mapData = _getMapData();
 
-    return Scaffold(
-      appBar: CustomAppBar(),
+    return BaseLayout(
       body: viewModel.isLoadingCompanies
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -112,9 +111,9 @@ class _CompaniesDirectoryPageState extends State<CompaniesDirectoryPage> {
                         )
                       : Column(
                           children: [
-                            Expanded(flex: 2, child: _buildList(displaydata, traductions)),
+                            Expanded(flex: 3, child: _buildList(displaydata, traductions)),
                             const Divider(height: 1),
-                            Expanded(flex: 3, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem != null))
+                            Expanded(flex: 2, child: CompaniesMapWidget(companies: mapData, isFiltered: _selectedItem != null))
                           ],
                         ),
                 ),

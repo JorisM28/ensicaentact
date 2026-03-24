@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '/View/widget/base_layout.dart';
 import '/View/widget/filtre_widget.dart';
 import '/Model/alumnis.dart';
 import 'add_alumni.dart';
-import '/View/widget/custom_app_bar.dart';
 import 'alumni_detail_page.dart';
 import '/View/screens/admin/admin_validate_page.dart';
 import 'alumni_preview.dart';
@@ -73,8 +73,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     double screenWidth = MediaQuery.of(context).size.width;
     bool isWideScreen = screenWidth > 800;
 
-    return Scaffold(
-      appBar: CustomAppBar(),
+    return BaseLayout(
       floatingActionButton: isAdmin ? _buildFabStack() : null,
       body: viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -196,18 +195,18 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     );
   }
 
-  Widget _studentCard(Alumnis student, bool isWideScreen) {
-    final isSelected = student == _selectedStudent;
+  Widget _studentCard(Alumnis alumni, bool isWideScreen) {
+    final isSelected = alumni == _selectedStudent;
     
     void openDetail() {
       if (isWideScreen) {
-        setState(() => _selectedStudent = student);
+        setState(() => _selectedStudent = alumni);
       } else {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => AlumniDetailPage(
-              alumni: student, 
+              alumni: alumni, 
               onSave: () {
                 viewModel.loadAlumnis();
               }, 
@@ -236,7 +235,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                 backgroundColor: AppColors.ensiCyan,
                 radius: 30,
                 child: Text(
-                  student.firstname.isNotEmpty ? student.firstname[0] : "?",
+                  alumni.firstname.isNotEmpty ? alumni.firstname[0] : "?",
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
@@ -247,29 +246,29 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                   children: [
                     Text.rich(
                       TextSpan(
-                        text: student.wholeName,
+                        text: alumni.wholeName,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
                         children: [
-                          if (student.promotion != 0)
+                          if (alumni.promotion != 0)
                             TextSpan(
-                              text: " - ${student.promotion}",
+                              text: " - ${alumni.promotion}",
                               style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                         ],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (student.job.isNotEmpty || student.company.isNotEmpty)...[
-                      Text("${student.job} ${student.company.isEmpty || student.job.isEmpty  ? "" : "⟶"} ${student.company}", style: TextStyle(color: Colors.grey[800])),
+                    if (alumni.job.isNotEmpty || alumni.company.isNotEmpty)...[
+                      Text("${alumni.job} ${alumni.company.isEmpty || alumni.job.isEmpty  ? "" : "⟶"} ${alumni.company}", style: TextStyle(color: Colors.grey[800])),
                     ],  
                     const SizedBox(height: 5),
                     Wrap(
                       spacing: 5,
                       children: [
-                        if (student.sector.isNotEmpty)
-                          Chip(label: Text(student.sector, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
-                        if (student.city.isNotEmpty)
-                          Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(student.city, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
+                        if (alumni.sector.isNotEmpty)
+                          Chip(label: Text(alumni.sector, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
+                        if (alumni.city.isNotEmpty)
+                          Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(alumni.city, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
                       ],
                     ),
                   ],
@@ -286,7 +285,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                         context,
                         MaterialPageRoute(
                           builder: (context) => AlumniDetailPage(
-                            alumni: student, 
+                            alumni: alumni, 
                             onSave: () => viewModel.loadAlumnis(),
                           ),
                         ),
@@ -298,7 +297,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
               if (isAdmin) 
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _confirmDelete(student),
+                  onPressed: () => _confirmDeletion(alumni),
                 ),
             ],
           ),
@@ -354,17 +353,17 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     );
   }
 
-  Future<void> _confirmDelete(Alumnis student) async {
+  Future<void> _confirmDeletion(Alumnis alumni) async {
     final traductions = AppLocalizations.of(context)!; 
     bool confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(traductions.directoryDeleteConfirmTitle),
-        content: Text(traductions.directoryDeleteConfirmContent(student.wholeName)),
+        content: Text(traductions.directoryDeleteConfirmContent(alumni.wholeName)),
         actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: Text(traductions.no)), TextButton(onPressed: () => Navigator.pop(context, true), child: Text(traductions.yes))],
       ),
     ) ?? false;
-    if (confirm) viewModel.deleteAlumni(student);
+    if (confirm) viewModel.deleteAlumni(alumni);
   }
 
 void _displayHistory(BuildContext context) async {
@@ -385,22 +384,43 @@ void _displayHistory(BuildContext context) async {
           ]
         ),
         content: SizedBox(
-          width: 500,
-          height: 400,
+          width: 550,
+          height: 500,
           child: logs.isEmpty
               ? Center(child: Text(traductions.directoryHistoryEmpty))
-              : ListView.builder(
+              : ListView.separated(
                   itemCount: logs.length,
+                  separatorBuilder: (context, index) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final log = logs[index];
                     final String desc = log['description'] ?? '';
-                    final bool isDelete = log['action'] == 'SUPPRESSION';
+                    final String action = log['action'] ?? '';
+                    
+                    final bool isDelete = action == 'SUPPRESSION';
+                    final bool isUpdate = action == 'MODIFICATION';
+                    final bool isAdd = action == 'AJOUT';
+                    IconData iconData = Icons.info_outline;
+                    Color iconColor = Colors.grey;
+                    Color bgColor = Colors.grey[100]!;
 
+                    if (isDelete) {
+                      iconData = Icons.delete_forever;
+                      iconColor = Colors.red;
+                      bgColor = Colors.red[50]!;
+                    } else if (isUpdate) {
+                      iconData = Icons.edit;
+                      iconColor = Colors.blue;
+                      bgColor = Colors.blue[50]!;
+                    } else if (isAdd) {
+                      iconData = Icons.person_add;
+                      iconColor = Colors.green;
+                      bgColor = Colors.green[50]!;
+                    }
 
                     String alumniName = "${log['prenom_alumni'] ?? ''} ${log['nom_alumni'] ?? ''}".trim();
                     String editorName = "${log['prenom_editeur'] ?? ''} ${log['nom_editeur'] ?? ''}".trim();
 
-                    if (editorName.isEmpty) editorName = "Admin";
+                    if (editorName.isEmpty) editorName = "Admin système";
 
                     if (alumniName.isEmpty && isDelete) {
                        alumniName = desc.replaceAll("Suppression de ", "");
@@ -409,19 +429,43 @@ void _displayHistory(BuildContext context) async {
                     }
 
                     return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       leading: CircleAvatar(
-                        backgroundColor: isDelete ? Colors.red[50] : Colors.green[50],
-                        child: Icon(
-                          isDelete ? Icons.delete_forever : Icons.person_add, 
-                          color: isDelete ? Colors.red : Colors.green, 
-                          size: 20
-                        ),
+                        backgroundColor: bgColor,
+                        child: Icon(iconData, color: iconColor, size: 22),
                       ),
                       title: Text(
-                        "${log['prenom_alumni']} ${log['nom_alumni']}", 
-                        style: const TextStyle(fontWeight: FontWeight.bold)
+                        alumniName, 
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
                       ),
-                      subtitle: Text("${log['action']} on ${log['date_action']}"),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 6.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "$action par $editorName le ${log['date_action']}",
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                            ),
+                            if (desc.isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[100],
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: Colors.grey[300]!)
+                                ),
+                                child: Text(
+                                  desc,
+                                  style: const TextStyle(color: Colors.black87, fontStyle: FontStyle.italic, fontSize: 13),
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
+                      ),
+                      isThreeLine: desc.isNotEmpty,
                     );
                   },
                 ),
@@ -435,7 +479,6 @@ void _displayHistory(BuildContext context) async {
       ),
     );
   }
-
   void _changeKeyboardSelection(int direction) {
     final list = viewModel.alumnis;
     if (list.isEmpty) return;

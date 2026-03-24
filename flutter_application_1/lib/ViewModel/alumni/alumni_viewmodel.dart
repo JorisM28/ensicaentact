@@ -46,7 +46,9 @@ class AlumniViewModel extends ChangeNotifier {
   late TextEditingController companyController;
   late TextEditingController cityController;
   late TextEditingController postalCodeController;
+  late TextEditingController countryController;
   late TextEditingController emailController;
+  late TextEditingController passwordController;
   late TextEditingController phoneController;
   late TextEditingController sectorController;
   late TextEditingController specialisationController;
@@ -77,7 +79,9 @@ class AlumniViewModel extends ChangeNotifier {
     companyController = TextEditingController(text: currentAlumni.company);
     cityController = TextEditingController(text: currentAlumni.city);
     postalCodeController = TextEditingController(text: currentAlumni.postalCode);
+    countryController = TextEditingController(text: currentAlumni.country);
     emailController = TextEditingController(text: currentAlumni.email);
+    passwordController = TextEditingController(text : currentAlumni.password);
     phoneController = TextEditingController(text: currentAlumni.phone);
     sectorController = TextEditingController(text: currentAlumni.sector);
     specialisationController = TextEditingController(text: currentAlumni.specialisation);
@@ -90,10 +94,10 @@ class AlumniViewModel extends ChangeNotifier {
     deceasedSwitch = currentAlumni.deceased == 1;
 
     internshipDisplay = List.from(currentAlumni.internships);
-    initialiserStageEditors();
+    initInternshipEditors();
   }
 
-  void initialiserStageEditors() {
+  void initInternshipEditors() {
     for (var editor in internshipEditors) editor.dispose();
     internshipEditors.clear();
     for (var stage in internshipDisplay) {
@@ -114,7 +118,7 @@ class AlumniViewModel extends ChangeNotifier {
 
   void toggleEdit() {
     isEdited = !isEdited;
-    if (isEdited) initialiserStageEditors();
+    if (isEdited) initInternshipEditors();
     notifyListeners();
   }
 
@@ -186,7 +190,7 @@ class AlumniViewModel extends ChangeNotifier {
       codePostal: postalCodeController.text.trim()
     );
 
-    List<Map<String, dynamic>> stagesData = internshipEditors.map((editor) => {
+    List<Map<String, dynamic>> internshipsData = internshipEditors.map((editor) => {
       "intitule": editor.entilted.text.trim(),
       "entreprise": editor.entreprise.text.trim(),
       "ville": editor.city.text.trim(),
@@ -219,11 +223,13 @@ class AlumniViewModel extends ChangeNotifier {
       "entreprise": companyController.text.trim(),
       "ville": cityController.text.trim(),
       "code_postal": postalCodeController.text.trim(),
+      "pays": countryController.text.trim(),
       "latitude": coords?['lat'],
       "longitude": coords?['lon'],
       "email": emailController.text.trim(),
+      "password" : passwordController.text.trim(),
       "tel": phoneController.text.trim(),
-      "stages": stagesData,
+      "stages": internshipsData,
     };
 
 
@@ -248,6 +254,7 @@ class AlumniViewModel extends ChangeNotifier {
       lastName: lastNameController.text.trim(),
       firstname: firstNameController.text.trim(),
       email: emailController.text.trim(),
+      password: passwordController.text.trim(),
       phone: phoneController.text.trim(),
       permission: permissionInt,
       deceased: deceasedInt,

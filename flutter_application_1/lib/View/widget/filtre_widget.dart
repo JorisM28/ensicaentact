@@ -61,20 +61,20 @@ class ZoneFiltres extends StatelessWidget {
         ],
 
         if (sectorAvailable.isNotEmpty) ...[
-          Text(traductions.filterPromotions, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(traductions.filterSectors, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 5),
           Wrap(
             spacing: 6.0,
             runSpacing: 6.0,
             children: sectorAvailable.map((filiere) {
-              final estCoche = sectorFilterSelected.contains(filiere);
+              final isSelected = sectorFilterSelected.contains(filiere);
               return FilterChip(
                 label: Text(filiere),
-                selected: estCoche,
+                selected: isSelected,
                 checkmarkColor: Colors.white,
                 selectedColor: AppColors.ensiCyan,
                 labelStyle: TextStyle(
-                  color: estCoche ? Colors.white : Colors.black
+                  color: isSelected ? Colors.white : Colors.black
                 ),
                 onSelected: (bool selected) {
                   onSectorChanged(filiere, selected);

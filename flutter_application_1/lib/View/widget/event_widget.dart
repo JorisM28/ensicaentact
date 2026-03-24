@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '/ViewModel/widget/event_widget_viewmodel.dart';
 import '/service_locator.dart';
-import '../theme/colors.dart';
+import '/View/theme/colors.dart';
 import '/View/screens/event/event_page.dart';
 import '/l10n/app_localizations.dart';
 import '/Model/data/services/auth_service.dart';

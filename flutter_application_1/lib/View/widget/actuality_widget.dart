@@ -23,6 +23,9 @@ class _ActualityWidgetState extends State<ActualityWidget> {
     _viewModel = sl<NewsViewModel>();
     _viewModel.loadData();
     _viewModel.addListener(_onViewModelChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel.loadData();
+    });
   }
 
   @override
@@ -38,7 +41,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
   }
 
 
-  void _confirmerSuppression(Map<String, dynamic> item) {
+  void _confirmDeletion(Map<String, dynamic> item) {
     final traductions = AppLocalizations.of(context)!;
 
     showDialog(
@@ -195,7 +198,7 @@ class _ActualityWidgetState extends State<ActualityWidget> {
                       backgroundColor: Colors.white, radius: 14,
                       child: IconButton(
                         icon: const Icon(Icons.delete_outline, color: Colors.red, size: 16),
-                        onPressed: () => _confirmerSuppression(item),
+                        onPressed: () => _confirmDeletion(item),
                         padding: EdgeInsets.zero,
                       ),
                     ),

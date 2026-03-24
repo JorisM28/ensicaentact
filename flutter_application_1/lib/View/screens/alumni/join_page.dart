@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import '/View/widget/base_layout.dart';
 import '/View/screens/alumni/add_alumni.dart';
-import '/View/widget/custom_app_bar.dart';
 class JoinPage extends StatelessWidget {
   const JoinPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: CustomAppBar(),
+    return BaseLayout(
       body: AddAlumniForm(
         isAdmin: false, 
         onSuccess: () {

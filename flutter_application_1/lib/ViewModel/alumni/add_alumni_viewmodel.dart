@@ -32,18 +32,18 @@ class AddAlumniViewModel extends ChangeNotifier {
       }
 
       List<Map<String, dynamic>> finalInternships = [];
-      for (var stageMap in internshipsData) {
-        var coordsStage = await _getCoordonnees(
-            stageMap['ville'] ?? '',
-            stageMap['pays'] ?? '',
-            stageMap['code_postal'] ?? ''
+      for (var internshipMap in internshipsData) {
+        var coordsInternship = await _getCoordonnees(
+            internshipMap['ville'] ?? '',
+            internshipMap['pays'] ?? '',
+            internshipMap['code_postal'] ?? ''
         );
 
-        if (coordsStage != null) {
-          stageMap['latitude'] = coordsStage['lat'];
-          stageMap['longitude'] = coordsStage['lon'];
+        if (coordsInternship != null) {
+          internshipMap['latitude'] = coordsInternship['lat'];
+          internshipMap['longitude'] = coordsInternship['lon'];
         }
-        finalInternships.add(stageMap);
+        finalInternships.add(internshipMap);
       }
 
       if (finalInternships.isNotEmpty) {

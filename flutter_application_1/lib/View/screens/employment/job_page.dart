@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '/View/widget/base_layout.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';
-import '/View/widget/custom_app_bar.dart';
 import '/l10n/app_localizations.dart';
 import '/ViewModel/event/job_viewmodel.dart';
 
@@ -50,21 +50,21 @@ class _JobPageState extends State<JobPage> {
     );
   }
 
-  void ouvrirFormulaire({Map<String, dynamic>? existingOffer, required bool isInternship, required Color color}) {
+  void openForm({Map<String, dynamic>? existingOffer, required bool isInternship, required Color color}) {
     final bool isEditing = existingOffer != null;
     final currentUser = sl<AuthService>().currentUser;
     final traductions = AppLocalizations.of(context)!;
 
-    final titreCtrl = TextEditingController(text: isEditing ? existingOffer['titre'] : "");
-    final entCtrl = TextEditingController(text: isEditing ? existingOffer['entreprise'] : "");
-    final villeCtrl = TextEditingController(text: isEditing ? existingOffer['ville'] : "");
+    final titleCtrl = TextEditingController(text: isEditing ? existingOffer['titre'] : "");
+    final companyCtrl = TextEditingController(text: isEditing ? existingOffer['entreprise'] : "");
+    final cityCtrl = TextEditingController(text: isEditing ? existingOffer['ville'] : "");
     final emailCtrl = TextEditingController(text: isEditing ? existingOffer['contact_email'] : "");
     final descCtrl = TextEditingController(text: isEditing ? existingOffer['description'] : "");
 
     String typeSelect = isEditing ? (existingOffer['type'] ?? 'CDI') : (isInternship ? 'Stage' : 'CDI');
 
     final List<String> possibleTypes = isInternship
-        ? ['Stage']
+        ? ['Stage en présentiel','Stage hybride','Stage en distanciel']
         : ['CDI', 'CDD', 'Alternance', 'Freelance', 'Intérim'];
 
     if (!possibleTypes.contains(typeSelect)) {
@@ -83,9 +83,9 @@ class _JobPageState extends State<JobPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(controller: titreCtrl, decoration: InputDecoration(labelText: traductions.jobTitleLabel)),
-                    TextField(controller: entCtrl, decoration: InputDecoration(labelText: traductions.companyLabel)),
-                    TextField(controller: villeCtrl, decoration: InputDecoration(labelText: traductions.cityLabel)),
+                    TextField(controller: titleCtrl, decoration: InputDecoration(labelText: traductions.jobTitleLabel)),
+                    TextField(controller: companyCtrl, decoration: InputDecoration(labelText: traductions.companyLabel)),
+                    TextField(controller: cityCtrl, decoration: InputDecoration(labelText: traductions.cityLabel)),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: typeSelect,
@@ -104,13 +104,13 @@ class _JobPageState extends State<JobPage> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: color, foregroundColor: Colors.white),
                 onPressed: () async {
-                  if (titreCtrl.text.isNotEmpty && entCtrl.text.isNotEmpty) {
+                  if (titleCtrl.text.isNotEmpty && companyCtrl.text.isNotEmpty) {
                     String monId = (currentUser?.id).toString();
 
                     final Map<String, dynamic> dataToSend = {
-                      "titre": titreCtrl.text,
-                      "entreprise": entCtrl.text,
-                      "ville": villeCtrl.text,
+                      "titre": titleCtrl.text,
+                      "entreprise": companyCtrl.text,
+                      "ville": cityCtrl.text,
                       "type": typeSelect,
                       "contact_email": emailCtrl.text,
                       "description": descCtrl.text,
@@ -120,7 +120,6 @@ class _JobPageState extends State<JobPage> {
                     if (isEditing) {
                       dataToSend["id_offre"] = existingOffer['id_offre'].toString();
                     }
-
 
                     bool success = await viewModel.saveOffer(dataToSend, isEditing);
 
@@ -190,86 +189,89 @@ class _JobPageState extends State<JobPage> {
     bool isAlumni = (role == 'alumni');
     bool canAdd = (isAdmin || isAlumni);
 
-    return Scaffold(
-      appBar: CustomAppBar(),
+    return BaseLayout(
       body: ListenableBuilder(
-          listenable: viewModel,
-          builder: (context, _) {
-            final filteredOffers = viewModel.everyOffer.where((o) {
-              final titre = (o['titre'] ?? '').toLowerCase();
-              final companies = (o['entreprise'] ?? '').toLowerCase();
-              final keyWord = _search.toLowerCase();
-              return titre.contains(keyWord) || companies.contains(keyWord);
-            }).toList();
+        listenable: viewModel,
+        builder: (context, _) {
+          final filteredOffers = viewModel.everyOffer.where((o) {
+            final titre = (o['titre'] ?? '').toLowerCase();
+            final companies = (o['entreprise'] ?? '').toLowerCase();
+            final keyWord = _search.toLowerCase();
+            return titre.contains(keyWord) || companies.contains(keyWord);
+          }).toList();
 
-            final internshipList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
-            final jobList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
+          final internshipList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() == 'stage').toList();
+          final jobList = filteredOffers.where((o) => (o['type'] ?? '').toLowerCase() != 'stage').toList();
 
-            return Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: TextField(
-                    controller: _searchCtrl,
-                    decoration: InputDecoration(
-                      labelText: traductions.searchOfferHint,
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      suffixIcon: _search.isNotEmpty
-                          ? IconButton(icon: const Icon(Icons.clear), onPressed: () => setState(() { _searchCtrl.clear(); _search = ""; }))
-                          : null,
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: TextField(
+                  controller: _searchCtrl,
+                  decoration: InputDecoration(
+                    labelText: traductions.searchOfferHint,
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                    suffixIcon: _search.isNotEmpty
+                        ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => setState(() {
+                          _searchCtrl.clear();
+                          _search = "";
+                        }))
+                        : null,
+                  ),
+                  onChanged: (val) => setState(() => _search = val),
+                ),
+              ),
+              Expanded(
+                child: viewModel.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Row(
+                  children: [
+                    Expanded(
+                      child: _buildColumn(
+                        title: traductions.jobOffersTitle,
+                        color: Colors.blue[800]!,
+                        list: jobList,
+                        isInternship: false,
+                        canAdd: canAdd,
+                        id: myId,
+                        isAdmin: isAdmin,
+                        traductions: traductions,
+                      ),
                     ),
-                    onChanged: (val) => setState(() => _search = val),
-                  ),
-                ),
-
-                Expanded(
-                  child: viewModel.isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : Row(
-                    children: [
-                      Expanded(
-                        child: _buildColonne(
-                            titre: traductions.jobOffersTitle,
-                            couleur: Colors.blue[800]!,
-                            liste: jobList,
-                            isStage: false,
-                            canAdd: canAdd,
-                            monId: myId,
-                            isAdmin: isAdmin,
-                            traductions: traductions
-                        ),
+                    Container(width: 1, color: Colors.grey[300]),
+                    Expanded(
+                      child: _buildColumn(
+                        title: traductions.internshipOffersTitle,
+                        color: Colors.orange[800]!,
+                        list: internshipList,
+                        isInternship: true,
+                        canAdd: canAdd,
+                        id: myId,
+                        isAdmin: isAdmin,
+                        traductions: traductions,
                       ),
-                      Container(width: 1, color: Colors.grey[300]),
-                      Expanded(
-                        child: _buildColonne(
-                            titre: traductions.internshipOffersTitle,
-                            couleur: Colors.orange[800]!,
-                            liste: internshipList,
-                            isStage: true,
-                            canAdd: canAdd,
-                            monId: myId,
-                            isAdmin: isAdmin,
-                            traductions: traductions
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            );
-          }
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildColonne({
-    required String titre,
-    required Color couleur,
-    required List<Map<String, dynamic>> liste,
-    required bool isStage,
+  Widget _buildColumn({
+    required String title,
+    required Color color,
+    required List<Map<String, dynamic>> list,
+    required bool isInternship,
     required bool canAdd,
-    required String monId,
+    required String id,
     required bool isAdmin,
     required AppLocalizations traductions,
   }) {
@@ -278,24 +280,24 @@ class _JobPageState extends State<JobPage> {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(15),
-          color: couleur.withOpacity(0.1),
+          color: color.withOpacity(0.1),
           child: Text(
-            titre,
+            title,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: couleur),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
           ),
         ),
 
         Expanded(
-          child: liste.isEmpty
+          child: list.isEmpty
               ? Center(child: Text(traductions.noOfferFound, style: const TextStyle(color: Colors.grey)))
               : ListView.builder(
             padding: const EdgeInsets.all(10),
-            itemCount: liste.length,
+            itemCount: list.length,
             itemBuilder: (context, index) {
-              final offre = liste[index];
+              final offre = list[index];
               String idOfferAuthor = (offre['id_auteur'] ?? '').toString();
-              bool isMyOffer = (idOfferAuthor == monId);
+              bool isMyOffer = (idOfferAuthor == id);
               bool can = isAdmin || isMyOffer;
 
               return Card(
@@ -321,14 +323,14 @@ class _JobPageState extends State<JobPage> {
                       if (!can)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: couleur.withOpacity(0.1), borderRadius: BorderRadius.circular(5)),
-                          child: Text(offre['type'] ?? '', style: TextStyle(fontSize: 10, color: couleur, fontWeight: FontWeight.bold)),
+                          decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(5)),
+                          child: Text(offre['type'] ?? '', style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold)),
                         ),
 
                       if (can) ...[
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue, size: 20),
-                          onPressed: () => ouvrirFormulaire(existingOffer: offre, isInternship: isStage, color: couleur),
+                          onPressed: () => openForm(existingOffer: offre, isInternship: isInternship, color: color),
                           tooltip: traductions.editBtn,
                         ),
                         IconButton(
@@ -352,13 +354,13 @@ class _JobPageState extends State<JobPage> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: couleur,
+                    backgroundColor: color,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.all(15)
                 ),
                 icon: const Icon(Icons.add),
-                label: Text(isStage ? traductions.addInternship : traductions.addJob),
-                onPressed: () => ouvrirFormulaire(isInternship: isStage, color: couleur),
+                label: Text(isInternship ? traductions.addInternship : traductions.addJob),
+                onPressed: () => openForm(isInternship: isInternship, color: color),
               ),
             ),
           ),
