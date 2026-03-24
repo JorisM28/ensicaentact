@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../ViewModel/widget/event_widget_viewmodel.dart';
+import '/ViewModel/widget/event_widget_viewmodel.dart';
 import '/View/theme/colors.dart';
 import '/service_locator.dart';
 import '/Model/data/services/auth_service.dart';

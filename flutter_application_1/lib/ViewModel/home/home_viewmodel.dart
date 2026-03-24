@@ -55,7 +55,7 @@ void showAddNewsDialog(BuildContext context, AppLocalizations traductions) {
 }
 
 void showAddEventDialog(BuildContext context, AppLocalizations traductions) {
-  final titreCtrl = TextEditingController();
+  final titleCtrl = TextEditingController();
   final descCtrl = TextEditingController();
   final lieuCtrl = TextEditingController();
   final dateCtrl = TextEditingController();
@@ -69,7 +69,7 @@ void showAddEventDialog(BuildContext context, AppLocalizations traductions) {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: titreCtrl, decoration: InputDecoration(labelText: traductions.dialogTitleLabel)),
+            TextField(controller: titleCtrl, decoration: InputDecoration(labelText: traductions.dialogTitleLabel)),
             TextField(controller: descCtrl, decoration: InputDecoration(labelText: traductions.descriptionField), maxLines: 3),
             TextField(controller: lieuCtrl, decoration: InputDecoration(labelText: traductions.dialogLocationLabel)),
             TextField(
@@ -116,10 +116,10 @@ void showAddEventDialog(BuildContext context, AppLocalizations traductions) {
         TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
         ElevatedButton(
           onPressed: () async {
-            if (titreCtrl.text.isEmpty) return;
+            if (titleCtrl.text.isEmpty) return;
 
             await sl<AlumniRepository>().addEvent({
-              "titre": titreCtrl.text,
+              "titre": titleCtrl.text,
               "description": descCtrl.text,
               "lieu": lieuCtrl.text,
               "date_event": dateCtrl.text,

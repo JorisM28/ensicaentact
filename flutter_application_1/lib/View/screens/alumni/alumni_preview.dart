@@ -78,13 +78,13 @@ class AlumniPreview extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         if (alumni.promotion != 0)
-          _infoBulle(Icons.calendar_month_outlined, alumni.promotion.toString(), Colors.orangeAccent),
+          _hintInfo(Icons.calendar_month_outlined, alumni.promotion.toString(), Colors.orangeAccent),
         if (alumni.city.isNotEmpty)
-          _infoBulle(Icons.location_on, alumni.city, Colors.red),
+          _hintInfo(Icons.location_on, alumni.city, Colors.red),
         if (alumni.sector.isNotEmpty)
-          _infoBulle(Icons.school, alumni.sector, Colors.green),
+          _hintInfo(Icons.school, alumni.sector, Colors.green),
         if (alumni.specialisation.isNotEmpty)
-          _infoBulle(Icons.auto_awesome, alumni.specialisation, Colors.cyan),
+          _hintInfo(Icons.auto_awesome, alumni.specialisation, Colors.cyan),
       ],
     );
   }
@@ -108,10 +108,10 @@ class AlumniPreview extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(child: _infoBulle(Icons.calendar_today, stage.year, Colors.purple)),
-              Expanded(child: _infoBulle(Icons.public, stage.country, Colors.lightBlue)),
-              Expanded(child: _infoBulle(Icons.location_city, stage.city, Colors.teal)),
-              Expanded(child: _infoBulle(Icons.subject, stage.entitled, Colors.pink)),
+              Expanded(child: _hintInfo(Icons.calendar_today, stage.year, Colors.purple)),
+              Expanded(child: _hintInfo(Icons.public, stage.country, Colors.lightBlue)),
+              Expanded(child: _hintInfo(Icons.location_city, stage.city, Colors.teal)),
+              Expanded(child: _hintInfo(Icons.subject, stage.entitled, Colors.pink)),
             ],
           ),
         )),
@@ -119,7 +119,7 @@ class AlumniPreview extends StatelessWidget {
     );
   }
 
-  Widget _infoBulle(IconData icon, String text, Color color) {
+  Widget _hintInfo(IconData icon, String text, Color color) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

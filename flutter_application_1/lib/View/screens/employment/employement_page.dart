@@ -22,7 +22,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
     viewModel.addListener(() => setState(() {}));
   }
 
-  void _confirmDelete(String id) {
+  void _confirmDeletion(String id) {
     final traductions = AppLocalizations.of(context)!;
     showDialog(
       context: context,
@@ -146,7 +146,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
                         const SizedBox(width: 10),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                          onPressed: () => _confirmDelete(offre['id_offre'].toString()),
+                          onPressed: () => _confirmDeletion(offre['id_offre'].toString()),
                         ),
                       ]
                     ],
@@ -204,7 +204,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
     );
   }
 
-  void _addPopUp(bool isStage, Color couleur) {
+  void _addPopUp(bool isStage, Color color) {
     final traductions = AppLocalizations.of(context)!;
     final tCtrl = TextEditingController();
     final cCtrl = TextEditingController();
@@ -244,7 +244,7 @@ class _EmploymentPageState extends State<EmploymentPage> {
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx), child: Text(traductions.cancel)),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: couleur, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: color, foregroundColor: Colors.white),
               onPressed: () async {
                 if (tCtrl.text.isNotEmpty && cCtrl.text.isNotEmpty) {
                   bool ok = await viewModel.addOffer({

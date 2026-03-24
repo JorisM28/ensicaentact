@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '/View/widget/base_layout.dart';
 import 'add_alumni.dart';
-import '../../../l10n/app_localizations.dart';
+import '/l10n/app_localizations.dart';
 
 void main() {
   runApp(const MyAlumniApp());

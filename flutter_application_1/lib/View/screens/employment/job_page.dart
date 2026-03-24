@@ -121,7 +121,6 @@ class _JobPageState extends State<JobPage> {
                       dataToSend["id_offre"] = existingOffer['id_offre'].toString();
                     }
 
-
                     bool success = await viewModel.saveOffer(dataToSend, isEditing);
 
                     if (mounted) {

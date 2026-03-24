@@ -22,18 +22,18 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
     viewModel.fetchPendingRequests();
   }
 
-  void showReviewDialog(Map<String, dynamic> request, Map<String, dynamic> dataDecoded, String type) {
+  void showReviewDialog(Map<String, dynamic> request, Map<String, dynamic> dataDecoded, String type, AppLocalizations traductions) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Validation : $type", style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("${traductions.adminValidationTitle}: $type", style: const TextStyle(fontWeight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Posté par : ${request['prenom'] ?? ''} ${request['nom'] ?? ''}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-              Text("Email : ${request['email'] ?? 'Non renseigné'}"),
+              Text("${traductions.adminPostedBy} : ${request['prenom'] ?? ''} ${request['nom'] ?? ''}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text("${traductions.emailLabel} : ${request['email'] ?? traductions.notProvided}"),
               const Divider(height: 30),
               ...dataDecoded.entries.map((e) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -51,10 +51,10 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
               bool success = await viewModel.rejectRequest(idReq);
 
               if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Demande refusée/supprimée")));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(traductions.adminRequestRejected)));
               }
             },
-            child: const Text("Refuser", style: TextStyle(color: Colors.red)),
+            child: Text(traductions.rejectBtn, style: TextStyle(color: Colors.red)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
@@ -68,7 +68,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Demande validée avec succès !")));
               }
             },
-            child: const Text("Valider et Publier"),
+            child: Text(traductions.validateAndPublishBtn),
           ),
         ],
       ),
@@ -108,11 +108,11 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
               if (type == 'EVENEMENT') {
                 iconType = Icons.event;
                 colorType = Colors.orange;
-                titlePrefix = "Évènement";
+                titlePrefix = traductions.event;
               } else if (type == 'OFFRE' || type == 'EMPLOI') {
                 iconType = Icons.work;
                 colorType = Colors.blue;
-                titlePrefix = "Offre";
+                titlePrefix = traductions.offer;
               }
 
               return Card(
@@ -153,7 +153,7 @@ class _AdminValidationPageState extends State<AdminValidationPage> {
                         );
                       } else {
 
-                        showReviewDialog(request, dataDecoded, type);
+                        showReviewDialog(request, dataDecoded, type, traductions);
                       }
                     } catch (e) {
                       debugPrint("Erreur de parsing JSON: $e");

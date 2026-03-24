@@ -195,18 +195,18 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     );
   }
 
-  Widget _studentCard(Alumnis student, bool isWideScreen) {
-    final isSelected = student == _selectedStudent;
+  Widget _studentCard(Alumnis alumni, bool isWideScreen) {
+    final isSelected = alumni == _selectedStudent;
     
     void openDetail() {
       if (isWideScreen) {
-        setState(() => _selectedStudent = student);
+        setState(() => _selectedStudent = alumni);
       } else {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => AlumniDetailPage(
-              alumni: student, 
+              alumni: alumni, 
               onSave: () {
                 viewModel.loadAlumnis();
               }, 
@@ -235,7 +235,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                 backgroundColor: AppColors.ensiCyan,
                 radius: 30,
                 child: Text(
-                  student.firstname.isNotEmpty ? student.firstname[0] : "?",
+                  alumni.firstname.isNotEmpty ? alumni.firstname[0] : "?",
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
@@ -246,29 +246,29 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                   children: [
                     Text.rich(
                       TextSpan(
-                        text: student.wholeName,
+                        text: alumni.wholeName,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
                         children: [
-                          if (student.promotion != 0)
+                          if (alumni.promotion != 0)
                             TextSpan(
-                              text: " - ${student.promotion}",
+                              text: " - ${alumni.promotion}",
                               style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.bold, fontSize: 14),
                             ),
                         ],
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (student.job.isNotEmpty || student.company.isNotEmpty)...[
-                      Text("${student.job} ${student.company.isEmpty || student.job.isEmpty  ? "" : "⟶"} ${student.company}", style: TextStyle(color: Colors.grey[800])),
+                    if (alumni.job.isNotEmpty || alumni.company.isNotEmpty)...[
+                      Text("${alumni.job} ${alumni.company.isEmpty || alumni.job.isEmpty  ? "" : "⟶"} ${alumni.company}", style: TextStyle(color: Colors.grey[800])),
                     ],  
                     const SizedBox(height: 5),
                     Wrap(
                       spacing: 5,
                       children: [
-                        if (student.sector.isNotEmpty)
-                          Chip(label: Text(student.sector, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
-                        if (student.city.isNotEmpty)
-                          Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(student.city, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
+                        if (alumni.sector.isNotEmpty)
+                          Chip(label: Text(alumni.sector, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.blue[50]),
+                        if (alumni.city.isNotEmpty)
+                          Chip(avatar: const Icon(Icons.location_on, size: 14), label: Text(alumni.city, style: const TextStyle(fontSize: 10)), backgroundColor: Colors.orange[50]),
                       ],
                     ),
                   ],
@@ -285,7 +285,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
                         context,
                         MaterialPageRoute(
                           builder: (context) => AlumniDetailPage(
-                            alumni: student, 
+                            alumni: alumni, 
                             onSave: () => viewModel.loadAlumnis(),
                           ),
                         ),
@@ -297,7 +297,7 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
               if (isAdmin) 
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _confirmDelete(student),
+                  onPressed: () => _confirmDeletion(alumni),
                 ),
             ],
           ),
@@ -353,17 +353,17 @@ class _DirectoryPageState extends State<DirectoryPage> with RouteAware {
     );
   }
 
-  Future<void> _confirmDelete(Alumnis student) async {
+  Future<void> _confirmDeletion(Alumnis alumni) async {
     final traductions = AppLocalizations.of(context)!; 
     bool confirm = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(traductions.directoryDeleteConfirmTitle),
-        content: Text(traductions.directoryDeleteConfirmContent(student.wholeName)),
+        content: Text(traductions.directoryDeleteConfirmContent(alumni.wholeName)),
         actions: [TextButton(onPressed: () => Navigator.pop(context, false), child: Text(traductions.no)), TextButton(onPressed: () => Navigator.pop(context, true), child: Text(traductions.yes))],
       ),
     ) ?? false;
-    if (confirm) viewModel.deleteAlumni(student);
+    if (confirm) viewModel.deleteAlumni(alumni);
   }
 
 void _displayHistory(BuildContext context) async {

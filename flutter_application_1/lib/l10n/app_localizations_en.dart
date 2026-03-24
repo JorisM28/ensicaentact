@@ -789,4 +789,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminCorruptedDataError => 'Corrupted data error';
+
+  @override
+  String get adminValidationTitle => 'Validation';
+
+  @override
+  String get adminPostedBy => 'Posted by';
+
+  @override
+  String get notProvided => 'Not provided';
+
+  @override
+  String get adminRequestRejected => 'Request rejected/deleted';
+
+  @override
+  String get rejectBtn => 'Reject';
+
+  @override
+  String get adminRequestApproved => 'Request successfully approved!';
+
+  @override
+  String get validateAndPublishBtn => 'Validate and Publish';
+
+  @override
+  String get event => 'Event';
+
+  @override
+  String get offer => 'Offer';
+
+  @override
+  String get noEmail => 'No email';
 }

@@ -320,14 +320,14 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
       return Card(elevation: 1, child: Padding(padding: EdgeInsets.all(16.0), child: Center(child: Text(traductions.detailContactHidden, style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)))));
     }
 
-    bool modeLigne = screenWidth > 600 && viewModel.currentAlumni.email.isNotEmpty && viewModel.currentAlumni.phone.isNotEmpty;
+    bool lineMode = screenWidth > 600 && viewModel.currentAlumni.email.isNotEmpty && viewModel.currentAlumni.phone.isNotEmpty;
 
     return Card(
       elevation: 2,
       child: Column(
         children: [
           Padding(padding: EdgeInsets.all(10.0), child: Text(traductions.contactLabel, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-          if (modeLigne)
+          if (lineMode)
             Row(
               children: [
                 Expanded(child: _buildEditableTile(Icons.email, Colors.green, traductions.profileEmail, viewModel.emailController, viewModel.currentAlumni.email)),
@@ -509,7 +509,7 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
     );
   }
 
-  Widget _buildInternshipCard(dynamic stage) {
+  Widget _buildInternshipCard(dynamic internship) {
     final traductions = AppLocalizations.of(context)!; 
     return Card(
       elevation: 3,
@@ -522,12 +522,12 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
           children: [
             Row(
               children: [
-                Icon(stage.type == "E" ? Icons.apartment : Icons.school,
+                Icon(internship.type == "E" ? Icons.apartment : Icons.school,
                     color: AppColors.ensiCyan, size: 22),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    "${stage.year} - ${stage.entitled}",
+                    "${internship.year} - ${internship.entitled}",
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -537,18 +537,18 @@ class _AlumniDetailPageState extends State<AlumniDetailPage> {
             ),
             const Divider(height: 24),
             _buildInternshipField(
-                stage.type == "U" ? traductions.detailInternshipUniversity : traductions.detailInternshipCompany,
-                stage.type == "E" ? Icons.apartment : Icons.school,
+                internship.type == "U" ? traductions.detailInternshipUniversity : traductions.detailInternshipCompany,
+                internship.type == "E" ? Icons.apartment : Icons.school,
                 Colors.green,
-                stage.company),
+                internship.company),
             _buildInternshipField(traductions.detailInternshipLocation, Icons.location_on, Colors.red,
-                "${stage.city}, ${stage.country}, ${stage.country}",
+                "${internship.city}, ${internship.country}, ${internship.country}",
                 isItalic: true),
-            if (stage.startDate.isNotEmpty || stage.endDate.isNotEmpty)
+            if (internship.startDate.isNotEmpty || internship.endDate.isNotEmpty)
               _buildInternshipField(traductions.detailInternshipPeriod, Icons.calendar_today, Colors.blue,
-                  "${stage.startDate} au ${stage.endDate}"),
+                  "${internship.startDate} au ${internship.endDate}"),
             _buildInternshipField(traductions.detailInternshipDescription, Icons.insert_drive_file,
-                Colors.grey, stage.description),
+                Colors.grey, internship.description),
           ],
         ),
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../ViewModel/widget/key_figure_widget_viewmodel.dart';
+import '/ViewModel/widget/key_figure_widget_viewmodel.dart';
 import '/l10n/app_localizations.dart';
 import '/service_locator.dart';
 

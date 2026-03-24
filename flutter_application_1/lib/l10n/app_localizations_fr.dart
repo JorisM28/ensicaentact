@@ -792,4 +792,34 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminCorruptedDataError => 'Erreur de données corrompues';
+
+  @override
+  String get adminValidationTitle => 'Validation';
+
+  @override
+  String get adminPostedBy => 'Posté par';
+
+  @override
+  String get notProvided => 'Non renseigné';
+
+  @override
+  String get adminRequestRejected => 'Demande refusée/supprimée';
+
+  @override
+  String get rejectBtn => 'Refuser';
+
+  @override
+  String get adminRequestApproved => 'Demande validée avec succès !';
+
+  @override
+  String get validateAndPublishBtn => 'Valider et Publier';
+
+  @override
+  String get event => 'Évènement';
+
+  @override
+  String get offer => 'Offre';
+
+  @override
+  String get noEmail => 'Pas d\'email';
 }

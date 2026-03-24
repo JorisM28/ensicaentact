@@ -1639,6 +1639,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Erreur de données corrompues'**
   String get adminCorruptedDataError;
+
+  /// No description provided for @adminValidationTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validation'**
+  String get adminValidationTitle;
+
+  /// No description provided for @adminPostedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Posté par'**
+  String get adminPostedBy;
+
+  /// No description provided for @notProvided.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non renseigné'**
+  String get notProvided;
+
+  /// No description provided for @adminRequestRejected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande refusée/supprimée'**
+  String get adminRequestRejected;
+
+  /// No description provided for @rejectBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get rejectBtn;
+
+  /// No description provided for @adminRequestApproved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande validée avec succès !'**
+  String get adminRequestApproved;
+
+  /// No description provided for @validateAndPublishBtn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider et Publier'**
+  String get validateAndPublishBtn;
+
+  /// No description provided for @event.
+  ///
+  /// In fr, this message translates to:
+  /// **'Évènement'**
+  String get event;
+
+  /// No description provided for @offer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Offre'**
+  String get offer;
+
+  /// No description provided for @noEmail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas d\'email'**
+  String get noEmail;
 }
 
 class _AppLocalizationsDelegate

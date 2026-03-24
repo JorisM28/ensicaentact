@@ -305,7 +305,17 @@
   "suffixLabel": "Suffixe (ex: %, +)",
   "titleLabelAdmin": "Titre du bloc",
   "iconLabel": "Icône",
-  "livePreview": "Aperçu en direct"
+  "livePreview": "Aperçu en direct",
 
+  "adminValidationTitle": "Validation",
+  "adminPostedBy": "Posté par",
+  "notProvided": "Non renseigné",
+  "adminRequestRejected": "Demande refusée/supprimée",
+  "rejectBtn": "Refuser",
+  "adminRequestApproved": "Demande validée avec succès !",
+  "validateAndPublishBtn": "Valider et Publier",
+  "event": "Évènement",
+  "offer": "Offre",
+  "noEmail": "Pas d'email"
 
 }

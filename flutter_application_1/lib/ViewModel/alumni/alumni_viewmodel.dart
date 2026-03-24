@@ -92,10 +92,10 @@ class AlumniViewModel extends ChangeNotifier {
     deceasedSwitch = currentAlumni.deceased == 1;
 
     internshipDisplay = List.from(currentAlumni.internships);
-    initialiserStageEditors();
+    initInternshipEditors();
   }
 
-  void initialiserStageEditors() {
+  void initInternshipEditors() {
     for (var editor in internshipEditors) editor.dispose();
     internshipEditors.clear();
     for (var stage in internshipDisplay) {
@@ -116,7 +116,7 @@ class AlumniViewModel extends ChangeNotifier {
 
   void toggleEdit() {
     isEdited = !isEdited;
-    if (isEdited) initialiserStageEditors();
+    if (isEdited) initInternshipEditors();
     notifyListeners();
   }
 
@@ -188,7 +188,7 @@ class AlumniViewModel extends ChangeNotifier {
       codePostal: postalCodeController.text.trim()
     );
 
-    List<Map<String, dynamic>> stagesData = internshipEditors.map((editor) => {
+    List<Map<String, dynamic>> internshipsData = internshipEditors.map((editor) => {
       "intitule": editor.entilted.text.trim(),
       "entreprise": editor.entreprise.text.trim(),
       "ville": editor.city.text.trim(),
@@ -226,7 +226,7 @@ class AlumniViewModel extends ChangeNotifier {
       "longitude": coords?['lon'],
       "email": emailController.text.trim(),
       "tel": phoneController.text.trim(),
-      "stages": stagesData,
+      "stages": internshipsData,
     };
 
 

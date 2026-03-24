@@ -7,7 +7,6 @@ import '/ViewModel/alumni/add_alumni_viewmodel.dart';
 
 class StageFormModel {
   final Key key = UniqueKey();
-
   final TextEditingController controllerEntitled = TextEditingController();
   final TextEditingController controllerCompany = TextEditingController();
   final TextEditingController controllerCity = TextEditingController();
@@ -104,7 +103,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
   String type = 'E';
   final List<StageFormModel> _internships = [];
 
-  Future<void> _selectionnerDate(BuildContext context, TextEditingController controller) async {
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -192,7 +191,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
     });
   }
 
-  void _supprimerStage(int index) {
+  void _deleteInternship(int index) {
     setState(() {
       _internships[index].dispose();
       _internships.removeAt(index);
@@ -316,7 +315,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                         prefixIcon: const Icon(Icons.cake),
                       ),
                       readOnly: true,
-                      onTap: () => _selectionnerDate(context, _controllerDateOfBirth),
+                      onTap: () => _selectDate(context, _controllerDateOfBirth),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -514,7 +513,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                         prefixIcon: const Icon(Icons.calendar_today),
                       ),
                       readOnly: true,
-                      onTap: () => _selectionnerDate(context, _controllerStartDate),
+                      onTap: () => _selectDate(context, _controllerStartDate),
                     ),
                   ),
                 ],
@@ -561,7 +560,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                               IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red),
                                 tooltip: traductions.deleteBtn,
-                                onPressed: () => _supprimerStage(index),
+                                onPressed: () => _deleteInternship(index),
                               ),
                             ],
                           ),
@@ -587,7 +586,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                                     prefixIcon: const Icon(Icons.calendar_today),
                                   ),
                                   readOnly: true,
-                                  onTap: () => _selectionnerDate(context, intership.controllerStartDate),
+                                  onTap: () => _selectDate(context, intership.controllerStartDate),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -600,7 +599,7 @@ class _AddAlumniFormState extends State<AddAlumniForm> {
                                     prefixIcon: const Icon(Icons.event),
                                   ),
                                   readOnly: true,
-                                  onTap: () => _selectionnerDate(context, intership.controllerEndDate),
+                                  onTap: () => _selectDate(context, intership.controllerEndDate),
                                 ),
                               ),
                             ],

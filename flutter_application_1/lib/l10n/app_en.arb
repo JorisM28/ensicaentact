@@ -305,5 +305,16 @@
   "suffixLabel": "Suffix (e.g., %, +)",
   "titleLabelAdmin": "Block title",
   "iconLabel": "Icon",
-  "livePreview": "Live Preview"
+  "livePreview": "Live Preview",
+
+  "adminValidationTitle": "Validation",
+  "adminPostedBy": "Posted by",
+  "notProvided": "Not provided",
+  "adminRequestRejected": "Request rejected/deleted",
+  "rejectBtn": "Reject",
+  "adminRequestApproved": "Request successfully approved!",
+  "validateAndPublishBtn": "Validate and Publish",
+  "event": "Event",
+  "offer": "Offer",
+  "noEmail": "No email"
 }

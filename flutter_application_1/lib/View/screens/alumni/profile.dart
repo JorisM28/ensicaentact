@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../ViewModel/widget/profile_viewmodel.dart';
+import '/ViewModel/widget/profile_viewmodel.dart';
 import '/service_locator.dart';
 import '/l10n/app_localizations.dart';
 import '/View/screens/home_page.dart';

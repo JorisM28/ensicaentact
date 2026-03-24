@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_ensicaentact/View/screens/alumni/join_page.dart';
+import '/View/screens/alumni/join_page.dart';
 import '/View/screens/event/event_page.dart';
 import '/View/screens/employment/companies_directory_page.dart';
 import 'package:url_launcher/url_launcher.dart';

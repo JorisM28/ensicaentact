@@ -53,10 +53,10 @@ class _JobOfferWidgetState extends State<JobOfferWidget> {
                 return Text(traductions.noOfferFound);
               }
 
-              final offres = _viewModel.offers.take(4).toList();
+              final offers = _viewModel.offers.take(4).toList();
 
               return Column(
-                children: offres.map((job) => _buildJobCard(job, traductions)).toList(),
+                children: offers.map((job) => _buildJobCard(job, traductions)).toList(),
               );
             },
           ),
